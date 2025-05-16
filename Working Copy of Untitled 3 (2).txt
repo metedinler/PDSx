@@ -1,0 +1,50 @@
+5. DÜÞÜK SEVÝYE PROGRAMLAMA ve JIT
+
+Komut	Açýklama
+ASM ... END ASM	Inline Assembly
+CALL DLL	DLL fonksiyonu çaðýr
+SysCallWrapper	Sistem API çaðrýlarý için güvenli katman
+UnsafeMemory	Adres üzerinden veri okuma/yazma
+POKE, PEEK	Doðrudan bellek eriþimi
+MALLOC, FREE	Bellek yönetimi
+JIT SAVE, JIT LOAD	Bytecode .bcx dosyalarý kaydet/yükle
+.mx dosyalarý	Saf makine kodu modülleri (Machine Extensions)
+.lx dosyalarý	Library Extensions (hazýr derlenmiþ fonksiyonlar)
+6. MULTITHREADING & MULTIPROCESSING
+
+Komut	Açýklama
+thread web_scrape, "url"	Tek satýr thread baþlatma
+process analyze_data, data	Tek satýr process baþlatma
+run ([t1,t2],[p1,p2])	Tüm thread ve processleri baþlat
+thread(), process() fonksiyonel formatta olacak.
+
+thread ... end thread, process ... end process yapýsal uzun format da opsiyonel desteklenecek.
+
+7. FONKSÝYONEL PROGRAMLAMA
+
+Komut	Açýklama
+MAP, FILTER, REDUCE	Koleksiyon fonksiyonlarý
+LAMBDA	Hýzlý inline fonksiyon tanýmý
+IMMUTABLE	Deðiþtirilemez koleksiyon yapýlarý opsiyonel olacak
+8. EVENT-DRIVEN PROGRAMLAMA
+
+Komut	Açýklama
+ON EVENT	Belirli olay iþleyici tanýmý
+RAISE EVENT	Olayý tetikleme
+WAIT EVENT	Olay gerçekleþmesini bekleme
+GUI planý	GUI kontroller (Button, Checkbox, Tab, Window) için olaylar tanýmlanacak
+9. GUI PLANI
+
+Konsept	Açýklama
+Core	Sadece temel pencere + event desteklenecek (çekirdek)
+GUI.libx	Tüm detaylar (butonlar, listeler, menüler, sekmeler) GUI.libx üzerinden
+Event-Loop	GUI olaylarý PIPE uyumlu olacak
+Window Manager	GUI baþlat, pencere oluþtur, eventleri iþle
+10. SONUÇ
+? Tüm yenilikler artýk:
+
+Compact BASIC tarzýnda
+
+Python, C, Prolog, ASM esintileri taþýyan
+
+Modüler, hýzlý, olabilecek en geniþ yapýya sahip

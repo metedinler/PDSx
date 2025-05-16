@@ -1,0 +1,72 @@
+# Temel Exception
+class PdsXException(Exception):
+    pass
+
+def execute_line(self, line):
+        # Komut çözümleyici burada olacak (bir sonraki bölümde)
+        pass
+def event_action_nop():
+        pass
+
+
+pdsXv13u Ultimate Interpreter - Tam ve Eksiksiz Plan
+
+No	BÖLÜM	AÇIKLAMA
+0	Genel Yapý	pdsXv12u ve pdsXv12c'den tüm kod ve özellikler tam olarak aktarýlacak.
+1	Interpreter Temel	Dosyadan çalýþtýrma, repl (etkileþimli mod), argparse destekli çalýþtýrýcý.
+2	Memory Management	Hafýza yönetimi, Garbage Collection, Memory Pool
+3	LibXCore Yardýmcý Fonksiyonlar	100+ sistem, dosya, matematik, NLP, API, PDF, veritabaný iþlemleri fonksiyonlarý
+4	Event Sistemi	64 event slotu, öncelik, zamanlayýcý, interrupt, delay destekli.
+5	PIPELINE Sistemi	Pipe start-end, pipe içinde SQL sorgusu, MAP, FILTER, SAVE, LOAD iþlemleri.
+6	SQL-ISAM Sistemi	Open/Create/Insert/Update/Delete/Close DB destekleri, otomatik baðlanma.
+7	INLINE Bloklar	INLINE ASM / INLINE C / INLINE REPLY kod bloklarý desteði.
+8	Save/Load Sýkýþtýrmalý Destek	Program, state ve pipe verilerinin .gz, .zip sýkýþtýrmalý ve düz kaydý.
+9	ARRAY/STRUCT/UNION/CLASS Veri Yapýlarý	Komple destek: StructInstance, UnionInstance, ClassInstance, ArrayInstance.
+10	STACK/QUEUE Veri Yapýlarý	Push, Pop, Enqueue, Dequeue, Peek, Swap, Duplicate, Clear komutlarý.
+11	ENUM/TUPLE Veri Yapýlarý	Temel veri koleksiyon yapýlarý (enum-tuple destekli).
+12	NLP ve AI Fonksiyonlarý	Text preprocessing, tokenization, ner extraction, summarization, embedding.
+13	PROLOG V3 Motoru	Facts, Rules, Query, pAND, pOR, pNOT, pXOR, pIMP, pBI-COND destekli mantýksal motor.
+14	PROLOG V3 BASIC Entegrasyonu	pQUERY, pASSERT, pRETRACT, pCLEAR, pCOUNT, pFORALL, pEXISTS komutlarý interpreter içinde.
+15	PROLOG V3 Tree ve Graph Veri Yapýlarý	Mantýksal aðaç ve grafik yapý destekleri.
+16	Backtracking Mekanizmasý	PROLOG motorunda tam geri izleme algoritmasý.
+17	Meta Programlama	Gamma, Omega, Lambda gibi dinamik fonksiyonlar, BASIC içinde meta-programlama desteði.
+18	Exception Management	PdsXException sýnýfý ile tüm interpreter hatalarý yönetilecek.
+19	Execute Line Yapýsý	Tüm komutlarý destekleyen profesyonel execute_line fonksiyonu (komut adlarýna göre dispatch).
+20	Lang.json Sistemi	Çok dilli yardým sistemi: Türkçe, Ýngilizce, Almanca JSON dosyalarýndan help desteði.
+21	Tree/Graph Koleksiyon Komutlarý	YENÝ: Aðaç ve Grafik iþlemleri için düðüm ekleme, arama, gezme, kaldýrma iþlemleri.
+22	Zaman bazlý Event/State/Timer Mekanizmalarý	Event'lara baðlý zaman tetiklemeleri.
+23	INLINE HEADER ve C Compilation	C programlarý yazma, header tanýmlama, dosyadan compile edip çalýþtýrma sistemi.
+24	Multi-Encoding Desteði	UTF-8 baþta olmak üzere 20+ encoding desteði (set/get encoding).
+25	Tam Koleksiyon Ýþlemleri	Union, Intersection, Difference, All, Any, Exists iþlemleri.
+26	Program Save/Load/Checkpoint	Program hafýzasýný kaydetme/yükleme (state snapshot).
+27	Threading ve Async Destekleri	Async function çalýþtýrma, threading event ve iþlemleri.
+28	System Information Fonksiyonlarý	CPU, RAM, Disk info, network info çekme fonksiyonlarý.
+29	Web + API Fonksiyonlarý	HTTP GET, POST, API request, Response parse fonksiyonlarý.
+30	Hata ve Loglama Sistemleri	Log kayýt dosyasý ve hata yakalama yönetimi.
+ÖZEL NOT:
+PdsXv13u tam olarak önceki pdsXv12u üzerine kurulacak.
+
+Önceki interpreter'da eksik olan Basic komutlar burada execute_line içine doðrudan tam entegre edilecek.
+
+Her komut için gerçek, çalýþan, eksiksiz yorumlama yapýlacak.
+
+Tüm veri yapýlarý, Prolog motoru, LibXCore yardýmcý fonksiyonlarý eksiksiz olacak.
+
+     Detaylý Alt Plan Akýþý
+pdsXv12u ? Taban alýnacak.
+
+pdsXv13u ? Tüm modifikasyonlar yeni sýnýf olarak açýlacak.
+
+pdsXv11 içeriði, pdsXv12c, pdsXv12u içerikleri birleþtirilecek, eksik olan eski komutlar koruma altýna alýnacak.
+
+libXCore geniþletilecek (NLP, geliþmiþ Matematik, geliþmiþ Dosya, Geliþmiþ Web API, Session, Async destekleri).
+
+Prolog Motoru (PrologV3) hem temel hem geniþ özelliklerde çalýþacak.
+
+Her þey sýfýrdan deðil sohbette verilen kodlardan yeniden birleþtirerek, eksikse yazýlarak oluþturulacak.
+
+BASIC PDS Komutlarý + Prolog Komutlarý + PIPELINE SQL Komutlarý tamamen uyumlu olacak.
+
+Komutlar arasýnda geçiþ köprüsü olacak (örneðin: Prolog query, Basic deðiþkenlere etki edecek).
+
+proje dosyalarina ekledigim programlarý incele. Her birindeki komut fonksiyon ve özellikleri siniflandir guruplandir. bir komut yada fonksiyon örnegin 1. Programda var ama 3. de yok veya 2. Programda yok, bu durum önemli, bu komut v13u da olacak. Ben hiçbir komut ve fonksiyonun çýkarýlmasýný istemedim. Bu 3 dosya v13 için temel olacak. Daha önce yazmaya çalýþtýðýn tüm v13lerde bir eksik var. Bu nedenle pdsXv13 tam bir program olsa bile plana göre elenecek bir çok özellik ve komut ve fonsiyonu var. Bu nedenle elindeki her ilgili yapýyý kullanacak yazýlmýþ programlardaki en iyisini arayacak ve plana uygun olup olmadigina bakacaksin. Belki elindeki program için bir fonksiyon plana uygun ama fazla özellikler de içeriyor ozaman daha iyi özellikler olaný kullanacak gerekirse diðer program parçalarýnda daha iyi hale getireceksin. Önce programý hafizanda tamamen yazacaksin. Programý 5 kere gozden geçirecek tüm konuþmalarý senin yazdýðýn benim yazdýðým her þeyi dikkate alacak gerekli geliþtirmeyi yaparak yazacaksin.yani programý bana verene kadar içsel olarak 5 kere konu ile ilgili her konuþma program parçasý gözden geçirilecek ardindaan yazýlacak. Bu 5 kere olacak. Bunun için bana þu kadar süre bekle sukadar sonra gibi cümleler yazmayacaksin. Biliyorum ki senin otomatik iþ yapma kabiliyetin yok.yani ben yaz diye komut verdiðimde yaziyorsun. Bir birimizi kandýrmayalým. Bu nedenle bu mesaja cevap vermek yerine iþe koyulacak ve ilk bolumu yazacaksin.her bölüm öncesi ne yapacaðýný detaylandýracaksin. Her bölüm öncesi yazacagin Komutlar fonksiyonlar ve sýnýflar eksiksiz olarak bana bildirecek onay sonrasý yazacaksýn. Her bölüm sonrasý sonraki bölüme ait iþin adý yazilacak. Bazý iþler uzun bazýlarý kýsa olabilir ancak hiçbir program parçasý profosyonel seviyenin altýnda olmayacak. Kesinlikle basit örnek dummy todo pass gecilmeyecek. Beni gerizekalý yerine koymayacaksin. Her program parçasýný 24 bin harf civarýnda mantýklý bir yerden keserek bana sunacaksin. Programýn kesilen yerinden sonrasýnda hemen yeni iþe veya programýn diðer parçalarýna gecilmeyecek önceki yaptýðýn iþte eksiklik varmý bakacaksýn. Hafizandaki programda örneðin libXcore 3 kez 24 bin harcýyor ama birkaç fonksiyon geride kaldý o noktadan baþlayarak bana yazacaksin. Bu sadece libXcore için deðil programýn her bölümü ve her sýnýf fonksiyonu için geçerli. Yalakalýk yapmayacaksýn. Unutmayacaksin. Program icindeki class isimleri yanýnda parantez içinde hangi programdan miras aldýðýn yazýyor. Bunu rem ile yapacaksýn. Programýn baþýndaki importlarý otomatik yükleme sistemine yazacaksýn. Bazý program içi importlar var gezip veya zip gibi bunlar programýn baþýnda yazýlacak fonksiyon yada sýnýfýn baþýnda deðil. Python kabul edebilir ama ben kabul etmiyorum. Programda kullanýlan tüm kütüphaneler program baþýnda yazýlacak. Buda demektir ki önce programý hafizanda yazýp, sonra inceleyip duzeltmen duzenlemen gerekecek.  PdsXv13u pdsX basic interpreterini yazmaya önceki versiyonlar temel alýnarak ve daha önce yazdýðýn program parcalarinin en iyi halleri kullanilarak ve 30 maddelik plana göre geliþtirmeleri ile yazmaya basla. Baþla

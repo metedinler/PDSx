@@ -1,0 +1,29 @@
+ ref_patterns = [
+        r'(?i)(?:KAYNAKÇA|KAYNAKLAR|REFERENCES|BIBLIOGRAPHY).*?\n(.*?)(?=\n\s*\n|\Z)',
+        r'(?i)(?:REFERANSLAR|KAYNAK LÝSTESÝ).*?\n(.*?)(?=\n\s*\n|\Z)',
+        r'\n[\[\(](\d{4})[\]\)].*?(?=\n|$)',  # Yýl tabanlý referanslar
+        r'\n(?:[A-Za-z\u00C0-\u017F]+,\s+[A-Za-z\u00C0-\u017F\.]+\s+\(\d{4}\).*?)(?=\n|$)',  # Yazar, Yýl formatý
+    ]
+
+def detect_tables(text):
+    """Geliþmiþ tablo tespit algoritmasý"""
+    table_patterns = [
+        (r'(?i)(?:^|\n)(Tablo \d+)(?:\n)(.*?)(?=\nTablo \d+|\n\s*$)', 'tablo'),
+        (r'(?i)(?:^|\n)(Table \d+)(?:\n)(.*?)(?=\nTable \d+|\n\s*$)', 'table'),
+        (r'(?i)(?:^|\n)(Çizelge \d+)(?:\n)(.*?)(?=\nÇizelge \d+|\n\s*$)', 'çizelge'),
+        (r'(?i)(?:^|\n)(Figure \d+)(?:\n)(.*?)(?=\nFigure \d+|\n\s*$)', 'figure'),
+    ]
+# ----------------------------
+# Sayaçlar
+# ----------------------------
+basarili_embedding_sayisi = 0
+basarili_dosya_sayisi = 0
+basarisiz_embedding_sayisi = 0
+basarisiz_metin_cikartma_sayisi = 0
+total_files = 0
+success_count = 0
+embedding_failed_count = 0
+text_extraction_failed_count = 0
+
+
+

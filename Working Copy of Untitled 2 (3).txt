@@ -1,0 +1,294 @@
+'''
+clazz.py
+
+Saf Python ile sýfýrdan geliþmiþ OOP modülü:
+- Metaclass desteði
+- Statik ve dinamik sýnýf tanýmý (define_class)
+- Descriptors ve Property mekanizmalarý
+- Kalýtým (C3 MRO)
+- Encapsulation (public/protected/private)
+- Polymorphism & Operator overloading
+- Mix-in ve Interface desteði
+- Multiple Dispatch (@multidispatch)
+- Event / Hook sistemi
+- Seri hâle getirme / Klonlama
+- Otomatik __repr__ / __str__
+- Type Checking / Validation
+- Aspect-Oriented (before/after advice)
+- Yapýcý (constructor) & Yýkýcý (destructor) çaðrýlarý
+
+'''
+
+# ---------- Global Kayýtlar ve Event Sistemi ----------
+type_registry = {}
+interface_registry = {}
+event_listeners = {
+    'on_create': [], 'on_destroy': [],
+    'before_set': [], 'after_set': [],
+    'before_get': [], 'after_get': [],
+    'before_call': [], 'after_call': []
+}
+
+def on_event(event, callback):
+    event_listeners.setdefault(event, []).append(callback)
+
+def fire_event(event, *args, **kwargs):
+    for cb in event_listeners.get(event, []):
+        cb(*args, **kwargs)
+
+# ---------- Metaclass Desteði ----------
+def use_metaclass(metacls):
+    def decorator(name, bases, attrs):
+        return metacls(name, bases, attrs)
+    return decorator
+
+class MetaClassDef(type):
+    def __new__(mcs, name, bases, namespace):
+        # Ön iþleme ya da kayýt
+        cls_def = ClassDef(name, list(bases), namespace)
+        return cls_def
+
+# ---------- Core: ClassDef ve define_class ----------
+class ClassDef:
+    def __init__(self, name, bases, attrs):
+        self.name = name
+        self.bases = bases  # List[ClassDef]
+        self.raw_attrs = attrs.copy()
+        self.attrs = {}
+        self.mro = []
+        self.metaclass = attrs.get('__metaclass__', None)
+        self._process_attrs()
+        self._compute_mro()
+        # Interface kontrol
+        for iface in attrs.get('__interfaces__', []):
+            implements(self, iface)
+        type_registry[name] = self
+
+    def _process_attrs(self):
+        # Name mangling ve descriptor atama
+        for key, val in self.raw_attrs.items():
+            name = key
+            if key.startswith('__') and not key.endswith('__'):
+                name = f"_{self.name}{key}"
+            self.attrs[name] = val
+
+    def _compute_mro(self):
+        seqs = [[self]] + [b.mro[:] for b in self.bases] + [self.bases[:]]
+        mro = []
+        while True:
+            non_empty = [s for s in seqs if s]
+            if not non_empty: break
+            for seq in non_empty:
+                cand = seq[0]
+                if not any(cand in s[1:] for s in non_empty): break
+            else:
+                raise RuntimeError(f"Cannot compute MRO for {self.name}")
+            mro.append(cand)
+            for s in seqs:
+                if s and s[0] is cand: s.pop(0)
+        self.mro = mro
+
+    def lookup(self, attr):
+        for cls in self.mro:
+            if attr in cls.attrs:
+                return cls.attrs[attr]
+        raise AttributeError(f"{self.name} has no attribute {attr}")
+
+# Statik / Dinamik sýnýf tanýmý
+
+def define_class(name, bases=None, attrs=None, metaclass=None, interfaces=None):
+    bases = bases or []
+    attrs = attrs or {}
+    if interfaces:
+        attrs['__interfaces__'] = interfaces
+    if metaclass:
+        return metaclass(name, bases, attrs)
+    return ClassDef(name, bases, attrs)
+
+# ----- Interface Desteði -----
+def define_interface(name, methods):
+    interface_registry[name] = set(methods)
+
+def implements(cls_def, interface_name):
+    required = interface_registry.get(interface_name, set())
+    missing = [m for m in required if m not in cls_def.attrs]
+    if missing:
+        raise TypeError(f"{cls_def.name} must implement {interface_name}: missing {missing}")
+    return True
+
+# ---------- Instance ve Yaþam Döngüsü ----------
+class Instance:
+    def __init__(self, cls_def, **kwargs):
+        object.__setattr__(self, '_clazz', cls_def)
+        object.__setattr__(self, '_data', {})
+        fire_event('on_create', self)
+        # Constructor çaðrýsý
+        init = cls_def.attrs.get('__init__')
+        if callable(init): init(self, **kwargs)
+
+    def __getattr__(self, name):
+        fire_event('before_get', self, name)
+        cls = object.__getattribute__(self, '_clazz')
+        # private mangling
+        if name.startswith('__') and not name.endswith('__'):
+            name = f"_{cls.name}{name}"
+        data = object.__getattribute__(self, '_data')
+        if name in data: value = data[name]
+        else:
+            attr = cls.lookup(name)
+            if callable(attr):
+                value = lambda *a, **k: _invoke(self, attr, *a, **k)
+            else: value = attr
+        fire_event('after_get', self, name, value)
+        return value
+
+    def __setattr__(self, name, value):
+        fire_event('before_set', self, name, value)
+        cls = object.__getattribute__(self, '_clazz')
+        if name.startswith('__') and not name.endswith('__'):
+            name = f"_{cls.name}{name}"
+        data = object.__getattribute__(self, '_data')
+        data[name] = value
+        fire_event('after_set', self, name, value)
+
+    # Yýkýcý
+    def __del__(self):
+        dtor = self._clazz.attrs.get('__del__')
+        if callable(dtor): dtor(self)
+        fire_event('on_destroy', self)
+
+    # Operatör Yükleme
+    def __add__(self, other): return self._binary_op('__add__', other)
+    def __eq__(self, other): return self._binary_op('__eq__', other)
+    # Diðer operatörler benzer þekilde...
+
+    def _binary_op(self, op, other):
+        fn = self._clazz.lookup(op)
+        return fn(self, other)
+
+    # Temsil
+    def __repr__(self):
+        data = object.__getattribute__(self, '_data')
+        return f"<{self._clazz.name} {data}>"
+
+    # Seri hâle getirme / Klonlama
+    def to_dict(self): return dict(object.__getattribute__(self, '_data'))
+    @classmethod
+    def from_dict(cls, cls_def, data):
+        inst = Instance(cls_def)
+        for k, v in data.items(): setattr(inst, k, v)
+        return inst
+    def clone(self): return Instance.from_dict(self._clazz, self.to_dict())
+
+# Örnek çaðrý
+
+def new_instance(cls_def, **kwargs):
+    return Instance(cls_def, **kwargs)
+
+# Metot çaðrýlarýný sarmalama (AOP)
+def _invoke(self, func, *args, **kwargs):
+    name = func.__name__
+    for m, adv in event_listeners['before_call']:
+        if m == name: adv(self, *args, **kwargs)
+    result = func(self, *args, **kwargs)
+    for m, adv in event_listeners['after_call']:
+        if m == name: adv(self, result)
+    return result
+
+# ---------- Descriptors & Property ----------
+class Descriptor:
+    def __get__(self, instance, owner): raise NotImplementedError
+    def __set__(self, instance, value): raise NotImplementedError
+    def __delete__(self, instance): raise NotImplementedError
+
+class Property(Descriptor):
+    def __init__(self, fget=None, fset=None, fdel=None):
+        self.fget, self.fset, self.fdel = fget, fset, fdel
+    def __get__(self, inst, owner): return self.fget(inst)
+    def __set__(self, inst, val): self.fset(inst, val)
+    def __delete__(self, inst): self.fdel(inst)
+    def getter(self, f): self.fget = f; return self
+    def setter(self, f): self.fset = f; return self
+
+# ---------- Type Checking ----------
+class TypeChecked(Descriptor):
+    def __init__(self, name, typ):
+        self.name, self.typ = name, typ
+        self.storage = f"_{name}"
+    def __get__(self, inst, owner): return getattr(inst, self.storage)
+    def __set__(self, inst, value):
+        if not isinstance(value, self.typ):
+            raise TypeError(f"{self.name} must be {self.typ}")
+        setattr(inst, self.storage, value)
+    def __delete__(self, inst): delattr(inst, self.storage)
+
+def typechecked(func):
+    def wrapper(*args, **kwargs):
+        anns = func.__annotations__
+        for n, t in anns.items():
+            if n=='return': continue
+            if n in kwargs and not isinstance(kwargs[n], t):
+                raise TypeError(f"{n} must be {t}")
+        return func(*args, **kwargs)
+    return wrapper
+
+# ---------- Multiple Dispatch ----------
+def multidispatch(func):
+    registry = {}
+    def register(*types):
+        def inner(f): registry[types] = f; return f
+        return inner
+    def wrapper(*args, **kwargs):
+        types = tuple(type(a) for a in args)
+        f = registry.get(types) or registry.get(tuple(object for _ in types))
+        if not f: raise TypeError(f"No match for {types}")
+        return f(*args, **kwargs)
+    wrapper.register = register
+    return wrapper
+
+# ---------- Utils & Introspection ----------
+def get_class(name): return type_registry.get(name)
+def list_methods(obj): return [k for k,v in obj.attrs.items() if callable(v)]
+def list_fields(obj): return [k for k,v in obj.attrs.items() if not callable(v)]
+def is_instance(obj, cname):
+    return isinstance(obj, Instance) and get_class(cname) in obj._clazz.mro
+
+# ---------- Örnek ----------
+if __name__=='__main__':
+    # Metaclass örneði
+    @use_metaclass(MetaClassDef)
+    def X(): pass
+
+    # Interface tanýmý
+    define_interface('IRenderable', ['render'])
+    A = define_class('A', [], {'__init__': lambda self: setattr(self,'v',10), 'render': lambda self: f"A:{self.v}"}, interfaces=['IRenderable'])
+    a = new_instance(A)
+    print(a.render())
+
+    # Descriptor & Property
+    B = define_class('B', [], {'x': TypeChecked('x', int),
+                               'get_x': lambda self: self.x,
+                               'set_x': lambda self,val: setattr(self,'x',val)})
+    b = new_instance(B)
+    b.x=5
+    print(b.get_x())
+
+    # Multiple Dispatch
+    @multidispatch
+    def add(a,b): pass
+    @add.register(int,int)
+    def _(a,b): return a+b
+    @add.register(str,str)
+    def _(a,b): return a+"+"+b
+    print(add(2,3), add('a','b'))
+
+    # AOP
+    def before_greet(self): print('About to greet')
+    on_event('before_call', ('greet', before_greet))
+    G = define_class('G', [], {'greet': lambda self: print('Hello')})
+    g = new_instance(G)
+    g.greet()  # About to greet \n Hello
+
+    # Clone & repr
+    c2 = a.clone()
+    print(c2, repr(c2))

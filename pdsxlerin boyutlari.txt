@@ -1,0 +1,26 @@
+pdsX.py | 31.0 KB | C:/Users/mete/Zotero/basic/pdsxv12u/pdsX.py
+pdsXv11g.py | 64.12 KB | C:/Users/mete/Zotero/basic/pdsxv12u/pdsX/pdsXv11g/pdsXv11g.py
+pdsX.py | 82.65 KB | C:/Users/mete/Zotero/basic/pdsX.py
+grok 1.md | 17.69 KB | C:/Users/mete/Zotero/basic/pdsXX/grok 1.md
+grok2.md | 27.9 KB | C:/Users/mete/Zotero/basic/pdsXX/grok2.md
+grok3.md | 29.53 KB | C:/Users/mete/Zotero/basic/pdsXX/grok3.md
+grok4.md | 30.05 KB | C:/Users/mete/Zotero/basic/pdsXX/grok4.md
+grok5.md | 24.57 KB | C:/Users/mete/Zotero/basic/pdsXX/grok5.md
+grok6.md | 110.11 KB | C:/Users/mete/Zotero/basic/pdsXX/grok6.md
+grok7.md | 49.09 KB | C:/Users/mete/Zotero/basic/pdsXX/grok7.md
+1_ek.py | 0.95 KB | C:/Users/mete/Zotero/basic/temel basic interpreter/1_ek.py
+2_ek.py | 24.03 KB | C:/Users/mete/Zotero/basic/temel basic interpreter/2_ek.py
+3.py | 19.2 KB | C:/Users/mete/Zotero/basic/temel basic interpreter/3.py
+5 basic.py | 30.75 KB | C:/Users/mete/Zotero/basic/temel basic interpreter/5 basic.py
+destek1.py | 10.35 KB | C:/Users/mete/Zotero/basic/temel basic interpreter/destek1.py
+pdsX.py | 84.58 KB | C:/Users/mete/Zotero/basic/temel basic interpreter/pdsX.py
+pdsX_ilave.py | 15.65 KB | C:/Users/mete/Zotero/basic/temel basic interpreter/pdsX_ilave.py
+pdsX_v10.py | 97.39 KB | C:/Users/mete/Zotero/basic/temel basic interpreter/pdsX_v10.py
+pdsx_v11.py | 79.4 KB | C:/Users/mete/Zotero/basic/temel basic interpreter/pdsx_v11.py
+pdsX_v110.py | 93.51 KB | C:/Users/mete/Zotero/basic/temel basic interpreter/pdsX_v110.py
+QBasicPDSInterpreter 6.py | 52.46 KB | C:/Users/mete/Zotero/basic/temel basic interpreter/QBasicPDSInterpreter 6.py
+QBasicPDSInterpreter 7.py | 52.06 KB | C:/Users/mete/Zotero/basic/temel basic interpreter/QBasicPDSInterpreter 7.py
+QBasicPDSInterpreter2.py | 16.37 KB | C:/Users/mete/Zotero/basic/temel basic interpreter/QBasicPDSInterpreter2.py
+QBasicPDSInterpreter4.py | 23.47 KB | C:/Users/mete/Zotero/basic/temel basic interpreter/QBasicPDSInterpreter4.py
+QBasicPDSInterpreter9.py | 82.65 KB | C:/Users/mete/Zotero/basic/temel basic interpreter/QBasicPDSInterpreter9.py
+temel basic interpreter.py | 6.73 KB | C:/Users/mete/Zotero/basic/temel basic interpreter/temel basic interpreter.py

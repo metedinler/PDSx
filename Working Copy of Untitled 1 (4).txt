@@ -1,0 +1,177 @@
+save modulunu yaz. vizyonumuza uygun sekilde tamamen ve eksiksiz ve plana uygun ve cok cok daha fazla sekilde gelistir,  modulunu yaz. vizyonumuza uygun sekilde tamamen ve eksiksiz ve plana uygun ve cok cok daha fazla sekilde gelistir,  eski ornekler ve programlardaki denenen gelistirmeleri  ile yaz. ffarkli yapilar ile etkin ve daha kullanisli yapilari da ekle, ileri derecede deneysel yapilardan 5 adet guclu yapi ortaya koy. ve modulu buna gore yaz
+
+modulunu yaz. vizyonumuza uygun sekilde tamamen ve eksiksiz ve plana uygun ve cok cok daha fazla sekilde gelistir,  modulunu yaz. vizyonumuza uygun sekilde tamamen ve eksiksiz ve plana uygun ve cok cok daha fazla sekilde gelistir,  eski ornekler ve eski (yuklenen ve cevaplardaki ve onceki versiyonlardaki) programlardaki denenen gelistirmeleri  ile yaz. farkli yapilar ile etkin ve daha kullanisli yapilari da ekle, ileri derecede deneysel yapilardan 5 adet guclu yapi ortaya koy. ve modulu buna gore yaz
+
+'''
+clazz.py
+
+Saf Python kullanarak sýfýrdan OOP desteði saðlayan modül:
+- Statik ve dinamik sýnýf tanýmý (define_class)
+- Instantiation (new_instance)
+- Kalýtým (C3 MRO)
+- Encapsulation (public/protected/private)
+- Polymorphism, metot override
+- Abstraction (@abstract)
+- Introspection yardýmcýlarý
+'''
+
+# Registry tüm sýnýflarý saklar
+type_registry = {}
+
+# ------------------ Meta Model (ClassDef) ------------------
+class ClassDef:
+    def __init__(self, name, bases, attrs):
+        self.name = name
+        self.bases = bases or []           # List[ClassDef]
+        self.raw_attrs = attrs or {}       # Orijinal attr dict
+        self.attrs = {}                    # Ýþlenmiþ attr dict
+        self.mro = []                      # Hesaplanan MRO
+        self._process_attrs()
+        self._compute_mro()
+
+    def _process_attrs(self):
+        # Name mangling ve soyut metod kontrolü
+        for key, val in self.raw_attrs.items():
+            mangled = key
+            if key.startswith('__') and not key.endswith('__'):
+                mangled = f"_{self.name}{key}"
+            self.attrs[mangled] = val
+
+    def _compute_mro(self):
+        # C3 linearization
+        seqs = [[self]] + [base.mro[:] for base in self.bases] + [self.bases[:]]
+        mro = []
+        while True:
+            non_empty = [seq for seq in seqs if seq]
+            if not non_empty:
+                break
+            for seq in non_empty:
+                candidate = seq[0]
+                if not any(candidate in s[1:] for s in non_empty):
+                    break
+            else:
+                raise RuntimeError(f"Cannot compute MRO for {self.name}")
+            mro.append(candidate)
+            for seq in seqs:
+                if seq and seq[0] is candidate:
+                    seq.pop(0)
+        self.mro = mro
+
+    def lookup(self, attr):
+        # MRO sýrasýna göre attribute/metot arar
+        # Name mangling kontrolü önceden yapýlmýþ attr isimlerini al
+        for cls in self.mro:
+            if attr in cls.attrs:
+                return cls.attrs[attr]
+        raise AttributeError(f"{self.name} has no attribute {attr}")
+
+# Sýnýf tanýmlama fonksiyonu
+def define_class(name, bases=None, attrs=None):
+    # bases: List[ClassDef]
+    if bases:
+        for b in bases:
+            if not isinstance(b, ClassDef):
+                raise TypeError("Bases must be ClassDef instances")
+    cls = ClassDef(name, bases or [], attrs or {})
+    # Soyut metod kontrolü
+    abstract_methods = [k for k, v in cls.attrs.items() if getattr(v, '__is_abstract__', False)]
+    if abstract_methods:
+        raise TypeError(f"Cannot instantiate abstract class {name} with abstract methods: {abstract_methods}")
+    type_registry[name] = cls
+    return cls
+
+# ------------------ Instance Model ------------------
+class Instance:
+    def __init__(self, cls_def):
+        object.__setattr__(self, '_clazz', cls_def)
+        object.__setattr__(self, '_data', {})
+
+    def __getattr__(self, name):
+        # Name mangling için kontrol
+        cls = object.__getattribute__(self, '_clazz')
+        # private -> mangled
+        if name.startswith('__') and not name.endswith('__'):
+            name = f"_{cls.name}{name}"
+        # önce data
+        data = object.__getattribute__(self, '_data')
+        if name in data:
+            return data[name]
+        # sonra sýnýf attr/metot
+        attr = cls.lookup(name)
+        if callable(attr):
+            # bind self
+            return lambda *args, **kwargs: attr(self, *args, **kwargs)
+        return attr
+
+    def __setattr__(self, name, value):
+        cls = object.__getattribute__(self, '_clazz')
+        # private mangling
+        if name.startswith('__') and not name.endswith('__'):
+            name = f"_{cls.name}{name}"
+        object.__getattribute__(self, '_data')[name] = value
+
+# Örnek üretici
+def new_instance(cls_def, **kwargs):
+    inst = Instance(cls_def)
+    # Initialize verilen anahtarlarla
+    for k, v in kwargs.items():
+        setattr(inst, k, v)
+    return inst
+
+# ------------------ Abstraction ------------------
+def abstract(func):
+    """Abstract metod iþaretleyici"""
+    setattr(func, '__is_abstract__', True)
+    return func
+
+# ------------------ Introspection & Utils ------------------
+def get_class(name):
+    return type_registry.get(name)
+
+def list_methods(obj):
+    cls = obj if isinstance(obj, ClassDef) else object.__getattribute__(obj, '_clazz')
+    return [k for k, v in cls.attrs.items() if callable(v)]
+
+def list_fields(obj):
+    cls = obj if isinstance(obj, ClassDef) else object.__getattribute__(obj, '_clazz')
+    return [k for k, v in cls.attrs.items() if not callable(v)]
+
+def is_instance(obj, class_name):
+    if not isinstance(obj, Instance): return False
+    cls = object.__getattribute__(obj, '_clazz')
+    target = get_class(class_name)
+    return target in cls.mro
+
+# ------------------ Örnek Kullaným ------------------
+if __name__ == '__main__':
+    # Basit sýnýf
+    Person = define_class('Person', [], {
+        'name': 'Unknown',
+        'greet': lambda self: f"Hi, {self.name}!"
+    })
+    p = new_instance(Person)
+    p.name = 'Mete'
+    print(p.greet())  # Hi, Mete!
+
+    # Kalýtým
+    Employee = define_class('Employee', [Person], {
+        'role': 'Worker',
+        'greet': lambda self: f"Hello {self.name}, your role is {self.role}."
+    })
+    e = new_instance(Employee, name='Ali', role='Engineer')
+    print(e.greet())  # Hello Ali, your role is Engineer.
+
+    # Abstract sýnýf
+    Shape = define_class('Shape', [], {
+        'area': abstract(lambda self: None)
+    })
+    # Aþaðýdaki satýr hata fýrlatýr (abstract metod var)
+    # s = new_instance(Shape)
+
+    # Abstract metod override eden sýnýf
+    Circle = define_class('Circle', [Shape], {
+        'radius': 1,
+        'area': lambda self: 3.14 * self.radius * self.radius
+    })
+    c = new_instance(Circle, radius=2)
+    print(c.area())  # 12.56

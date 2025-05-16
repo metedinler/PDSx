@@ -1,0 +1,351 @@
+.git/COMMIT_EDITMSG
+.git/HEAD
+.git/config
+.git/description
+.git/hooks/applypatch-msg.sample
+.git/hooks/commit-msg.sample
+.git/hooks/fsmonitor-watchman.sample
+.git/hooks/post-update.sample
+.git/hooks/pre-applypatch.sample
+.git/hooks/pre-commit.sample
+.git/hooks/pre-merge-commit.sample
+.git/hooks/pre-push.sample
+.git/hooks/pre-rebase.sample
+.git/hooks/pre-receive.sample
+.git/hooks/prepare-commit-msg.sample
+.git/hooks/push-to-checkout.sample
+.git/hooks/sendemail-validate.sample
+.git/hooks/update.sample
+.git/index
+.git/info/exclude
+.git/logs/HEAD
+.git/logs/refs/heads/main
+.git/logs/refs/remotes/origin/main
+.git/objects/00/a2cd2583c7302ca85377311afd5fa2507a6c28
+.git/objects/49/875d9e08bb7bd23621a0e7909a1d0a0c4f892a
+.git/objects/4b/9ce4634167be58ac065d5cebeda36024f4b966
+.git/objects/4f/e33e3283ebd4ff064c904a4858d5a83ae9338d
+.git/objects/58/96ba5ef56362b2d003a738cf04f75277707c54
+.git/objects/84/85ced71aa33fa87c8d77ba085624ed45ee493d
+.git/objects/8d/eefbeafffe05686f3d1e6ab2264130c57f483c
+.git/objects/bc/1c8d30dd6874dc463b2680c1fb2fdf83e105fe
+.git/objects/c6/49387a75ad3d850808b79b6df56fdfe238435f
+.git/objects/d2/803a351852248ace1112273c829fd5a916399a
+.git/refs/heads/main
+.git/refs/remotes/origin/main
+PDSX Interpreter Analysis and User Manual.markdown
+PDSX Yorumlayıcı Analizi ve Kullanım Kılavuzu.markdown
+api_key.txt
+basic pdsX/tam verilen.py
+basic pdsX/tam1.py
+chatgpt konusma/chat.html
+chatgpt konusma/conversations.json
+chatgpt konusma/dalle-generations/file-3RLfU9IJD94QYu0AS3jsPOGS-af41a4fb-36e5-4dd7-a44c-96d828158269.webp
+chatgpt konusma/dalle-generations/file-6fzbPk9FUmrkvaXoFATeP5-c5f8de44-0064-4847-a7e8-5be159674a8b.webp
+chatgpt konusma/dalle-generations/file-9HGCBfJlsLh0kmgpAGa1V0QH-9dca4883-46b7-4562-8814-533d0a8fc957.webp
+chatgpt konusma/dalle-generations/file-LVTQyzFFRNVmidMhDXk2WL-5081c3c8-1b10-429f-964e-67b11f43c8b5.webp
+chatgpt konusma/dalle-generations/file-QnWANdiaSy4MCMJvnshESbP6-180c5e36-199a-4a91-aafa-bad9e8c1ca9b.webp
+chatgpt konusma/dalle-generations/file-roRbnMCqwhAq2HNkrYgB6IOm-835ac2ea-00ca-404c-abdd-31227029799b.webp
+chatgpt konusma/message_feedback.json
+chatgpt konusma/shared_conversations.json
+chatgpt konusma/user.json
+interpreter_errors (2).log
+interpreter_errors.log
+klasorlistele.basX
+module.basX
+omega fonksiyonu.txt
+pcode/PcodeProjects/Library/pdsXv11
+pcode/PcodeProjects/Projects/pdsX/Build/profile.xml
+pcode/PcodeProjects/Projects/pdsX/Data/projectdata.xml
+pcode/PcodeProjects/Projects/pdsX/Data/session.xml
+pcode/PcodeProjects/Projects/pdsX/Data/wpad.txt
+pcode/PcodeProjects/Projects/pdsX/Rope/config.py
+pcode/PcodeProjects/Projects/pdsX/Rope/objectdb
+pcode/PcodeProjects/Projects/pdsX/Rope/profile.xml
+pcode/PcodeProjects/Projects/pdsX/project.xml
+pcode/PcodeProjects/Projects/pdsX/src/pdsX.py
+pcode/PcodeProjects/Projects/pdsX/temp/Backup/Files/1746729138.92672.0
+pcode/PcodeProjects/Projects/pdsX/temp/Backup/Files/1746731922.064515.1
+pcode/PcodeProjects/Projects/pdsX/temp/Backup/bak
+pcode/PcodeProjects/Settings/ColorSchemes/Python/Dark.xml
+pcode/PcodeProjects/Settings/ColorSchemes/Python/Designer.xml
+pcode/PcodeProjects/Settings/ColorSchemes/Python/KewlDark.xml
+pcode/PcodeProjects/Settings/keymap.xml
+pcode/PcodeProjects/Settings/modules.xml
+pcode/PcodeProjects/Settings/usedata.xml
+pcode/Pcode_Library_Per_8._May_22-26-11_2025.pcdlib.pcdlib).zip
+pcode/pdsXv11.py
+pdsX Interpreter Dokümantasyonu.markdown
+pdsX Interpreter Kullanım Kılavuzu.markdown
+pdsX modul gelistirme
+pdsXLinter.basX
+pdsXX/.git/AUTO_MERGE
+pdsXX/.git/COMMIT_EDITMSG
+pdsXX/.git/FETCH_HEAD
+pdsXX/.git/HEAD
+pdsXX/.git/ORIG_HEAD
+pdsXX/.git/config
+pdsXX/.git/description
+pdsXX/.git/hooks/applypatch-msg.sample
+pdsXX/.git/hooks/commit-msg.sample
+pdsXX/.git/hooks/fsmonitor-watchman.sample
+pdsXX/.git/hooks/post-update.sample
+pdsXX/.git/hooks/pre-applypatch.sample
+pdsXX/.git/hooks/pre-commit.sample
+pdsXX/.git/hooks/pre-merge-commit.sample
+pdsXX/.git/hooks/pre-push.sample
+pdsXX/.git/hooks/pre-rebase.sample
+pdsXX/.git/hooks/pre-receive.sample
+pdsXX/.git/hooks/prepare-commit-msg.sample
+pdsXX/.git/hooks/push-to-checkout.sample
+pdsXX/.git/hooks/sendemail-validate.sample
+pdsXX/.git/hooks/update.sample
+pdsXX/.git/index
+pdsXX/.git/info/exclude
+pdsXX/.git/logs/HEAD
+pdsXX/.git/logs/refs/heads/main
+pdsXX/.git/logs/refs/remotes/origin/main
+pdsXX/.git/objects/00/a2cd2583c7302ca85377311afd5fa2507a6c28
+pdsXX/.git/objects/05/18addb5917f6ab51369cc162d0acb844f35ed0
+pdsXX/.git/objects/1a/5ed7b73d8e2c6a0282fb1429616cd70cb4a2e3
+pdsXX/.git/objects/1a/b09e1583b6a5ce47bb8dd8ec4b6a17a124cf95
+pdsXX/.git/objects/1f/ec936324530ef7757c769294abbeb3d782ca76
+pdsXX/.git/objects/40/90d8bcd52ab8c68c9f9c23f895663cd8a87cac
+pdsXX/.git/objects/49/875d9e08bb7bd23621a0e7909a1d0a0c4f892a
+pdsXX/.git/objects/49/f87d3e506fdf8214304b71ae5952c69c4afd3c
+pdsXX/.git/objects/4b/9ce4634167be58ac065d5cebeda36024f4b966
+pdsXX/.git/objects/4f/e33e3283ebd4ff064c904a4858d5a83ae9338d
+pdsXX/.git/objects/58/96ba5ef56362b2d003a738cf04f75277707c54
+pdsXX/.git/objects/5f/59c46651f22891b94cf0bae9899727e4fb5089
+pdsXX/.git/objects/6e/b90b5f040b65c4cd870e1ec1223611ccd2f114
+pdsXX/.git/objects/75/e76f6ca2c4a1068206dfef3d8d6cf62a2e09c9
+pdsXX/.git/objects/84/85ced71aa33fa87c8d77ba085624ed45ee493d
+pdsXX/.git/objects/8d/eefbeafffe05686f3d1e6ab2264130c57f483c
+pdsXX/.git/objects/a4/f541be7efe8ca01c74c177312ffa53d88fdb23
+pdsXX/.git/objects/bc/1c8d30dd6874dc463b2680c1fb2fdf83e105fe
+pdsXX/.git/objects/be/29f173e0f46151702d43c70cb658ebdfe5d924
+pdsXX/.git/objects/c6/49387a75ad3d850808b79b6df56fdfe238435f
+pdsXX/.git/objects/c9/c00156ecd1a87abc4a71565bef5f55ec0cd170
+pdsXX/.git/objects/d2/803a351852248ace1112273c829fd5a916399a
+pdsXX/.git/objects/de/f69da1b47709e5450c1fd63e1d32835758bca5
+pdsXX/.git/refs/heads/main
+pdsXX/.git/refs/remotes/origin/main
+pdsXX/1.txt
+pdsXX/2.txt
+pdsXX/3.txt
+pdsXX/4.txt
+pdsXX/5.txt
+pdsXX/6.txt
+pdsXX/7.txt
+pdsXX/8.txt
+pdsXX/grok 1.md
+pdsXX/grok2.md
+pdsXX/grok3.md
+pdsXX/grok4.md
+pdsXX/grok5.md
+pdsXX/grok6.md
+pdsXX/grok7.md
+pdsXX/libX_core detay ve komutlari var.md
+pdsXX/pdsXX imalat plani.md
+pdsXX/pdsXX imalat plani_2.md
+pdsXX/pdsXv11c.py
+pdsXu/Help Manager.py
+pdsXu/data_types.py
+pdsXu/lib_db.py
+pdsXu/libxcore.py
+pdsXu/memory_manager.py
+pdsXu/pdsXu.py
+pdsxv12u/.git/AUTO_MERGE
+pdsxv12u/.git/COMMIT_EDITMSG
+pdsxv12u/.git/FETCH_HEAD
+pdsxv12u/.git/HEAD
+pdsxv12u/.git/ORIG_HEAD
+pdsxv12u/.git/config
+pdsxv12u/.git/description
+pdsxv12u/.git/hooks/applypatch-msg.sample
+pdsxv12u/.git/hooks/commit-msg.sample
+pdsxv12u/.git/hooks/fsmonitor-watchman.sample
+pdsxv12u/.git/hooks/post-update.sample
+pdsxv12u/.git/hooks/pre-applypatch.sample
+pdsxv12u/.git/hooks/pre-commit.sample
+pdsxv12u/.git/hooks/pre-merge-commit.sample
+pdsxv12u/.git/hooks/pre-push.sample
+pdsxv12u/.git/hooks/pre-rebase.sample
+pdsxv12u/.git/hooks/pre-receive.sample
+pdsxv12u/.git/hooks/prepare-commit-msg.sample
+pdsxv12u/.git/hooks/push-to-checkout.sample
+pdsxv12u/.git/hooks/sendemail-validate.sample
+pdsxv12u/.git/hooks/update.sample
+pdsxv12u/.git/index
+pdsxv12u/.git/info/exclude
+pdsxv12u/.git/logs/HEAD
+pdsxv12u/.git/logs/refs/heads/main
+pdsxv12u/.git/logs/refs/remotes/origin/main
+pdsxv12u/.git/objects/00/a2cd2583c7302ca85377311afd5fa2507a6c28
+pdsxv12u/.git/objects/11/a1936ab97499ff0287960cc8d9c9d2d54687ad
+pdsxv12u/.git/objects/24/bb3babf107e910249c4db3c29b356d5e1cc05d
+pdsxv12u/.git/objects/2b/bfea9152edfaf343218130a1bb547eafabaea2
+pdsxv12u/.git/objects/3f/c79a6feb1370479a4ef999c7bd29eda5cc2bcc
+pdsxv12u/.git/objects/49/875d9e08bb7bd23621a0e7909a1d0a0c4f892a
+pdsxv12u/.git/objects/4b/9ce4634167be58ac065d5cebeda36024f4b966
+pdsxv12u/.git/objects/4f/e33e3283ebd4ff064c904a4858d5a83ae9338d
+pdsxv12u/.git/objects/58/96ba5ef56362b2d003a738cf04f75277707c54
+pdsxv12u/.git/objects/60/f18417069af680291ac7cd1e58c6972f8e3092
+pdsxv12u/.git/objects/61/a4695f928618ec452ca579ab1e2139067c43e2
+pdsxv12u/.git/objects/69/67fb1cc05cafb35a0356f38e7233d72f4c9666
+pdsxv12u/.git/objects/84/85ced71aa33fa87c8d77ba085624ed45ee493d
+pdsxv12u/.git/objects/86/2c9c755127e0c2d222762a5a45357d81406810
+pdsxv12u/.git/objects/8d/eefbeafffe05686f3d1e6ab2264130c57f483c
+pdsxv12u/.git/objects/ad/a230e4495b4eb9a367d6347b0b0eff305b421b
+pdsxv12u/.git/objects/ae/0bbfc19bf1586249285e217690a7bf15afcddd
+pdsxv12u/.git/objects/bc/1c8d30dd6874dc463b2680c1fb2fdf83e105fe
+pdsxv12u/.git/objects/c6/49387a75ad3d850808b79b6df56fdfe238435f
+pdsxv12u/.git/objects/cc/5fb4c0ce27263aa66a1d630facfff18e401e39
+pdsxv12u/.git/objects/d2/803a351852248ace1112273c829fd5a916399a
+pdsxv12u/.git/objects/d7/9d5a6aa8c09301f0ba27a0388966156152eace
+pdsxv12u/.git/objects/d7/cdc53ed8a249d5f75c21932d40b7a45a05c453
+pdsxv12u/.git/refs/heads/main
+pdsxv12u/.git/refs/remotes/origin/main
+pdsxv12u/.vscode/easycode.ignore
+pdsxv12u/1.txt
+pdsxv12u/2.txt
+pdsxv12u/3.txt
+pdsxv12u/4.txt
+pdsxv12u/5.txt
+pdsxv12u/6.txt
+pdsxv12u/7.txt
+pdsxv12u/8.txt
+pdsxv12u/lang.json
+pdsxv12u/pdsX.py
+pdsxv12u/pdsX/pdsXv11g/pdsXv11g.py
+pdsxv12u/pipe.py
+pdsxv12u/sqlmolule.py
+sample.pdf
+tahminoyunu.basX
+temel basic interpreter/.git/AUTO_MERGE
+temel basic interpreter/.git/COMMIT_EDITMSG
+temel basic interpreter/.git/FETCH_HEAD
+temel basic interpreter/.git/HEAD
+temel basic interpreter/.git/ORIG_HEAD
+temel basic interpreter/.git/config
+temel basic interpreter/.git/description
+temel basic interpreter/.git/hooks/applypatch-msg.sample
+temel basic interpreter/.git/hooks/commit-msg.sample
+temel basic interpreter/.git/hooks/fsmonitor-watchman.sample
+temel basic interpreter/.git/hooks/post-update.sample
+temel basic interpreter/.git/hooks/pre-applypatch.sample
+temel basic interpreter/.git/hooks/pre-commit.sample
+temel basic interpreter/.git/hooks/pre-merge-commit.sample
+temel basic interpreter/.git/hooks/pre-push.sample
+temel basic interpreter/.git/hooks/pre-rebase.sample
+temel basic interpreter/.git/hooks/pre-receive.sample
+temel basic interpreter/.git/hooks/prepare-commit-msg.sample
+temel basic interpreter/.git/hooks/push-to-checkout.sample
+temel basic interpreter/.git/hooks/sendemail-validate.sample
+temel basic interpreter/.git/hooks/update.sample
+temel basic interpreter/.git/index
+temel basic interpreter/.git/info/exclude
+temel basic interpreter/.git/logs/HEAD
+temel basic interpreter/.git/logs/refs/heads/main
+temel basic interpreter/.git/logs/refs/remotes/origin/main
+temel basic interpreter/.git/objects/00/a2cd2583c7302ca85377311afd5fa2507a6c28
+temel basic interpreter/.git/objects/0f/29fa4787145ead44b4e7cf4aaba463fe336cfa
+temel basic interpreter/.git/objects/18/1ce37f3d5b429c006644bd1e9633c801897c18
+temel basic interpreter/.git/objects/21/e8a7d0c8706b6a3f191b613f69e505993a8864
+temel basic interpreter/.git/objects/2b/bfea9152edfaf343218130a1bb547eafabaea2
+temel basic interpreter/.git/objects/2f/175c714831a8ff909593d0f7fe75cca9d0bff2
+temel basic interpreter/.git/objects/35/c990a103e7355767c58705c8d90337ac7bf4a3
+temel basic interpreter/.git/objects/3c/4899b68bbd38822c5985a8160f35c1ce4615b3
+temel basic interpreter/.git/objects/3d/b7fed74a597db8193b208e048c6af1b39494f1
+temel basic interpreter/.git/objects/40/6447f587d49d55b057f839aabb13083b20c0b9
+temel basic interpreter/.git/objects/40/93f1db1f90f551116b2ca7c84d40f8b38ac333
+temel basic interpreter/.git/objects/40/c6f8e9212e4da9341568af1b4c8263591d1bcc
+temel basic interpreter/.git/objects/41/4037693a828d2f3bf28602151e005d1cb33b31
+temel basic interpreter/.git/objects/49/875d9e08bb7bd23621a0e7909a1d0a0c4f892a
+temel basic interpreter/.git/objects/4b/9ce4634167be58ac065d5cebeda36024f4b966
+temel basic interpreter/.git/objects/4f/e33e3283ebd4ff064c904a4858d5a83ae9338d
+temel basic interpreter/.git/objects/58/96ba5ef56362b2d003a738cf04f75277707c54
+temel basic interpreter/.git/objects/59/3be09fe6c253b732e1af02a902e34f18d9240d
+temel basic interpreter/.git/objects/64/111ebf445a67d01e07a464c53682d27d60df2e
+temel basic interpreter/.git/objects/65/381e38442d053295b2de7758cf01777cbb22bf
+temel basic interpreter/.git/objects/67/fe830ebbfc96fe97829f0b3909b2fd1c614128
+temel basic interpreter/.git/objects/7f/77cf3bd7bb8b0ebdd75a8c937eb5bcb5fdcb95
+temel basic interpreter/.git/objects/84/85ced71aa33fa87c8d77ba085624ed45ee493d
+temel basic interpreter/.git/objects/85/c26c6993cf1d9116d522ec160cb7aaa74fb007
+temel basic interpreter/.git/objects/86/3d94c27b751e1c29711ea50a4cf4d2889e8baf
+temel basic interpreter/.git/objects/8a/c6e51e643f77f7ea23a7957a8bc3eeaf93005f
+temel basic interpreter/.git/objects/8b/55c6b6a7470eb83265b56e64426b465412a073
+temel basic interpreter/.git/objects/8d/eefbeafffe05686f3d1e6ab2264130c57f483c
+temel basic interpreter/.git/objects/98/8341b168b4f16b67c41d20d4758bf242eb6ebb
+temel basic interpreter/.git/objects/9b/b32e61d22b28c3a898066d5a8ff21e7ac9ec67
+temel basic interpreter/.git/objects/a5/c6bfbfb08725edfb9b5b6198425592ef8e6332
+temel basic interpreter/.git/objects/b5/be0fc86220c2b5f9fe029e4ad5e4b668328804
+temel basic interpreter/.git/objects/b7/f4a76a9e6f2a36ac30aed759d9db29906be852
+temel basic interpreter/.git/objects/bb/bca0ba35c294cca5d174540bb02727f6e5c9b9
+temel basic interpreter/.git/objects/bb/f7972532ecb0638ff5abf0f3339961f4ceb3e6
+temel basic interpreter/.git/objects/bc/1c8d30dd6874dc463b2680c1fb2fdf83e105fe
+temel basic interpreter/.git/objects/c6/49387a75ad3d850808b79b6df56fdfe238435f
+temel basic interpreter/.git/objects/d2/803a351852248ace1112273c829fd5a916399a
+temel basic interpreter/.git/objects/d7/cdc53ed8a249d5f75c21932d40b7a45a05c453
+temel basic interpreter/.git/objects/db/0f7c2fe48aed74f527f218b1782ec031978104
+temel basic interpreter/.git/objects/e6/9de29bb2d1d6434b8b29ae775ad8c2e48c5391
+temel basic interpreter/.git/objects/f5/a927a0b851f975b49a2bb6fd2bb73bfa0bfa4a
+temel basic interpreter/.git/refs/heads/main
+temel basic interpreter/.git/refs/remotes/origin/main
+temel basic interpreter/.github/copilot-instructions.md
+temel basic interpreter/.gpt-runner/copilot.gpt.md
+temel basic interpreter/.vscode/easycode.ignore
+temel basic interpreter/1.txt
+temel basic interpreter/1_ek.py
+temel basic interpreter/2.txt
+temel basic interpreter/2_ek.py
+temel basic interpreter/3.py
+temel basic interpreter/3.txt
+temel basic interpreter/4.txt
+temel basic interpreter/5 basic.py
+temel basic interpreter/5.txt
+temel basic interpreter/6.txt
+temel basic interpreter/7.txt
+temel basic interpreter/8.txt
+temel basic interpreter/KlasorListele.basX
+temel basic interpreter/QBasicPDSInterpreter 6.py
+temel basic interpreter/QBasicPDSInterpreter 7.py
+temel basic interpreter/QBasicPDSInterpreter2.py
+temel basic interpreter/QBasicPDSInterpreter4.py
+temel basic interpreter/QBasicPDSInterpreter9.py
+temel basic interpreter/destek1.py
+temel basic interpreter/interpreter_errors.log
+temel basic interpreter/lang.json
+temel basic interpreter/mete
+temel basic interpreter/pdsX.py
+temel basic interpreter/pdsX_ilave.py
+temel basic interpreter/pdsX_v10.py
+temel basic interpreter/pdsX_v110.py
+temel basic interpreter/pdsx_v11.py
+temel basic interpreter/temel basic interpreter.py
+temel basic interpreter/test codes/test1.basX
+temel basic interpreter/test1.basX
+test.db
+test1.basX
+test2.basX
+test_program_1.basX
+test_program_10.basX
+test_program_11.basX
+test_program_12.basX
+test_program_13.basX
+test_program_14.basX
+test_program_15.basX
+test_program_16.basX
+test_program_17.basX
+test_program_18.basX
+test_program_19.basX
+test_program_2.basX
+test_program_20.basX
+test_program_3.basX
+test_program_4.basX
+test_program_5.basX
+test_program_6.basX
+test_program_7.basX
+test_program_8.basX
+test_program_9.basX
+~PDSX Interpreter Programlama Dili Kullanım Kılavuzu X.md.saved.bak

@@ -1,0 +1,400 @@
+# pdsXv13u Ultimate Interpreter
+# Baþlangýç ve Temel Yapýlar
+                  # # Exception Sýnýfý PASS GECMIS (CHATGPT)
+import os
+import sys
+import math
+import time
+import json
+import glob
+import re
+import shutil
+import random
+import socket
+import struct
+import logging
+import ctypes
+import threading
+import asyncio
+import sqlite3
+import requests
+import pdfplumber
+import numpy as np
+import pandas as pd
+import psutil
+import traceback
+from types import SimpleNamespace
+from datetime import datetime
+from collections import defaultdict, namedtuple
+from packaging import version
+import subprocess
+import importlib.metadata
+import argparse
+
+# Eksik kütüphane kontrolü
+def install_missing_libraries():
+    required = {
+        'numpy': 'numpy',
+        'pandas': 'pandas',
+        'scipy': 'scipy',
+        'psutil': 'psutil',
+        'pdfplumber': 'pdfplumber',
+        'bs4': 'beautifulsoup4',
+        'requests': 'requests',
+        'packaging': 'packaging'
+    }
+    installed = {pkg.metadata['Name'].lower() for pkg in importlib.metadata.distributions()}
+    missing = [lib for lib, pkg in required.items() if lib not in installed]
+    if missing:
+        print(f"Eksik kütüphaneler yükleniyor: {missing}")
+        for lib in missing:
+            try:
+                subprocess.check_call([sys.executable, "-m", "pip", "install", required[lib]])
+                print(f"{lib} kuruldu.")
+            except subprocess.CalledProcessError:
+                print(f"Hata: {lib} yüklenemedi, elle kurun.")
+
+install_missing_libraries()
+
+# Loglama
+logging.basicConfig(filename='pdsxv13u_errors.log', level=logging.ERROR,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
+
+# Memory Manager
+class MemoryManager:
+    def __init__(self):
+        self.heap = {}
+        self.ref_counts = {}
+
+    def allocate(self, size):
+        ptr = id(bytearray(size))
+        self.heap[ptr] = bytearray(size)
+        self.ref_counts[ptr] = 1
+        return ptr
+
+    def release(self, ptr):
+        if ptr in self.ref_counts:
+            self.ref_counts[ptr] -= 1
+            if self.ref_counts[ptr] == 0:
+                del self.heap[ptr]
+                del self.ref_counts[ptr]
+
+    def dereference(self, ptr):
+        return self.heap.get(ptr, None)
+
+    def set_value(self, ptr, value):
+        if ptr in self.heap:
+            if isinstance(value, (int, float)):
+                self.heap[ptr][:] = struct.pack('d', float(value))
+            elif isinstance(value, str):
+                self.heap[ptr][:] = value.encode()
+
+    def sizeof(self, obj):
+        if isinstance(obj, (int, float)):
+            return 8
+        elif isinstance(obj, str):
+            return len(obj.encode())
+        elif isinstance(obj, (list, np.ndarray)):
+            return obj.nbytes if hasattr(obj, 'nbytes') else len(obj) * 8
+        return 0
+
+# Exception Sýnýfý
+class PdsXException(Exception):
+PASS
+
+# LibXCore Sýnýfý
+class LibXCore:
+    def __init__(self, interpreter=None):
+        self.interpreter = interpreter
+        self.default_encoding = "utf-8"
+        self.supported_encodings = [
+            "utf-8", "cp1254", "iso-8859-9", "ascii", "utf-16", "utf-32",
+            "cp1252", "iso-8859-1", "windows-1250", "latin-9",
+            "cp932", "gb2312", "gbk", "euc-kr", "cp1251", "iso-8859-5",
+            "cp1256", "iso-8859-6", "cp874", "iso-8859-7", "cp1257", "iso-8859-8"
+        ]
+        self.pipes = {}
+        self.pipe_id_counter = 0
+        self.databases = {}
+
+    def sum(self, iterable):
+        return sum(iterable)
+
+    def mean(self, iterable):
+        return sum(iterable) / len(iterable) if iterable else 0
+
+    def min(self, iterable):
+        return min(iterable) if iterable else None
+
+    def max(self, iterable):
+        return max(iterable) if iterable else None
+
+    def floor(self, x):
+        return math.floor(x)
+
+    def ceil(self, x):
+        return math.ceil(x)
+
+    def round(self, x, digits=0):
+        return round(x, digits)
+
+    def exists(self, path):
+        return os.path.exists(path)
+
+    def mkdir(self, path):
+        os.makedirs(path, exist_ok=True)
+
+    def copy_file(self, src, dst):
+        shutil.copy(src, dst)
+
+    def move_file(self, src, dst):
+        shutil.move(src, dst)
+
+    def delete_file(self, path):
+        os.remove(path)
+
+    def list_dir(self, path):
+        return os.listdir(path)
+
+    def listfile(self, path, pattern="*"):
+        files = glob.glob(os.path.join(path, pattern))
+        return [{"name": f, "compressed": f.endswith(".hz")} for f in files]
+
+    def read_lines(self, path):
+        with open(path, "r", encoding=self.default_encoding) as f:
+            return f.readlines()
+
+    def write_json(self, obj, path):
+        with open(path, "w", encoding=self.default_encoding) as f:
+            json.dump(obj, f)
+
+    def read_json(self, path):
+        with open(path, "r", encoding=self.default_encoding) as f:
+            return json.load(f)
+
+    def sleep(self, seconds):
+        time.sleep(seconds)
+
+    def random_int(self, min_val, max_val):
+        return random.randint(min_val, max_val)
+
+    def ping(self, host):
+        try:
+            socket.gethostbyname(host)
+            return True
+        except socket.error:
+            return False
+
+    def getenv(self, name):
+        return os.getenv(name)
+
+    def join_path(self, *parts):
+        return os.path.join(*parts)
+
+    def timer(self):
+        return time.time()
+
+    def time_now(self):
+        return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    def date_now(self):
+        return datetime.now().strftime("%Y-%m-%d")
+
+    def memory_usage(self):
+        process = psutil.Process()
+        return process.memory_info().rss / 1024 / 1024
+
+    def cpu_count(self):
+        return multiprocessing.cpu_count()
+
+    def str(self, value):
+        return str(value)
+
+    def val(self, s):
+        try:
+            return int(s)
+        except ValueError:
+            try:
+                return float(s)
+            except ValueError:
+                raise Exception(f"Geçersiz deðer: {s}")
+
+    def type_of(self, value):
+        if isinstance(value, int):
+            return "INTEGER"
+        elif isinstance(value, float):
+            return "FLOAT"
+        elif isinstance(value, str):
+            return "STRING"
+        elif isinstance(value, list):
+            return "LIST"
+        elif isinstance(value, dict):
+            return "DICT"
+        else:
+            return "UNKNOWN"
+
+# Struct Yapýsý
+class StructInstance:
+    def __init__(self, fields, type_table):
+        self.fields = {name: None for name, _ in fields}
+        self.field_types = {name: type_name for name, type_name in fields}
+        self.type_table = type_table
+        self.sizes = {name: self._get_size(type_name) for name, type_name in fields}
+        self.offsets = {}
+        offset = 0
+        for name in self.fields:
+            self.offsets[name] = offset
+            offset += self.sizes[name]
+
+    def set_field(self, field_name, value):
+        if field_name not in self.fields:
+            raise ValueError(f"Geçersiz alan: {field_name}")
+        expected_type = self.type_table.get(self.field_types[field_name].upper(), object)
+        if not isinstance(value, expected_type):
+            try:
+                value = expected_type(value)
+            except:
+                raise TypeError(f"{field_name} için beklenen tip {expected_type.__name__}, ancak {type(value).__name__} alýndý")
+        self.fields[field_name] = value
+
+    def get_field(self, field_name):
+        if field_name not in self.fields:
+            raise ValueError(f"Geçersiz alan: {field_name}")
+        return self.fields[field_name]
+
+    def _get_size(self, type_name):
+        size_map = {
+            "INTEGER": 4, "DOUBLE": 8, "STRING": 8, "BYTE": 1,
+            "SHORT": 2, "LONG": 8, "SINGLE": 4, "LIST": 8, "ARRAY": 8, "DICT": 8
+        }
+        return size_map.get(type_name.upper(), 8)
+
+# Union Yapýsý
+class UnionInstance:
+    def __init__(self, fields, type_table):
+        self.field_types = {name: type_name for name, type_name in fields}
+        self.type_table = type_table
+        self.active_field = None
+        self.value = bytearray(8)
+        self.sizes = {name: self._get_size(type_name) for name, type_name in fields}
+
+    def set_field(self, field_name, value):
+        if field_name not in self.field_types:
+            raise ValueError(f"Geçersiz alan: {field_name}")
+        expected_type = self.type_table.get(self.field_types[field_name].upper(), object)
+        if not isinstance(value, expected_type):
+            try:
+                value = expected_type(value)
+            except:
+                raise TypeError(f"{field_name} için beklenen tip {expected_type.__name__}, ancak {type(value).__name__} alýndý")
+        self.active_field = field_name
+        fmt = {"INTEGER": "i", "DOUBLE": "d", "STRING": "8s", "BYTE": "b",
+               "SHORT": "h", "LONG": "q", "SINGLE": "f"}.get(self.field_types[field_name].upper(), "8s")
+        if fmt == "8s":
+            value = str(value).encode('utf-8')[:8].ljust(8, b'\0')
+        else:
+            value = struct.pack(fmt, value)
+        self.value[:len(value)] = value
+
+    def get_field(self, field_name):
+        if field_name not in self.field_types:
+            raise ValueError(f"Geçersiz alan: {field_name}")
+        if self.active_field != field_name:
+            raise ValueError(f"{field_name} alaný aktif deðil")
+        fmt = {"INTEGER": "i", "DOUBLE": "d", "STRING": "8s", "BYTE": "b",
+               "SHORT": "h", "LONG": "q", "SINGLE": "f"}.get(self.field_types[field_name].upper(), "8s")
+        try:
+            if fmt == "8s":
+                return self.value.decode('utf-8').rstrip('\0')
+            return struct.unpack(fmt, self.value[:self.sizes[field_name]])[0]
+        except:
+            raise ValueError(f"{field_name} alanýndan veri okunamadý")
+
+    def _get_size(self, type_name):
+        size_map = {
+            "INTEGER": 4, "DOUBLE": 8, "STRING": 8, "BYTE": 1,
+            "SHORT": 2, "LONG": 8, "SINGLE": 4, "LIST": 8, "ARRAY": 8, "DICT": 8
+        }
+        return size_map.get(type_name.upper(), 8)
+
+# ArrayInstance Yapýsý
+class ArrayInstance:
+    def __init__(self, dimensions, element_type, type_table, types):
+        self.dimensions = dimensions
+        self.element_type = element_type
+        self.type_table = type_table
+        self.types = types
+        self.data = {}
+
+    def set_element(self, indices, value):
+        self.data[tuple(indices)] = value
+
+    def get_element(self, indices):
+        return self.data.get(tuple(indices))
+
+# Pointer Yapýsý
+class Pointer:
+    def __init__(self, address, target_type, interpreter):
+        self.address = address
+        self.target_type = target_type
+        self.interpreter = interpreter
+
+    def dereference(self):
+        if self.address not in self.interpreter.memory_pool:
+            raise ValueError(f"Geçersiz iþaretçi adresi: {self.address}")
+        value = self.interpreter.memory_pool[self.address]["value"]
+        expected_type = self.interpreter.type_table.get(self.target_type.upper(), object)
+        if not isinstance(value, expected_type):
+            raise TypeError(f"Beklenen tip {expected_type.__name__}, ancak {type(value).__name__} bulundu")
+        return value
+
+    def set(self, value):
+        if self.address not in self.interpreter.memory_pool:
+            raise ValueError(f"Geçersiz iþaretçi adresi: {self.address}")
+        expected_type = self.interpreter.type_table.get(self.target_type.upper(), object)
+        if not isinstance(value, expected_type):
+            try:
+                value = expected_type(value)
+            except:
+                raise TypeError(f"Beklenen tip {expected_type.__name__}, ancak {type(value).__name__} alýndý")
+        self.interpreter.memory_pool[self.address]["value"] = value
+
+    def add_offset(self, offset):
+        new_address = self.address + offset
+        if new_address not in self.interpreter.memory_pool:
+            raise ValueError(f"Geçersiz iþaretçi aritmetiði: {new_address}")
+        return Pointer(new_address, self.target_type, self.interpreter)
+
+# ClassInstance
+class ClassInstance(StructInstance):
+    def __init__(self, info, type_table, types, interpreter):
+        super().__init__(info["fields"], type_table)
+        self.methods = info["methods"]
+        self.access = info["access"]
+        self.interpreter = interpreter
+
+    def call_method(self, method_name, args):
+        method = self.methods.get(method_name)
+        if not method:
+            raise Exception(f"Metot bulunamadý: {method_name}")
+        params = [param for param, _ in method["params"]]
+        scope = dict(zip(params, args))
+        self.interpreter.local_scopes.append(scope)
+        old_program = self.interpreter.program
+        old_counter = self.interpreter.program_counter
+        self.interpreter.program = [(line, None) for line in method["body"]]
+        self.interpreter.program_counter = 0
+        self.interpreter.running = True
+        try:
+            while self.interpreter.running and self.interpreter.program_counter < len(self.interpreter.program):
+                line, _ = self.interpreter.program[self.interpreter.program_counter]
+                result = self.interpreter.execute_command(line)
+                if result is not None:
+                    self.interpreter.program_counter = result
+                else:
+                    self.interpreter.program_counter += 1
+        finally:
+            self.interpreter.program = old_program
+            self.interpreter.program_counter = old_counter
+            self.interpreter.local_scopes.pop()
+

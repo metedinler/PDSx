@@ -1,0 +1,59 @@
+Prolog Yorumlayýcý
+- pdsX12u sahip oldugu tum degiskenleri ve nesneleri kullanacaktir.
+- Sorgular tum degiskenleri ve nesneleri kullanabilir.
+- sorgular veri tabanini sql komutlarindan ortaya cikan sonuclari kullanabilir
+- sorgu sonuclari bagli degiskenlere doner.
+- Komutlar clas altinda degil, 
+- sorgu sonuclari fonksiyonu True veya False dondurur.
+- Sözdizimi:  QBasic pds 7.1 gibi komutlar olmalidir. kucuk buyuk harf kullanimi fark etmemelidir.
+- Backtrace komutu, 'Geri Ýzleme' :- Sorgu baþarýsýz olursa bir önceki adýmlara dönüp diðer olasýlýklarý deneme.
+- Backtrace komutu, Herhangi bir kuralýn gövdesindeki alt hedefler baþarýsýz olursa, bir önceki adým geri alýnýr ve baþka yollar denenir.
+- Gerçekler (facts komutu) ve kurallar (rules komutu) motorun bilgi tabanýnda saklanýr.
+- Add komutu gerceklere ve Kurallara yeni kurallar ekler (kisaca + matamatik komutu kullanilabilir)
+- Query komutu yorumlayici bir hedefin gerceklere ve kurallara uyup uymadigini belirler.
+- Amac: Basit gerçekler ve kurallar tanýmlayabilir. bunlar ile mantiksal sorgular yapabilir ve 
+- karmaþýk eþleme algoritmalarý ve optimize edilmiþ geri izleme mekanizmalarý eklenmeli.
+- orjinal prologda bulunan ?x veya ?y gibi degiskenler yani ?degisken  syntax'ini #degisken seklinde yapalim.
+- Sorgu ve Eþleþme Operatörleri not, or, and, xor, imp, (mantiksal ve bitwise operatorler kullanilabilmelidir).
+- Temel Mantýksal Operatörler ve Kullanýmlarýna izin verilmelidir
+- BI-COND (Çift Yönlü Ýmplikasyon) eklenmeli
+- COUNT: Belirli bir koþulu saðlayan kaç eleman olduðunu döndürür.
+- ALL/ANY, Tüm veya herhangi bir koþulun saðlanýp saðlanmadýðýný kontrol etme
+- EXISTS (Var Olma Kontrolü), Bir þeyin var olup olmadýðýný kontrol eder.
+- FORALL (Her Koþulun Saðlanmasý), Tüm elemanlarýn belirli bir koþulu saðlamasý gerektiðini ifade eder.
+- ASSERT: Yeni bir gerçek ekleme. Örneðin: `ASSERT(parent(john, mary))`.
+- RETRACT: Mevcut bir gerçeði silme. Örneðin: `RETRACT(parent(john, mary))
+- tree: yeni veri yapisi: Mantýksal veriler için aðaç yapýsý kullanýlabilir. uzeindeki dugumleri ve dallari ifade etmek gereklidir
+- yeni veri turu graf yapisi: Ýliþkileri ifade eden graf yapýlarý kullanýlabilir
+- tum komutlar, fonksiyonlar ve diger yapilarla iliskiye girebilmeli ve sonuc verebilmeli.
+- recursiv sorgu ve arama yapabilmeli
+- meta programlama ve ozellikle pdsX fonksiyonlari gamma, omega, lambda icinde ve disinda bir birleri ile ve irbirleri icinde veya disinda kullanilabilmeliler.
+- Meta programlama araclari, Kurallarýn, gerçeklerin veya sorgularýn kendisini program içinde bir yapý olarak iþleme
+- Daha zengin veri yapýlarý için `STRUCT` veya `TYPE` gibi Prolog'un mantýksal yapýsýna uygun geniþletilmiþ veri tanýmlarý.
+- Meta-Programlama ve Özel Kurallar, Self-Reference (Kendi Kendini Referanslama), Kurallar, kendilerini referans alarak daha karmaþýk mantýk çýkarýmlarý yapabilir. (fikirlere acigim). Örnek:RULE: recursive_rule(X) :- recursive_rule(Y), sibling(X, Y).
+- remove: REMOVE FACT(parent(john, mary)).
+- Zamanla iliþkili çýkarýmlar yapýlabilmeli.
+- Durum Geçiþleri (State Transitions) Bir durumdan diðerine geçiþ yapabilmeli.
+- clr tum kural ve gercekleri temizler. ayni zamanda tum degiskenleri temizler.
+- Kolleksiyonlar ki ( tum veri yapilari dir). tumunu kullanabilmelidir. bu zaten basic tum komut fonksiyon ve veri yapilarini kullanmali dedigimizde ortaya cikacak bir durumdur.
+- veri yapisi olarak yigin, stack ve sira, queue lerin hem yeni komutlarla kullanimi zenginlestirilmeli vede veri kumelerinin birlesim kesisim gibi kumelerle ilgili matematik islemlerinin yapilmasina olanak saglayan operatorler veya komutlar eklenmeli. bu sadece prolog a ozgu degil tum pdsX basic e ozel olmali
+- yiginin pop ve push peek ve poke komutlarindan haric baska komutlari olabilir mi?
+- sira queue komutlarinin zenginlestirilmesi icin caba sarfedilmeli.
+- yeni veri yapilari tree ve graf icinde zengin bir komut dizisi hazirlanmali
+ 
+
+
+
+
+
+
+
+Koleksiyonlar programlama dünyasýnda genellikle belirli bir mantýkla düzenlenmiþ ve birden fazla öðeyi bir arada tutan veri yapýlarýný ifade eder. Örneðin, liste, set, sözlük, sýra (queue), yýðýn (stack) gibi veri yapýlarý koleksiyonlar sýnýfýna girer. Mantýksal programlamada ve özellikle Prolog'da, koleksiyonlar iliþkileri veya veri kümelerini ifade etmek için oldukça kullanýþlýdýr ve pek çok senaryo için eklenebilir.
+
+
+
+
+
+
+
+

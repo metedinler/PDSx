@@ -1,0 +1,272 @@
+'''
+clazz.py
+
+Orta düzey deneysel saf Python OOP modülü:
+- Metaclass & sealed sýnýflar
+- Parametrik tip (Generics) stublarý
+- Basit Dependency Injection
+- Eklenti (plugin) yükleyici
+- RMI Proxy
+- Observable özelliði
+- Undo/Redo komut geçmiþi
+- Traits & mixin desteði
+- Desen eþleme (pattern match helper)
+- DSL bazlý sýnýf oluþturucu
+- Transactional retry mantýðý
+- Statik/dinamik sýnýf tanýmý
+- Descriptor & property
+- C3 MRO kalýtým
+- Encapsulation (public/protected/private)
+- Polymorphism ve operator overloading
+- Basit interface kontrolü
+- Multiple dispatch
+- Event hook sistemi
+- Yapýcý & yýkýcý
+- Type checking decorator
+''' 
+
+import threading, importlib, os, pickle, functools
+from collections import deque
+
+# ---------- Hata Türleri ----------
+class ClazzError(Exception): pass
+class MROError(ClazzError): pass
+class InterfaceError(ClazzError): pass
+class DispatchError(ClazzError): pass
+class TransactionError(ClazzError): pass
+
+# ---------- Global Kayýtlar ----------
+type_registry = {}
+interface_registry = {}
+event_listeners = {}
+_lock = threading.RLock()
+container = {}
+plugin_modules = {}
+
+# ---------- Lock Decorator ----------
+def synchronized(fn):
+    @functools.wraps(fn)
+    def wrapped(*a, **k):
+        with _lock:
+            return fn(*a, **k)
+    return wrapped
+
+# ---------- Dependency Injection ----------
+def injectable(cls):
+    container[cls.__name__] = cls
+    return cls
+
+def inject(name):
+    def deco(fn):
+        @functools.wraps(fn)
+        def wrapped(*a, **k):
+            if name not in container:
+                raise ClazzError(f"Injectable {name} bulunamadý")
+            return fn(container[name](), *a, **k)
+        return wrapped
+    return deco
+
+# ---------- Plugin Yükleyici ----------
+def load_plugins(path):
+    for f in os.listdir(path):
+        if f.endswith('.py'):
+            m = importlib.import_module(f[:-3])
+            plugin_modules[f] = m
+    return plugin_modules
+
+# ---------- RMI Proxy ----------
+class RMIProxy:
+    def __init__(self, remote): self._remote = remote
+    def __getattr__(self, name):
+        def call(*a, **k):
+            # stub: serialize/send
+            return getattr(self._remote, name)(*a, **k)
+        return call
+
+# ---------- Observable ----------
+class Observable:
+    def __init__(self): self._subs = []
+    def subscribe(self, fn): self._subs.append(fn)
+    def notify(self, *a, **k):
+        for s in self._subs: s(*a, **k)
+
+def observable(fn):
+    obs = Observable()
+    @functools.wraps(fn)
+    def wrapped(*a, **k):
+        res = fn(*a, **k)
+        obs.notify(res)
+        return res
+    wrapped.subscribe = obs.subscribe
+    return wrapped
+
+# ---------- Undo/Redo ----------
+class Command:
+    def execute(self): pass
+    def undo(self): pass
+
+class History:
+    def __init__(self):
+        self._undo = deque()
+        self._redo = deque()
+    def do(self, cmd):
+        cmd.execute(); self._undo.append(cmd); self._redo.clear()
+    def undo(self):
+        cmd = self._undo.pop(); cmd.undo(); self._redo.append(cmd)
+    def redo(self):
+        cmd = self._redo.pop(); cmd.execute(); self._undo.append(cmd)
+
+history = History()
+
+# ---------- Traits & Mixins ----------
+def apply_traits(cls, *traits):
+    for t in traits:
+        for name, val in t.__dict__.items():
+            if not name.startswith('__'):
+                setattr(cls, name, val)
+    return cls
+
+# ---------- Pattern Matching ----------
+def match(obj, patterns):
+    for typ, fn in patterns.items():
+        if isinstance(obj, typ): return fn(obj)
+    raise ClazzError(f"Desen bulunamadý: {type(obj)}")
+
+# ---------- DSL Builder ----------
+class ClassBuilder:
+    def __init__(self, name):
+        self.name = name
+        self.bases = []
+        self.attrs = {}
+    def bases(self, *bs):
+        self.bases = bs; return self
+    def attr(self, k, v):
+        self.attrs[k] = v; return self
+    def build(self):
+        return define_class(self.name, self.bases, self.attrs)
+
+def builder(name): return ClassBuilder(name)
+
+# ---------- Transactional ----------
+def transactional(retries=1):
+    def deco(fn):
+        @functools.wraps(fn)
+        def wrapped(*a, **k):
+            last = None
+            for i in range(retries+1):
+                state = pickle.dumps((a, k))
+                try:
+                    return fn(*a, **k)
+                except Exception as e:
+                    last = e
+                    a, k = pickle.loads(state)
+            raise TransactionError(last)
+        return wrapped
+    return deco
+
+# ---------- Core: ClassDef & Instance ----------
+class ClassDef:
+    def __init__(self, name, bases, attrs):
+        self.name = name
+        self.bases = bases
+        self.attrs = attrs
+        self.mro = self._compute_mro()
+    def _compute_mro(self):
+        mro = [self]
+        for b in self.bases:
+            for c in b.mro:
+                if c not in mro:
+                    mro.append(c)
+        return mro
+ClassDef.__name__ = 'ClassDef'
+
+def define_class(name, bases, attrs):
+    cls = ClassDef(name, bases or [], attrs or {})
+    type_registry[name] = cls
+    return cls
+
+class Instance:
+    def __init__(self, cls):
+        self._cls = cls
+        self._data = {}
+        if '__init__' in cls.attrs:
+            cls.attrs['__init__'](self)
+    def __getattr__(self, key):
+        if key in self._data:
+            return self._data[key]
+        for c in self._cls.mro:
+            if key in c.attrs:
+                val = c.attrs[key]
+                if callable(val):
+                    return lambda *a, **k: val(self, *a, **k)
+                return val
+        raise AttributeError(key)
+    def __setattr__(self, key, val):
+        if key.startswith('_'): return super().__setattr__(key, val)
+        self._data[key] = val
+
+def new_instance(cls): return Instance(cls)
+
+# ---------- Multiple Dispatch ----------
+def multidispatch(fn):
+    registry = {}
+    def register(types, f): registry[types] = f; return f
+    @functools.wraps(fn)
+    def wrapper(*a):
+        sig = tuple(type(x) for x in a)
+        if sig in registry: return registry[sig](*a)
+        raise DispatchError(sig)
+    wrapper.register = register
+    return wrapper
+
+# ---------- Event Hooks ----------
+def on(event):
+    def deco(fn):
+        event_listeners.setdefault(event, []).append(fn)
+        return fn
+    return deco
+
+def emit(event, *a, **k):
+    for fn in event_listeners.get(event, []): fn(*a, **k)
+
+# ---------- Type Checking ----------
+def typechecked(fn):
+    hints = fn.__annotations__
+    @functools.wraps(fn)
+    def wrapped(*a, **k):
+        for name, typ in hints.items():
+            if name=='return': continue
+            val = k.get(name) or a[list(hints).index(name)]
+            if not isinstance(val, typ):
+                raise TypeError(f"{name} tip {typ} deðil")
+        return fn(*a, **k)
+    return wrapped
+
+# ---------- Demo Kullaným ----------
+if __name__=='__main__':
+    @injectable
+    class Repo: pass
+    @inject('Repo')
+    def use(r, x): print(r, x)
+    use(10)
+
+    print(load_plugins('.'))
+
+    class S: def ping(self): return 'pong'
+    print(RMIProxy(S()).ping())
+
+    @observable
+    def prod(n): return n*3
+    prod.subscribe(lambda v: print('got',v))
+    prod(4)
+
+    class C:
+        def __init__(self): self.x=5
+    cmd = type('SetX',[Command],{
+        'execute':lambda self: setattr(self.obj,'x',10),
+        'undo':lambda self: setattr(self.obj,'x',5)
+    })
+    x = new_instance(define_class('X',[],{'__init__':lambda self: setattr(self,'obj',type('O',(),{'x':0})()),}))
+    # vs.
+    
+    print('OK')

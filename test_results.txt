@@ -1,0 +1,760 @@
+=== test_program_4.basX ===
+C:\Users\mete\zotero\basic\pdsX.py:3: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+  import pkg_resources
+Tnm gerekli kntnphaneler zaten ynkln.
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1603, in execute_command
+    raise Exception(f"Bilinmeyen komut: {command}")
+Exception: Bilinmeyen komut: \ufeffDIM text AS STRING
+System.Management.Automation.RemoteException
+During handling of the above exception, another exception occurred:
+System.Management.Automation.RemoteException
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1637, in run
+    next_line = self.execute_command(command, scope)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1606, in execute_command
+    print(error_msg)
+  File "C:\Users\mete\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u0131' in position 10: character maps to <undefined>
+System.Management.Automation.RemoteException
+During handling of the above exception, another exception occurred:
+System.Management.Automation.RemoteException
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1737, in <module>
+    main()
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1732, in main
+    interpreter.run_file(args.file)
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1723, in run_file
+    self.run()
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1650, in run
+    print(error_msg)
+  File "C:\Users\mete\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 3-4: character maps to <undefined>
+
+
+=== test_program_3.basX ===
+C:\Users\mete\zotero\basic\pdsX.py:3: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+  import pkg_resources
+Tnm gerekli kntnphaneler zaten ynkln.
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1603, in execute_command
+    raise Exception(f"Bilinmeyen komut: {command}")
+Exception: Bilinmeyen komut: \ufeffDIM x AS INTEGER
+System.Management.Automation.RemoteException
+During handling of the above exception, another exception occurred:
+System.Management.Automation.RemoteException
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1637, in run
+    next_line = self.execute_command(command, scope)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1606, in execute_command
+    print(error_msg)
+  File "C:\Users\mete\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u0131' in position 10: character maps to <undefined>
+System.Management.Automation.RemoteException
+During handling of the above exception, another exception occurred:
+System.Management.Automation.RemoteException
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1737, in <module>
+    main()
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1732, in main
+    interpreter.run_file(args.file)
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1723, in run_file
+    self.run()
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1650, in run
+    print(error_msg)
+  File "C:\Users\mete\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 3-4: character maps to <undefined>
+
+
+=== test_program_15.basX ===
+C:\Users\mete\zotero\basic\pdsX.py:3: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+  import pkg_resources
+Tnm gerekli kntnphaneler zaten ynkln.
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1622, in load_program
+    self.parse_program(code)
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 291, in parse_program
+    self.types[current_type] = namedtuple(current_type, [f[0] for f in type_fields[current_type]])
+                                                                       ~~~~~~~~~~~^^^^^^^^^^^^^^
+KeyError: None
+System.Management.Automation.RemoteException
+During handling of the above exception, another exception occurred:
+System.Management.Automation.RemoteException
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1737, in <module>
+    main()
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1732, in main
+    interpreter.run_file(args.file)
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1722, in run_file
+    self.load_program(file_name)
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1625, in load_program
+    print(error_msg)
+  File "C:\Users\mete\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u0131' in position 19: character maps to <undefined>
+
+
+=== test_program_10.basX ===
+C:\Users\mete\zotero\basic\pdsX.py:3: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+  import pkg_resources
+Tnm gerekli kntnphaneler zaten ynkln.
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1603, in execute_command
+    raise Exception(f"Bilinmeyen komut: {command}")
+Exception: Bilinmeyen komut: \ufeffDIM df AS DATAFRAME
+System.Management.Automation.RemoteException
+During handling of the above exception, another exception occurred:
+System.Management.Automation.RemoteException
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1637, in run
+    next_line = self.execute_command(command, scope)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1606, in execute_command
+    print(error_msg)
+  File "C:\Users\mete\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u0131' in position 10: character maps to <undefined>
+System.Management.Automation.RemoteException
+During handling of the above exception, another exception occurred:
+System.Management.Automation.RemoteException
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1737, in <module>
+    main()
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1732, in main
+    interpreter.run_file(args.file)
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1723, in run_file
+    self.run()
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1650, in run
+    print(error_msg)
+  File "C:\Users\mete\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 3-4: character maps to <undefined>
+
+
+=== test_program_6.basX ===
+C:\Users\mete\zotero\basic\pdsX.py:3: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+  import pkg_resources
+Tnm gerekli kntnphaneler zaten ynkln.
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1603, in execute_command
+    raise Exception(f"Bilinmeyen komut: {command}")
+Exception: Bilinmeyen komut: \ufeffSUB AddNumbers(a AS INTEGER, b AS INTEGER)
+System.Management.Automation.RemoteException
+During handling of the above exception, another exception occurred:
+System.Management.Automation.RemoteException
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1637, in run
+    next_line = self.execute_command(command, scope)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1606, in execute_command
+    print(error_msg)
+  File "C:\Users\mete\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u0131' in position 10: character maps to <undefined>
+System.Management.Automation.RemoteException
+During handling of the above exception, another exception occurred:
+System.Management.Automation.RemoteException
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1737, in <module>
+    main()
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1732, in main
+    interpreter.run_file(args.file)
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1723, in run_file
+    self.run()
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1650, in run
+    print(error_msg)
+  File "C:\Users\mete\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 3-4: character maps to <undefined>
+
+
+=== test_program_17.basX ===
+C:\Users\mete\zotero\basic\pdsX.py:3: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+  import pkg_resources
+Tnm gerekli kntnphaneler zaten ynkln.
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1603, in execute_command
+    raise Exception(f"Bilinmeyen komut: {command}")
+Exception: Bilinmeyen komut: \ufeffDIM t AS STRING
+System.Management.Automation.RemoteException
+During handling of the above exception, another exception occurred:
+System.Management.Automation.RemoteException
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1637, in run
+    next_line = self.execute_command(command, scope)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1606, in execute_command
+    print(error_msg)
+  File "C:\Users\mete\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u0131' in position 10: character maps to <undefined>
+System.Management.Automation.RemoteException
+During handling of the above exception, another exception occurred:
+System.Management.Automation.RemoteException
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1737, in <module>
+    main()
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1732, in main
+    interpreter.run_file(args.file)
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1723, in run_file
+    self.run()
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1650, in run
+    print(error_msg)
+  File "C:\Users\mete\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 3-4: character maps to <undefined>
+
+
+=== test_program_2.basX ===
+C:\Users\mete\zotero\basic\pdsX.py:3: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+  import pkg_resources
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1603, in execute_command
+Tnm gerekli kntnphaneler zaten ynkln.
+    raise Exception(f"Bilinmeyen komut: {command}")
+Exception: Bilinmeyen komut: \ufeffDIM i AS INTEGER
+System.Management.Automation.RemoteException
+During handling of the above exception, another exception occurred:
+System.Management.Automation.RemoteException
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1637, in run
+    next_line = self.execute_command(command, scope)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1606, in execute_command
+    print(error_msg)
+  File "C:\Users\mete\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u0131' in position 10: character maps to <undefined>
+System.Management.Automation.RemoteException
+During handling of the above exception, another exception occurred:
+System.Management.Automation.RemoteException
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1737, in <module>
+    main()
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1732, in main
+    interpreter.run_file(args.file)
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1723, in run_file
+    self.run()
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1650, in run
+    print(error_msg)
+  File "C:\Users\mete\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 3-4: character maps to <undefined>
+
+
+=== test_program_13.basX ===
+C:\Users\mete\zotero\basic\pdsX.py:3: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+  import pkg_resources
+Tnm gerekli kntnphaneler zaten ynkln.
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1603, in execute_command
+    raise Exception(f"Bilinmeyen komut: {command}")
+Exception: Bilinmeyen komut: \ufeffINCLUDE "module.basX"
+System.Management.Automation.RemoteException
+During handling of the above exception, another exception occurred:
+System.Management.Automation.RemoteException
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1637, in run
+    next_line = self.execute_command(command, scope)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1606, in execute_command
+    print(error_msg)
+  File "C:\Users\mete\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u0131' in position 10: character maps to <undefined>
+System.Management.Automation.RemoteException
+During handling of the above exception, another exception occurred:
+System.Management.Automation.RemoteException
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1737, in <module>
+    main()
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1732, in main
+    interpreter.run_file(args.file)
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1723, in run_file
+    self.run()
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1650, in run
+    print(error_msg)
+  File "C:\Users\mete\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 3-4: character maps to <undefined>
+
+
+=== test_program_8.basX ===
+C:\Users\mete\zotero\basic\pdsX.py:3: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+  import pkg_resources
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1603, in execute_command
+Tnm gerekli kntnphaneler zaten ynkln.
+    raise Exception(f"Bilinmeyen komut: {command}")
+Exception: Bilinmeyen komut: \ufeffDIM matrix(3, 3) AS INTEGER
+System.Management.Automation.RemoteException
+During handling of the above exception, another exception occurred:
+System.Management.Automation.RemoteException
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1637, in run
+    next_line = self.execute_command(command, scope)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1606, in execute_command
+    print(error_msg)
+  File "C:\Users\mete\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u0131' in position 10: character maps to <undefined>
+System.Management.Automation.RemoteException
+During handling of the above exception, another exception occurred:
+System.Management.Automation.RemoteException
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1737, in <module>
+    main()
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1732, in main
+    interpreter.run_file(args.file)
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1723, in run_file
+    self.run()
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1650, in run
+    print(error_msg)
+  File "C:\Users\mete\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 3-4: character maps to <undefined>
+
+
+=== test_program_9.basX ===
+C:\Users\mete\zotero\basic\pdsX.py:3: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+  import pkg_resources
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1603, in execute_command
+Tnm gerekli kntnphaneler zaten ynkln.
+    raise Exception(f"Bilinmeyen komut: {command}")
+Exception: Bilinmeyen komut: \ufeffDECLARE EXTERNAL FUNCTION GetWebPage(url AS STRING) AS STRING
+System.Management.Automation.RemoteException
+During handling of the above exception, another exception occurred:
+System.Management.Automation.RemoteException
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1637, in run
+    next_line = self.execute_command(command, scope)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1606, in execute_command
+    print(error_msg)
+  File "C:\Users\mete\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u0131' in position 10: character maps to <undefined>
+System.Management.Automation.RemoteException
+During handling of the above exception, another exception occurred:
+System.Management.Automation.RemoteException
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1737, in <module>
+    main()
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1732, in main
+    interpreter.run_file(args.file)
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1723, in run_file
+    self.run()
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1650, in run
+    print(error_msg)
+  File "C:\Users\mete\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 3-4: character maps to <undefined>
+
+
+=== test_program_19.basX ===
+C:\Users\mete\zotero\basic\pdsX.py:3: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+  import pkg_resources
+Tnm gerekli kntnphaneler zaten ynkln.
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1603, in execute_command
+    raise Exception(f"Bilinmeyen komut: {command}")
+Exception: Bilinmeyen komut: \ufeffDIM cmd AS STRING
+System.Management.Automation.RemoteException
+During handling of the above exception, another exception occurred:
+System.Management.Automation.RemoteException
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1637, in run
+    next_line = self.execute_command(command, scope)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1606, in execute_command
+    print(error_msg)
+  File "C:\Users\mete\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u0131' in position 10: character maps to <undefined>
+System.Management.Automation.RemoteException
+During handling of the above exception, another exception occurred:
+System.Management.Automation.RemoteException
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1737, in <module>
+    main()
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1732, in main
+    interpreter.run_file(args.file)
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1723, in run_file
+    self.run()
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1650, in run
+    print(error_msg)
+  File "C:\Users\mete\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 3-4: character maps to <undefined>
+
+
+=== test_program_5.basX ===
+C:\Users\mete\zotero\basic\pdsX.py:3: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+  import pkg_resources
+Tnm gerekli kntnphaneler zaten ynkln.
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1603, in execute_command
+    raise Exception(f"Bilinmeyen komut: {command}")
+Exception: Bilinmeyen komut: \ufeffOPEN "test.db" FOR ISAM AS #1
+System.Management.Automation.RemoteException
+During handling of the above exception, another exception occurred:
+System.Management.Automation.RemoteException
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1637, in run
+    next_line = self.execute_command(command, scope)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1606, in execute_command
+    print(error_msg)
+  File "C:\Users\mete\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u0131' in position 10: character maps to <undefined>
+System.Management.Automation.RemoteException
+During handling of the above exception, another exception occurred:
+System.Management.Automation.RemoteException
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1737, in <module>
+    main()
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1732, in main
+    interpreter.run_file(args.file)
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1723, in run_file
+    self.run()
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1650, in run
+    print(error_msg)
+  File "C:\Users\mete\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 3-4: character maps to <undefined>
+
+
+=== test_program_1.basX ===
+C:\Users\mete\zotero\basic\pdsX.py:3: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+  import pkg_resources
+Tnm gerekli kntnphaneler zaten ynkln.
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1603, in execute_command
+    raise Exception(f"Bilinmeyen komut: {command}")
+Exception: Bilinmeyen komut: \ufeffGLOBAL x AS INTEGER
+System.Management.Automation.RemoteException
+During handling of the above exception, another exception occurred:
+System.Management.Automation.RemoteException
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1637, in run
+    next_line = self.execute_command(command, scope)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1606, in execute_command
+    print(error_msg)
+  File "C:\Users\mete\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u0131' in position 10: character maps to <undefined>
+System.Management.Automation.RemoteException
+During handling of the above exception, another exception occurred:
+System.Management.Automation.RemoteException
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1737, in <module>
+    main()
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1732, in main
+    interpreter.run_file(args.file)
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1723, in run_file
+    self.run()
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1650, in run
+    print(error_msg)
+  File "C:\Users\mete\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 3-4: character maps to <undefined>
+
+
+=== test_program_16.basX ===
+C:\Users\mete\zotero\basic\pdsX.py:3: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+  import pkg_resources
+Tnm gerekli kntnphaneler zaten ynkln.
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1603, in execute_command
+    raise Exception(f"Bilinmeyen komut: {command}")
+Exception: Bilinmeyen komut: \ufeffON ERROR GOTO ErrorHandler
+System.Management.Automation.RemoteException
+During handling of the above exception, another exception occurred:
+System.Management.Automation.RemoteException
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1637, in run
+    next_line = self.execute_command(command, scope)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1606, in execute_command
+    print(error_msg)
+  File "C:\Users\mete\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u0131' in position 10: character maps to <undefined>
+System.Management.Automation.RemoteException
+During handling of the above exception, another exception occurred:
+System.Management.Automation.RemoteException
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1737, in <module>
+    main()
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1732, in main
+    interpreter.run_file(args.file)
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1723, in run_file
+    self.run()
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1650, in run
+    print(error_msg)
+  File "C:\Users\mete\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 3-4: character maps to <undefined>
+
+
+=== test_program_18.basX ===
+C:\Users\mete\zotero\basic\pdsX.py:3: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+  import pkg_resources
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1603, in execute_command
+Tnm gerekli kntnphaneler zaten ynkln.
+    raise Exception(f"Bilinmeyen komut: {command}")
+Exception: Bilinmeyen komut: \ufeffOPEN "test.db" FOR ISAM AS #1
+System.Management.Automation.RemoteException
+During handling of the above exception, another exception occurred:
+System.Management.Automation.RemoteException
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1637, in run
+    next_line = self.execute_command(command, scope)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1606, in execute_command
+    print(error_msg)
+  File "C:\Users\mete\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u0131' in position 10: character maps to <undefined>
+System.Management.Automation.RemoteException
+During handling of the above exception, another exception occurred:
+System.Management.Automation.RemoteException
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1737, in <module>
+    main()
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1732, in main
+    interpreter.run_file(args.file)
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1723, in run_file
+    self.run()
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1650, in run
+    print(error_msg)
+  File "C:\Users\mete\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 3-4: character maps to <undefined>
+
+
+=== test_program_11.basX ===
+C:\Users\mete\zotero\basic\pdsX.py:3: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+  import pkg_resources
+Tnm gerekli kntnphaneler zaten ynkln.
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1603, in execute_command
+    raise Exception(f"Bilinmeyen komut: {command}")
+Exception: Bilinmeyen komut: \ufeffDIM pdf_text AS STRING
+System.Management.Automation.RemoteException
+During handling of the above exception, another exception occurred:
+System.Management.Automation.RemoteException
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1637, in run
+    next_line = self.execute_command(command, scope)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1606, in execute_command
+    print(error_msg)
+  File "C:\Users\mete\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u0131' in position 10: character maps to <undefined>
+System.Management.Automation.RemoteException
+During handling of the above exception, another exception occurred:
+System.Management.Automation.RemoteException
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1737, in <module>
+    main()
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1732, in main
+    interpreter.run_file(args.file)
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1723, in run_file
+    self.run()
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1650, in run
+    print(error_msg)
+  File "C:\Users\mete\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 3-4: character maps to <undefined>
+
+
+=== test_program_12.basX ===
+C:\Users\mete\zotero\basic\pdsX.py:3: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+  import pkg_resources
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1603, in execute_command
+Tnm gerekli kntnphaneler zaten ynkln.
+    raise Exception(f"Bilinmeyen komut: {command}")
+Exception: Bilinmeyen komut: \ufeffDIM cmd AS STRING
+System.Management.Automation.RemoteException
+During handling of the above exception, another exception occurred:
+System.Management.Automation.RemoteException
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1637, in run
+    next_line = self.execute_command(command, scope)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1606, in execute_command
+    print(error_msg)
+  File "C:\Users\mete\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u0131' in position 10: character maps to <undefined>
+System.Management.Automation.RemoteException
+During handling of the above exception, another exception occurred:
+System.Management.Automation.RemoteException
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1737, in <module>
+    main()
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1732, in main
+    interpreter.run_file(args.file)
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1723, in run_file
+    self.run()
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1650, in run
+    print(error_msg)
+  File "C:\Users\mete\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 3-4: character maps to <undefined>
+
+
+=== test_program_14.basX ===
+C:\Users\mete\zotero\basic\pdsX.py:3: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+  import pkg_resources
+Tnm gerekli kntnphaneler zaten ynkln.
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1622, in load_program
+    self.parse_program(code)
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 318, in parse_program
+    parent_class = class_info[current_class]['parent']
+                   ~~~~~~~~~~^^^^^^^^^^^^^^^
+KeyError: None
+System.Management.Automation.RemoteException
+During handling of the above exception, another exception occurred:
+System.Management.Automation.RemoteException
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1737, in <module>
+    main()
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1732, in main
+    interpreter.run_file(args.file)
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1722, in run_file
+    self.load_program(file_name)
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1625, in load_program
+    print(error_msg)
+  File "C:\Users\mete\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u0131' in position 19: character maps to <undefined>
+
+
+=== test_program_7.basX ===
+C:\Users\mete\zotero\basic\pdsX.py:3: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+  import pkg_resources
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1603, in execute_command
+Tnm gerekli kntnphaneler zaten ynkln.
+    raise Exception(f"Bilinmeyen komut: {command}")
+Exception: Bilinmeyen komut: \ufeffDIM arr(5) AS INTEGER
+System.Management.Automation.RemoteException
+During handling of the above exception, another exception occurred:
+System.Management.Automation.RemoteException
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1637, in run
+    next_line = self.execute_command(command, scope)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1606, in execute_command
+    print(error_msg)
+  File "C:\Users\mete\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u0131' in position 10: character maps to <undefined>
+System.Management.Automation.RemoteException
+During handling of the above exception, another exception occurred:
+System.Management.Automation.RemoteException
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1737, in <module>
+    main()
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1732, in main
+    interpreter.run_file(args.file)
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1723, in run_file
+    self.run()
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1650, in run
+    print(error_msg)
+  File "C:\Users\mete\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 3-4: character maps to <undefined>
+
+
+=== test_program_20.basX ===
+C:\Users\mete\zotero\basic\pdsX.py:3: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+  import pkg_resources
+Traceback (most recent call last):
+Tnm gerekli kntnphaneler zaten ynkln.
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1603, in execute_command
+    raise Exception(f"Bilinmeyen komut: {command}")
+Exception: Bilinmeyen komut: \ufeffDIM plot AS OBJECT
+System.Management.Automation.RemoteException
+During handling of the above exception, another exception occurred:
+System.Management.Automation.RemoteException
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1637, in run
+    next_line = self.execute_command(command, scope)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1606, in execute_command
+    print(error_msg)
+  File "C:\Users\mete\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u0131' in position 10: character maps to <undefined>
+System.Management.Automation.RemoteException
+During handling of the above exception, another exception occurred:
+System.Management.Automation.RemoteException
+Traceback (most recent call last):
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1737, in <module>
+    main()
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1732, in main
+    interpreter.run_file(args.file)
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1723, in run_file
+    self.run()
+  File "C:\Users\mete\zotero\basic\pdsX.py", line 1650, in run
+    print(error_msg)
+  File "C:\Users\mete\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 3-4: character maps to <undefined>
+
+

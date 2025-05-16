@@ -1,0 +1,32 @@
+    def evaluate_expression(self, expr, scope_name=None):
+        expr = expr.strip()
+        namespace = {}
+        namespace.update(self.global_vars)
+        namespace.update(self.current_scope())
+        for var in self.shared_vars:
+            if scope_name in self.shared_vars[var] or not self.shared_vars[var]:
+                namespace[var] = self.shared_vars[var]
+        namespace.update(self.function_table)
+        namespace["np"] = np
+        namespace["pd"] = pd
+        namespace["stats"] = stats
+        # Ýçe aktarýlmýþ modüllerin fonksiyon ve sýnýflarýný ekle
+        for mod in self.modules.values():
+            namespace.update(mod["functions"])
+            namespace.update(mod["classes"])
+        try:
+            if "." in expr:
+                var_name, field_name = expr.split(".")
+                if var_name in self.current_scope():
+                    instance = self.current_scope()[var_name]
+                    if isinstance(instance, (StructInstance, UnionInstance)):
+                        return instance.get_field(field_name)
+            elif "*" in expr:
+                ptr_name = expr.replace("*", "").strip()
+                if ptr_name in self.current_scope():
+                    ptr = self.current_scope()[ptr_name]
+                    if isinstance(ptr, Pointer):
+                        return ptr.dereference()
+            return eval(expr, namespace)
+        except Exception as e:
+            raise Exception(f"Ýfade deðerlendirme hatasý: {expr}, Hata: {str(e)}")

@@ -1,0 +1,37 @@
+IMPORT "math.basX" AS math
+CALL math.sin(3.14)
+
+Hata Yönetimi:
+Sorun: Hata mesajlarý bazen yetersiz (örneðin, yalnýzca "Bilinmeyen komut"). Ayrýca, hata yýðýný (stack trace) yok.
+Öneri: Hata mesajlarýna satýr numarasý, komut içeriði ve çaðrý yýðýný ekleyin. Örnek:
+text
+
+Kopyala
+PDSX Hatasý: Geçersiz iþaretçi adresi: 1000, Satýr 10, Komut: PRINT *ptr
+Çaðrý yýðýný: main -> sub1 -> sub2
+Uygulama: execute_command içinde hata yakalama bloðunu güncelleyin ve traceback modülünü kullanýn.
+
+Çoklu Dil Desteði:
+** Sorun:** Hata mesajlarý ve anahtar kelimeler yalnýzca Ýngilizce.
+Öneri: Anahtar kelimeler ve mesajlar için bir dil dosyasý (lang.json) kullanýn. Örnek:
+json
+
+Kopyala
+{
+    "en": {"PRINT": "PRINT", "ERROR": "Error"},
+    "tr": {"PRINT": "YAZ", "ERROR": "Hata"}
+}
+Uygulama: execute_command içinde komutlarý dil dosyasýna göre eþleþtirin.
+
+Paralel Programlama:
+Sorun: Þu an tek iþ parçacýðý (thread) destekleniyor.
+Öneri: THREAD ve ASYNC komutlarý ekleyerek paralel yürütme saðlayýn. Örnek:
+basX
+
+Kopyala
+THREAD worker AS SUB
+    FOR i = 1 TO 100
+        PRINT i
+    NEXT i
+END SUB
+Uygulama: threading veya asyncio modüllerini entegre edin.

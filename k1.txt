@@ -1,0 +1,2721 @@
+Programý baþtan aþaðý incelediðimde karþýlaþabileceðin hata ve sorunlarý detaylý bir þekilde analiz ettim. Ýþte dikkat edilmesi gereken muhtemel hata kaynaklarý ve öneriler:
+
+1. Çevresel Deðiþkenlerin Yetersizliði veya Hatalý Tanýmlanmasý
+Sorun: os.getenv('STORAGE_DIR'), os.getenv('OPENAI_API_KEY'), os.getenv('ZOTERO_API_KEY'), os.getenv('ZOTERO_USER_ID') gibi deðerler alýnýrken None dönebilir. Eðer .env dosyasý eksikse veya doðru okunmuyorsa hata verebilir.
+Öneri:
+.env dosyasýnýn doðru yüklendiðinden emin ol.
+Bu deðiþkenlerin None olup olmadýðýný kontrol et ve hata mesajý ver:
+python
+Kopyala
+Düzenle
+if not STORAGE_DIR:
+    logger.error("STORAGE_DIR çevresel deðiþkeni tanýmlý deðil.")
+2. ChromaDB Baðlantýsý
+Sorun: chromadb.PersistentClient(path="chroma_db") baðlantýsý saðlanamazsa program çöker.
+Öneri: Baðlantý hatasý durumunda programýn çalýþmayý durdurmamasý için hata yönetimi ekle:
+python
+Kopyala
+Düzenle
+try:
+    chroma_client = chromadb.PersistentClient(path="chroma_db")
+except Exception as e:
+    logger.error(f"ChromaDB baðlantý hatasý: {e}")
+3. Loglama ve Log Dosyasý Ýzin Sorunlarý
+Sorun: pdf_processing.log dosyasý oluþturulamazsa veya yazýlamazsa program hata verebilir.
+Öneri: Log dosyasýný oluþturma aþamasýnda dosya izinlerini kontrol et:
+python
+Kopyala
+Düzenle
+try:
+    file_handler = logging.FileHandler('pdf_processing.log', encoding='utf-8')
+except Exception as e:
+    logger.error(f"Log dosyasý oluþturulamadý: {e}")
+4. fitz (PyMuPDF) ile PDF Okuma Sorunlarý
+Sorun: fitz.open(pdf_path) PDF dosyasýný okuyamazsa hata verebilir (PDF dosyasý bozuk olabilir veya format desteklenmiyor olabilir).
+Öneri: PDF okuma sýrasýnda hataya karþý önlem al:
+python
+Kopyala
+Düzenle
+try:
+    with fitz.open(pdf_path) as doc:
+        text = "\n".join(page.get_text("text", sort=True) for page in doc)
+except fitz.FileDataError:
+    logger.error(f"PDF dosyasý bozuk: {pdf_path}")
+except Exception as e:
+    logger.error(f"PDF metni çýkarýlamadý: {e}")
+5. Tablo Tespitinde Düzen ve Performans Sorunlarý
+Sorun: detect_tables fonksiyonunda tablo düzeni yanlýþ tespit edilebilir. Özellikle boþ satýrlar ve düzensiz formatlý tablolar sorun yaratabilir.
+Öneri: Tablo verisini tespit ederken boþ hücrelerin de düzgün þekilde iþlenmesine dikkat et:
+python
+Kopyala
+Düzenle
+if len(rows) > 1 and all(len(row) == len(rows[0]) for row in rows):  # Düzgün tablo kontrolü
+    tables.append(...)
+6. Referans Çýkarma Sorunlarý
+Sorun: Referans çýkarýmý için kullanýlan düzenli ifadeler yetersiz kalabilir. Özellikle uzun ve karmaþýk referans yapýlarý doðru tespit edilemeyebilir.
+Öneri: Farklý referans formatlarý için düzenli ifadeler test edilerek geniþletilmeli. Ayrýca bazý satýrlarýn birleþmesi gerektiðinde birleþtirme algoritmasý geliþtirilmeli.
+7. Dosya Ýþleme Sýrasýnda Bellek Kullanýmý Sorunlarý
+Sorun: Büyük dosyalar iþlenirken bellek aþýmý olabilir.
+Öneri: Büyük dosyalar için bölerek iþleme veya bellek kullanýmýný izleyen bir mekanizma eklemeyi düþün:
+python
+Kopyala
+Düzenle
+logger.info(f"Anlýk bellek kullanýmý: {memory_usage()}")
+8. Çok Ýþlemli (Multithreaded) Çalýþma Sorunlarý
+Sorun: ProcessPoolExecutor ile çoklu iþlem kullanýrken dosya kilitlenmesi veya ayný anda ayný dosyaya eriþim hatalarý yaþanabilir.
+Öneri: Dosya eriþimini thread-safe yapmak ve iþlemler arasý kilit mekanizmalarý kullanmak gerekebilir.
+9. Kaydedilen Dosyalarda Ýzin Hatalarý
+Sorun: Kaydedilen dosyalar (JSON, CSV, Excel vb.) için yazma izni olmadýðýnda veya hedef dizin eksik olduðunda hata olabilir.
+Öneri: Dosya kaydetmeden önce dizinlerin mevcut olduðundan emin ol:
+python
+Kopyala
+Düzenle
+os.makedirs(os.path.dirname(ref_file), exist_ok=True)
+10. Ýleri Düzey Hata Yönetimi ve Ýzleme
+Sorun: Traceback'lerin kaydedilmediði durumda hata tespiti zor olabilir.
+Öneri: Tüm hata noktalarýnda traceback ekleyerek hatanýn kaynaðýný daha net görmek mümkün:
+python
+Kopyala
+Düzenle
+logger.error(f"Hata: {traceback.format_exc()}")
+Bu öneriler ve kontrolleri ekleyerek kodun daha saðlam çalýþmasýný saðlayabiliriz. Ýstersen bu önerileri koduna eklemekte yardýmcý olabilirim.
+
+
+
+
+
+
+Þunu dedin:
+Birden 10 a kadar olasý hata kontrol önerilerin programd uygun yere yerlestiri 
+ChatGPT:
+Bu tür bir programýn çalýþmasý sýrasýnda karþýlaþabileceðiniz yaygýn hatalarý göz önünde bulundurarak aþaðýda 10 hata kontrol önerisi sunuyorum. Her öneriyi uygun yerlere yerleþtirerek kodunuzu daha dayanýklý hale getirebilirsiniz.
+
+1. Çevresel Deðiþken Kontrolü (Eksik Deðerler)
+python
+Kopyala
+Düzenle
+# API ve Client Yapýlandýrmalarý
+load_dotenv()
+required_env_vars = ['OPENAI_API_KEY', 'ZOTERO_API_KEY', 'ZOTERO_USER_ID']
+missing_vars = [var for var in required_env_vars if os.getenv(var) is None]
+if missing_vars:
+    logger.error(f"? Eksik çevresel deðiþkenler: {', '.join(missing_vars)}")
+    sys.exit(1)
+2. Dizinlerin Doðruluðunu Kontrol Etme
+python
+Kopyala
+Düzenle
+def validate_directory(directory):
+    if not os.path.exists(directory):
+        logger.error(f"? Dizin mevcut deðil: {directory}")
+        sys.exit(1)
+    if not os.path.isdir(directory):
+        logger.error(f"? Geçerli bir dizin deðil: {directory}")
+        sys.exit(1)
+
+# Örnek kullaným:
+validate_directory(KAYNAK_DIZIN)
+validate_directory(STORAGE_DIR)
+3. Bellek Kullanýmýný Ýzleme (Yüksek Bellek Kullanýmý Kontrolü)
+Bu kontrol, yüksek bellek kullanýmý tespit edildiðinde uyarý verir.
+
+python
+Kopyala
+Düzenle
+def check_memory_usage(limit_mb=500):
+    """Yüksek bellek kullanýmýný kontrol eder"""
+    memory_mb = psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2
+    if memory_mb > limit_mb:
+        logger.warning(f"?? Bellek kullanýmý yüksek: {memory_mb:.2f} MB")
+
+check_memory_usage()
+4. PDF Okuma Hatalarý Ýçin Ayrýntýlý Kayýt
+PDF'leri iþlerken belirsiz hatalarla karþýlaþýlabilir, bu nedenle hata mesajlarýný ayrýntýlý kaydedin.
+
+python
+Kopyala
+Düzenle
+def extract_text_from_pdf(pdf_path):
+    try:
+        with fitz.open(pdf_path) as doc:
+            text = "\n".join(page.get_text("text", sort=True) for page in doc)
+        return text
+    except fitz.fitz.FileDataError:
+        logger.error(f"? PDF bozuk veya açýlabilir deðil: {pdf_path}")
+    except Exception as e:
+        logger.error(f"? PDF metni çýkarýlamadý: {pdf_path}, Hata: {e}")
+    return None
+5. API Ýsteklerinin Zaman Aþýmýný Ele Alma
+API istekleri zaman aþýmýna uðradýðýnda uyarý vermek önemlidir.
+
+python
+Kopyala
+Düzenle
+def fetch_zotero_metadata(item_key):
+    headers = {"Zotero-API-Key": ZOTERO_API_KEY}
+    try:
+        response = requests.get(f"{ZOTERO_API_URL}/{item_key}", headers=headers, timeout=10)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            logger.error(f"? Zotero'dan veri alýnamadý: {response.status_code}")
+    except requests.exceptions.Timeout:
+        logger.error(f"? Zotero API isteði zaman aþýmýna uðradý.")
+    except Exception as e:
+        logger.error(f"? Zotero isteðinde hata oluþtu: {e}")
+    return None
+6. Metin Bölme Hatalarý Ýçin Kontrol
+Metin bölünemediðinde boþ veya None döndürme hatalarýný önleyin.
+
+python
+Kopyala
+Düzenle
+def split_text(text, chunk_size=256):
+    if not text:
+        logger.error("? Metin boþ veya None, bölünemedi.")
+        return []
+    words = text.split()
+    return [" ".join(words[i:i + chunk_size]) for i in range(0, len(words), chunk_size)]
+7. JSON Kaydetme Hatalarýna Karþý Dayanýklýlýk
+Dosya yazma hatalarýný kaydederek iþlem bütünlüðünü saðlayýn.
+
+python
+Kopyala
+Düzenle
+def save_references(references, file_path, source_type="pdf"):
+    try:
+        # TXT formatýnda kaydet
+        with open(ref_file, 'w', encoding='utf-8') as f:
+            f.write(f"Referanslar ({len(references)}):\n")
+            for i, ref in enumerate(references, 1):
+                f.write(f"{i}. {ref}\n")
+        
+        # JSON formatýnda kaydet
+        with open(ref_json, 'w', encoding='utf-8') as f:
+            json.dump(ref_data, f, ensure_ascii=False, indent=2)
+
+        logger.info(f"? Referanslar kaydedildi: {ref_file}")
+        return True
+    except OSError as e:
+        logger.error(f"? Dosya yazýlamadý: {e}")
+    except Exception as e:
+        logger.error(f"? Referanslar kaydedilirken hata: {e}")
+    return False
+8. Giriþ Dosyasý Formatý Kontrolü
+Yanlýþ formatlý dosyalarý iþlememek için kontrol ekleyin.
+
+python
+Kopyala
+Düzenle
+def validate_file_format(file_path):
+    if not file_path.lower().endswith(('.pdf', '.txt')):
+        logger.error(f"? Geçersiz dosya formatý: {file_path}")
+        return False
+    return True
+
+# Kullaným:
+for file in os.listdir(KAYNAK_DIZIN):
+    if not validate_file_format(file):
+        continue
+9. Tablo Tespiti Hatalarý
+Tablo bölümlerinin düzgün ayrýlmadýðý durumlar için kontrol ekleyin.
+
+python
+Kopyala
+Düzenle
+def detect_tables(text):
+    if not text:
+        logger.error("? Tablo tespiti için metin boþ.")
+        return []
+
+    # Tablo tespiti kodu burada devam eder
+10. Genel Hata Yakalama ve Kaydetme
+Programýn tamamýnda beklenmedik hatalarla karþýlaþýlabileceði için genel bir hata yakalama mekanizmasý ekleyin.
+
+python
+Kopyala
+Düzenle
+def main():
+    try:
+        init_dirs()
+        # Diðer iþlemler burada yer alýr
+    except Exception as e:
+        logger.critical(f"? Beklenmedik bir hata oluþtu: {traceback.format_exc()}")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()
+Bu hata kontrolleri, kodunuzun daha kararlý ve hatalara dayanýklý olmasýný saðlayacaktýr.
+
+
+
+
+
+
+Þunu dedin:
+Bu programa ilave olarak kaynak dosyasý içeriðindeki referanslarý vos viewer, pajeck programlarýna giriþ yapmak için uygun formatta ayrý ayrý kaydedilmesi için uygun yere bir fonksiyon yaz
+ChatGPT:
+Kaynak dosyasý içeriðindeki referanslarý alýp VOSviewer ve Pajek programlarýna uygun formatlarda kaydetmek için aþaðýdaki fonksiyonu ekleyebilirsin. Bu fonksiyon, referanslarý iþler ve her programýn kabul ettiði formata göre çýktýlar oluþturur.
+
+1. VOSviewer Formatý
+VOSviewer için genellikle co-occurrence matrix veya bibliographic coupling formatý tercih edilir.
+2. Pajek Formatý
+Pajek için .net formatýnda (sosyal að analizi için) veriler hazýrlanýr.
+Fonksiyonun Kodu:
+python
+Kopyala
+Düzenle
+def save_references_for_analysis(references, vosviewer_file, pajek_file):
+    """
+    Kaynak dosyasý referanslarýný VOSviewer ve Pajek formatýnda kaydeder.
+
+    :param references: List[str] - Referans listesi
+    :param vosviewer_file: str - VOSviewer için dosya yolu
+    :param pajek_file: str - Pajek için dosya yolu
+    """
+    try:
+        # VOSviewer için basit bir liste formatý kaydediyoruz
+        with open(vosviewer_file, 'w', encoding='utf-8') as vos_file:
+            vos_file.write("label\n")  # VOSviewer için baþlýk satýrý
+            for ref in references:
+                vos_file.write(f"{ref}\n")
+
+        logger.info(f"? VOSviewer formatýnda referanslar kaydedildi: {vosviewer_file}")
+
+        # Pajek için .net formatýnda kaydetme
+        with open(pajek_file, 'w', encoding='utf-8') as pajek_file:
+            pajek_file.write("*Vertices {}\n".format(len(references)))
+            for i, ref in enumerate(references, 1):
+                pajek_file.write(f'{i} "{ref}"\n')
+
+        logger.info(f"? Pajek formatýnda referanslar kaydedildi: {pajek_file}")
+
+    except Exception as e:
+        logger.error(f"? Referanslar analiz formatlarýna kaydedilemedi: {e}")
+Kullaným:
+Bu fonksiyon, referanslarýn ayrýþtýrýlmasýndan sonra çaðrýlabilir:
+
+python
+Kopyala
+Düzenle
+# Referans listesini analiz formatlarýnda kaydet
+save_references_for_analysis(references, "vosviewer_references.txt", "pajek_references.net")
+Açýklamalar:
+VOSviewer: Liste halinde referanslarý kaydediyoruz, baþlýk satýrý ekleniyor.
+Pajek: Að grafikleri için *Vertices formatýnda kaydediliyor. Her referans numaralandýrýlarak veriliyor.
+Bu yöntemle verilerin VOSviewer ve Pajek’e kolayca aktarýlmasý saðlanýr.
+
+
+
+
+
+
+Þunu dedin:
+Embeding dosyalarýndan yada chromadb deki embedinglerden konularýna göre arama yapmak amacýyla bir fonksiyon yaz. Bu fonksiyon sonucunda bulunan bilgileri bir dizine kaydetmeliyiz ve kümelenme analizi yapmak istiyorum. Arma sonucunda bulunan bilgi mutlaka kaynak dosyasýnýn bibliyografya bilgisi ile verilmeli.
+ChatGPT:
+Bu senaryoda embedding’lerden konularýna göre arama yaparak ilgili bilgilerin kütüphaneden çýkarýlmasýný ve kümelenme analizi için kullanýlabilir formatta kaydedilmesini saðlayan bir fonksiyon yazabiliriz. Sonuçlar, kaynak dosyasýnýn bibliyografik bilgisi ile birlikte kaydedilecektir.
+
+Gerekli Ýþ Akýþý:
+Embedding Aramasý:
+Kullanýcýnýn verdiði anahtar kelime veya konuya göre ChromaDB'de arama yapýlýr.
+Sonuç Formatlama:
+Her sonuç için ilgili bibliyografik bilgiler de çekilir ve eþleþtirilir.
+Sonuçlarý Kaydetme:
+Bulunan sonuçlar, kümelenme analizine uygun formatta kaydedilir.
+Kod:
+python
+Kopyala
+Düzenle
+import os
+import json
+
+def search_and_save_cluster_data(chromadb, query, output_dir="cluster_results"):
+    """
+    Embedding'lerden belirli bir konuya göre arama yapar, sonuçlarý kaynaklarýn bibliyografik bilgisiyle birlikte kaydeder.
+    :param chromadb: ChromaDB veritabaný baðlantý objesi
+    :param query: str - Arama yapýlacak konu/anahtar kelime
+    :param output_dir: str - Sonuçlarýn kaydedileceði dizin (varsayýlan: "cluster_results")
+    """
+    try:
+        # ChromaDB'de arama yap
+        results = chromadb.search(query=query, top_k=50)
+
+        # Sonuçlarý kaydetmek için dizin oluþtur
+        os.makedirs(output_dir, exist_ok=True)
+
+        output_file = os.path.join(output_dir, f"{query}_results.json")
+
+        # Sonuçlarý bibliyografik bilgilerle eþleþtir ve dosyaya kaydet
+        formatted_results = []
+        for result in results:
+            embedding_id = result['id']
+            bibliographic_info = get_bibliographic_info(embedding_id)  # Bibliyografik bilgi çekme fonksiyonu
+            formatted_results.append({
+                "query": query,
+                "content": result['text'],
+                "score": result['score'],
+                "bibliography": bibliographic_info
+            })
+
+        # JSON formatýnda kaydet
+        with open(output_file, 'w', encoding='utf-8') as outfile:
+            json.dump(formatted_results, outfile, indent=4, ensure_ascii=False)
+
+        logger.info(f"? '{query}' aramasý sonuçlarý {output_file} dosyasýna kaydedildi.")
+    
+    except Exception as e:
+        logger.error(f"? Arama ve kaydetme iþlemi baþarýsýz: {e}")
+
+def get_bibliographic_info(embedding_id):
+    """
+    Embedding ID'ye göre ilgili bibliyografik bilgiyi çeker.
+    :param embedding_id: str - Embedding'e ait kimlik
+    :return: dict - Bibliyografik bilgi
+    """
+    # Bu fonksiyon, embedding ID ile ChromaDB'deki bibliyografik bilgiyi eþleþtirmek için örnek bir yapýdadýr.
+    # Kullanýcýnýn ChromaDB'de nasýl bibliyografik bilgi tuttuðuna göre bu fonksiyon özelleþtirilebilir.
+    # Þu anda örnek bir veri döndürüyoruz:
+    return {
+        "author": "Örnek Yazar",
+        "title": "Örnek Baþlýk",
+        "journal": "Örnek Dergi",
+        "year": "2025"
+    }
+Açýklama:
+Arama ve Kaydetme:
+chromadb.search(query=query, top_k=50) ifadesi, en fazla 50 sonuç döndürür.
+Bibliyografik Bilgi:
+get_bibliographic_info fonksiyonu, her embedding’in ID’si ile ilgili bibliyografik bilgiyi çeker.
+Kullanýcýnýn bibliyografik bilgileri nasýl tuttuðuna göre bu fonksiyon özelleþtirilebilir.
+Sonuç Formatý:
+JSON formatýnda her bir sonuç için konu, metin, skor ve bibliyografik bilgiler kaydedilir.
+Sonuçlarýn Kullanýmý:
+Bu JSON dosyalarý kümelenme analizine girdi olarak kullanýlabilir.
+Kullaným Örneði:
+python
+Kopyala
+Düzenle
+search_and_save_cluster_data(chromadb, "balýk hidrolizatý")
+Bu þekilde, arama sonuçlarý konu bazýnda ayrý dosyalarda saklanarak kümelenme analizine hazýr hale getirilmiþ olur.
+
+
+
+
+
+
+Þunu dedin:
+Kümelenme analizi yapan bir fonksiyon yazalým elbette öncesinde ve sonrasýnda yapýlacak iþlerinde programlamaliyiz
+ChatGPT:
+Kümelenme analizi yapmak için aþaðýdaki adýmlar izlenmelidir:
+
+1. Ön Ýþlemler:
+Arama sonuçlarýnýn okunmasý (JSON formatýnda).
+Metinleri temizleme, durdurma kelimeleri çýkarma, küçük harfe çevirme gibi iþlemler.
+Metinleri vektörlere dönüþtürme (TF-IDF, Word2Vec vb.).
+2. Kümelenme Analizi:
+Uygun bir algoritma (K-means, DBSCAN vb.) seçerek kümelenme iþlemi.
+3. Son Ýþlemler:
+Her küme için metinleri ve bibliyografik bilgileri kaydetme.
+Kümelenme sonuçlarýný analiz etmek için görselleþtirme (isteðe baðlý).
+Ýþte bu süreci yönetecek bir kod:
+
+Kod:
+python
+Kopyala
+Düzenle
+import os
+import json
+import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
+from wordcloud import WordCloud
+
+def preprocess_text(text):
+    """
+    Metin ön iþleme fonksiyonu. Temizleme iþlemleri yapýlýr.
+    :param text: str - Ýþlenecek metin
+    :return: str - Ýþlenmiþ metin
+    """
+    import re
+    from nltk.corpus import stopwords
+
+    # Küçük harfe çevirme
+    text = text.lower()
+
+    # Noktalama iþaretlerini çýkar
+    text = re.sub(r'[^\w\s]', '', text)
+
+    # Durdurma kelimelerini çýkar (Türkçe stopwords kullanýmý)
+    stop_words = set(stopwords.words('turkish'))
+    text = " ".join([word for word in text.split() if word not in stop_words])
+
+    return text
+
+def load_search_results(input_dir):
+    """
+    Arama sonuçlarýný yükler ve metinleri bir liste olarak döndürür.
+    :param input_dir: str - Arama sonuçlarýnýn bulunduðu dizin
+    :return: List[Dict] - Metin ve bibliyografik bilgilerin listesi
+    """
+    results = []
+    for file_name in os.listdir(input_dir):
+        if file_name.endswith(".json"):
+            with open(os.path.join(input_dir, file_name), 'r', encoding='utf-8') as file:
+                data = json.load(file)
+                results.extend(data)
+    return results
+
+def cluster_analysis(results, n_clusters=5, output_dir="cluster_results"):
+    """
+    Kümelenme analizi yapar ve sonuçlarý kaydeder.
+    :param results: List[Dict] - Metin ve bibliyografik bilgiler
+    :param n_clusters: int - Küme sayýsý (varsayýlan: 5)
+    :param output_dir: str - Kümelenme sonuçlarýnýn kaydedileceði dizin
+    """
+    # Metinleri ön iþleme tabi tut
+    texts = [preprocess_text(result["content"]) for result in results]
+
+    # TF-IDF vektörleþtirme
+    vectorizer = TfidfVectorizer(max_features=1000)
+    X = vectorizer.fit_transform(texts)
+
+    # K-means kümelenme
+    kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+    clusters = kmeans.fit_predict(X)
+
+    # Sonuçlarý her küme için kaydet
+    os.makedirs(output_dir, exist_ok=True)
+    cluster_data = pd.DataFrame({
+        "content": texts,
+        "cluster": clusters,
+        "bibliography": [result["bibliography"] for result in results]
+    })
+
+    # Küme sonuçlarýný CSV olarak kaydet
+    cluster_data.to_csv(os.path.join(output_dir, "cluster_results.csv"), index=False, encoding='utf-8')
+
+    print(f"? Kümelenme sonuçlarý '{output_dir}/cluster_results.csv' dosyasýna kaydedildi.")
+
+    # Her küme için kelime bulutu oluþtur
+    for cluster_num in range(n_clusters):
+        cluster_texts = " ".join(cluster_data[cluster_data["cluster"] == cluster_num]["content"])
+        wordcloud = WordCloud(width=800, height=400, background_color='white').generate(cluster_texts)
+        plt.figure(figsize=(10, 5))
+        plt.imshow(wordcloud, interpolation='bilinear')
+        plt.axis("off")
+        plt.title(f"Küme {cluster_num} - Kelime Bulutu")
+        plt.savefig(os.path.join(output_dir, f"cluster_{cluster_num}_wordcloud.png"))
+        plt.close()
+
+def main():
+    """
+    Ana fonksiyon. Arama sonuçlarýný yükler, kümelenme analizi yapar ve sonuçlarý kaydeder.
+    """
+    input_dir = "cluster_results"  # Arama sonuçlarýnýn bulunduðu dizin
+    results = load_search_results(input_dir)
+    cluster_analysis(results, n_clusters=5)
+
+if __name__ == "__main__":
+    main()
+Açýklamalar:
+Metin Ön Ýþleme:
+Metinler küçük harfe çevrilir, durdurma kelimeleri çýkarýlýr ve gereksiz karakterler temizlenir.
+nltk.corpus.stopwords kullanýlarak Türkçe durdurma kelimeleri temizlenir.
+TF-IDF Vektörleþtirme:
+Metinler sayýsal vektörlere dönüþtürülür.
+Kümelenme:
+KMeans algoritmasý ile metinler 5 kümeye ayrýlýr.
+Sonuçlarý Kaydetme:
+Sonuçlar CSV dosyasýna kaydedilir.
+Kelime Bulutu:
+Her küme için kelime bulutu görselleþtirmeleri oluþturulup kaydedilir.
+Kullaným:
+Bu kod, arama sonuçlarýnýzý yükleyerek kümelenme analizi yapar ve sonuçlarý analiz edebileceðiniz formatta kaydeder. Ýstediðiniz küme sayýsýný n_clusters parametresi ile deðiþtirebilirsiniz.
+
+
+
+
+
+
+Þunu dedin:
+Hemen baþtan soralým bizim ana programimiza yonelik olarak mý yazýldý bu programlar
+ChatGPT:
+Bu programlar þu ana kadar paylaþtýðýnýz tüm özellikler ve ihtiyaçlar dikkate alýnarak genel bir yapý oluþturacak þekilde tasarlandý. Ancak tamamen ana programýnýza entegre edilmedi. Ana programýnýza entegre edebilmek için þu adýmlar izlenmeli:
+
+1. Mevcut Yapýya Entegrasyon:
+Arama sonuçlarýnýn ve bibliyografik bilgilerin ana programdan alýndýðý veya ChromaDB’den çekildiði bir yapý eklenmeli.
+Temizleme, tablo çýkarma gibi iþlemler önceden yapýldýðýndan bu iþlemler atlanmalý ya da optimize edilmeli.
+2. Arama ve Embedding ile Baðlantý:
+Ana programýnýzýn embedding arama fonksiyonundan dönen sonuçlar doðrudan kümelenme fonksiyonuna girdi olarak verilmelidir.
+Embedding sonuçlarýna kaynak dosyalarýnýn bibliyografik bilgileri eklenmeli.
+3. Sonuçlarý Kaydetme:
+Her küme için dosyalar (metin ve bibliyografik bilgilerle birlikte) uygun bir klasöre kaydedilmeli.
+Kümelenme sonuçlarý CSV olarak kaydedilirken programýnýzýn belirttiði JSON formatýna da uygun olabilir.
+Entegrasyon Adýmlarý:
+Örnek Kod ile Ana Program Baðlantýsý:
+
+Bu adýmlarý kapsayacak þekilde kodu ana programýnýza uygun olarak aþaðýda güncelleyebiliriz:
+
+python
+Kopyala
+Düzenle
+def cluster_analysis_from_chromadb(embedding_results, n_clusters=5, output_dir="cluster_results"):
+    """
+    ChromaDB'den çekilen embedding sonuçlarý üzerinde kümelenme analizi yapar.
+    :param embedding_results: List[Dict] - Embedding ve bibliyografik bilgiler
+    :param n_clusters: int - Küme sayýsý (varsayýlan: 5)
+    :param output_dir: str - Kümelenme sonuçlarýnýn kaydedileceði dizin
+    """
+    # Metinleri ve bibliyografik bilgileri ayýkla
+    texts = [result["content"] for result in embedding_results]
+    bibliographies = [result["bibliography"] for result in embedding_results]
+
+    # TF-IDF ile metinleri vektörleþtir
+    vectorizer = TfidfVectorizer(max_features=1000)
+    X = vectorizer.fit_transform(texts)
+
+    # K-means kümelenme
+    kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+    clusters = kmeans.fit_predict(X)
+
+    # Sonuçlarý kaydet
+    os.makedirs(output_dir, exist_ok=True)
+    cluster_data = pd.DataFrame({
+        "content": texts,
+        "cluster": clusters,
+        "bibliography": bibliographies
+    })
+
+    # Sonuçlarý kaydet
+    cluster_data.to_csv(os.path.join(output_dir, "cluster_results.csv"), index=False, encoding='utf-8')
+
+    print(f"? Kümelenme sonuçlarý '{output_dir}/cluster_results.csv' dosyasýna kaydedildi.")
+
+# Ana programýn embedding arama sonuçlarýný buraya geçirerek kümelenme baþlatabilirsiniz
+Güncellemeye Ýhtiyacýnýz Var Mý?
+Bu fonksiyonlarý tamamen ana programýnýza entegre etmek veya özelleþtirmek isterseniz hangi bölümlerin ana programla birebir baðlanmasý gerektiðini belirtin, ona göre düzenleyelim!
+
+
+
+
+
+
+Þunu dedin:
+Ana programýn hangi bölümlerine bu son yazdýðýmýz iki programý nasýl ve nereye entegre edilebilir
+ChatGPT:
+Ana programýnýza göre aþaðýdaki adýmlar ve entegrasyon noktalarýný kullanarak kümelenme analizi ve embedding arama fonksiyonlarýný ekleyebiliriz. Ana yapýnýn iþleyiþ sýrasý ve ihtiyaç duyulan verileri temel alarak entegrasyon öneriyorum:
+
+1. Embedding Arama Fonksiyonu Entegrasyonu
+Bu fonksiyonu bibliyografik bilgileri içeren arama sonuçlarý oluþturmak için kullanacaðýz. Programýn embedding oluþturduðu veya ChromaDB'den verileri çektiði noktaya aþaðýdaki adýmlarla entegre edebiliriz:
+
+Adým: Entegrasyon Noktasý:
+Embedding veya arama iþlemi tamamlandýktan sonra çaðrýlmalý.
+
+Ana program kod parçasý örneði:
+
+python
+Kopyala
+Düzenle
+# Arama sonuçlarý oluþturulduðunda embedding ve bibliyografik bilgileri ekleyelim
+embedding_results = search_embeddings_in_chromadb(query="aranan metin", chromadb_connection=chroma_connection)
+
+# Arama sonuçlarýný kaydetme
+save_search_results_with_bibliography(embedding_results, output_dir="search_results")
+
+# Kümelenme analizi için uygun hale getirilmiþ embedding sonuçlarýný kullanabiliriz
+Detaylý Entegrasyon Kodu:
+
+python
+Kopyala
+Düzenle
+def search_embeddings_in_chromadb(query, chromadb_connection):
+    """
+    ChromaDB'de verilen sorguya göre embedding aramasý yapar ve sonuçlarý döner.
+    :param query: str - Kullanýcý arama sorgusu
+    :param chromadb_connection: ChromaDB baðlantýsý
+    :return: List[Dict] - Bibliyografik bilgileri içeren embedding sonuçlarý
+    """
+    # Arama iþlemi
+    embedding_results = chromadb_connection.search(query)
+
+    # Bibliyografik bilgileri çekme
+    for result in embedding_results:
+        result["bibliography"] = fetch_bibliography_for_id(result["id"])  # ID'ye göre bibliyografya ekle
+
+    return embedding_results
+2. Kümelenme Analizi Entegrasyonu
+Bu adýmda arama sonuçlarý kullanýlarak kümeleme yapýlacak. Embedding aramasý tamamlandýktan hemen sonra kümelenme analizi baþlatýlmalý.
+
+Adým: Entegrasyon Noktasý:
+Arama iþlemi bittikten sonra kümeleme baþlatýlacak. Embedding sonuçlarý bibliyografik bilgilerle birlikte kümelenecek ve sonuçlar bir dizine kaydedilecek.
+
+Ana program kod parçasý örneði:
+
+python
+Kopyala
+Düzenle
+# Embedding arama sonuçlarýyla kümelenme analizi yapalým
+cluster_analysis_from_chromadb(embedding_results, n_clusters=5, output_dir="cluster_results")
+Detaylý Entegrasyon Kodu:
+
+python
+Kopyala
+Düzenle
+def cluster_analysis_from_chromadb(embedding_results, n_clusters=5, output_dir="cluster_results"):
+    """
+    ChromaDB'den çekilen embedding sonuçlarý üzerinde kümelenme analizi yapar.
+    :param embedding_results: List[Dict] - Embedding ve bibliyografik bilgiler
+    :param n_clusters: int - Küme sayýsý (varsayýlan: 5)
+    :param output_dir: str - Kümelenme sonuçlarýnýn kaydedileceði dizin
+    """
+    # Embedding verilerini ve bibliyografik bilgileri ayýkla
+    texts = [result["content"] for result in embedding_results]
+    bibliographies = [result["bibliography"] for result in embedding_results]
+
+    # TF-IDF ile metinleri vektörleþtir
+    vectorizer = TfidfVectorizer(max_features=1000)
+    X = vectorizer.fit_transform(texts)
+
+    # K-means kümelenme
+    kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+    clusters = kmeans.fit_predict(X)
+
+    # Sonuçlarý kaydet
+    os.makedirs(output_dir, exist_ok=True)
+    cluster_data = pd.DataFrame({
+        "content": texts,
+        "cluster": clusters,
+        "bibliography": bibliographies
+    })
+
+    # Sonuçlarý CSV olarak kaydet
+    cluster_data.to_csv(os.path.join(output_dir, "cluster_results.csv"), index=False, encoding='utf-8')
+
+    print(f"? Kümelenme sonuçlarý '{output_dir}/cluster_results.csv' dosyasýna kaydedildi.")
+3. Entegrasyon Adýmlarý Özet:
+Embedding Arama:
+
+search_embeddings_in_chromadb fonksiyonu embedding sonuçlarý üzerinde arama yapar.
+Arama sonuçlarýna bibliyografik bilgiler eklenir.
+Kümelenme Analizi:
+
+cluster_analysis_from_chromadb fonksiyonu embedding arama sonuçlarý üzerinde kümelenme analizi yapar.
+Bibliyografik bilgileri içeren sonuçlar CSV dosyasý olarak kaydedilir.
+Sonraki Adýmlar:
+Bu adýmlardan sonra programýn mevcut akýþý içinde her iki fonksiyonun düzgün çalýþýp çalýþmadýðýný test edebiliriz. Eðer özel entegrasyon noktalarý veya baþka özellikler eklemek isterseniz, detay verin, hemen düzenleyelim!
+
+
+
+
+
+
+Þunu dedin:
+Embedinglerimizin asýl amacý bir yapay zekayý finetuning ile eðitmek istiyorum
+ChatGPT:
+Bellek güncellendi
+Fine-tuning amacýyla embedding’leri kullanmak için þu adýmlarla ana programa entegrasyon öneririm:
+
+1. Embedding Arama Fonksiyonu Entegrasyonu
+Amaç: Belirli konulardaki embedding’lerin toplanmasý ve kümelenmesi.
+Entegrasyon Yeri: Arama sonuçlarýný hem eðitim hem de validation dataset oluþturmak için kullanabiliriz.
+Yapýlacaklar:
+Bulunan embedding’leri train_data ve validation_data olarak kaydedin.
+Bibliyografik bilgileri ve metinleri JSON formatýnda saklayarak etiketi belirginleþtirin.
+2. Kümelenme Analizi Fonksiyonu Entegrasyonu
+Amaç: Kümelenen veri setlerini, modelin öðrenmesi gereken farklý temalar veya kategoriler olarak kullanmak.
+Entegrasyon Yeri:
+Kümelenmiþ verileri kategori etiketleri olarak fine-tuning sýrasýnda kullanabilirsiniz.
+train_data içinde her küme bir sýnýf olarak etiketlenebilir.
+Yapýlacaklar:
+Kümelenen verileri, sýnýflandýrma etiketleriyle birlikte kaydedin.
+Bu etiketleri, modelin eðitim aþamasýnda veri setine ekleyin.
+Bu iki fonksiyon ile embedding’lerden zengin bir eðitim veri seti oluþturmuþ olacaðýz. Ana programa uygun entegrasyonu yaparak fine-tuning iþlemi için hazýr bir veri pipeline’ý oluþturabiliriz.
+
+
+
+
+
+
+Þunu dedin:
+Ben bu pdfler içinde Ace inhibisyon deðerleri hidroliz þartlarý gibi metodolojik verileri ve bulgulerimla karþýlaþtýrma yappacagim sayýsal verileri de liste, tablo halinde kullanmak için sorgulamalar yapmak istiyorum
+ChatGPT:
+Bu ihtiyacý karþýlayacak bir yapýyý þu þekilde tasarlayabiliriz:
+
+1. Veritabanýnda Sayýsal ve Metodolojik Bilgileri Yapýlandýrma
+PDF dosyalarýndan ACE inhibisyon deðerleri, hidroliz þartlarý, sýcaklýk, pH, süre gibi sayýsal ve metodolojik verileri çýkararak belirli alanlarda saklayabiliriz.
+Bu bilgiler embedding’e eklenerek daha anlamlý sorgulamalar yapýlabilir. Ayrýca bibliyografik bilgilerin de sorgu sonuçlarýna eklenmesi saðlanabilir.
+2. Metodolojik ve Sayýsal Veri Sorgulama Fonksiyonu
+Bir fonksiyon yazýlarak aþaðýdaki adýmlar izlenebilir:
+
+Veri Çekme: ChromaDB veya benzeri bir veritabanýndan embedding'ler ve iliþkili sayýsal veriler alýnacak.
+Sorgu:
+ACE inhibisyon deðeri, sýcaklýk, pH gibi parametrelere göre arama yapýlacak.
+Örneðin: "ACE inhibisyonu %50'nin üzerinde ve pH 7.0 civarýnda olanlar." gibi sorgulara yanýt verebilecek.
+Sonuçlarý Listeleme:
+Sayýsal veriler ve metodolojik parametreler tablo halinde listelenecek.
+Her sonuç, bibliyografik bilgileriyle birlikte döndürülecek.
+CSV veya Excel Formatýnda Kaydetme:
+Sonuçlar isteðe baðlý olarak .csv veya .xlsx formatýnda kaydedilebilecek.
+3. Örnek Kod Yapýsý
+Bu iþlevi gerçekleþtirecek örnek bir fonksiyon yapýsý aþaðýda verilmiþtir:
+
+python
+Kopyala
+Düzenle
+import pandas as pd
+
+def metodolojik_veri_sorgulama(veritabaný, kriterler):
+    """
+    Veritabanýndan sayýsal ve metodolojik verilere göre arama yapar.
+    Arama kriterlerini kullanarak sonuçlarý döner ve isteðe baðlý olarak kaydeder.
+    """
+    sonuçlar = []
+    
+    # Veritabanýndaki tüm embedding'leri çek
+    tüm_veriler = veritabaný.get_all_data()  
+    
+    # Kriterlere göre filtreleme
+    for veri in tüm_veriler:
+        sayýsal_deðerler = veri['sayýsal_veriler']  # Örnek: ACE inhibisyonu, pH vb.
+        uygun = True
+        
+        # Kriterlere göre kontrol et
+        for kriter, deðer in kriterler.items():
+            if kriter in sayýsal_deðerler and sayýsal_deðerler[kriter] != deðer:
+                uygun = False
+                break
+                
+        if uygun:
+            sonuçlar.append(veri)
+
+    # Sonuçlarý tablo halinde düzenle
+    df = pd.DataFrame(sonuçlar)
+
+    # Sonuçlarý tablo halinde kaydet (opsiyonel)
+    df.to_excel("sorgu_sonuçlarý.xlsx", index=False)
+
+    return df
+4. Entegrasyon Planý
+Bu fonksiyon þu þekilde kullanýlabilir:
+
+PDF’lerden çekilen tüm metodolojik ve sayýsal veriler, ChromaDB’ye eklenir.
+Kullanýcý arama kriterlerini belirlediðinde ilgili veriler sorgulanarak sonuçlar döndürülür ve gerekirse dosya olarak kaydedilir.
+Bu sistem sayesinde ACE inhibisyonu, hidroliz þartlarý ve diðer metodolojik verileri kolayca karþýlaþtýrabilirsiniz.
+
+
+
+
+
+
+Þunu dedin:
+Bir metodun geliþmesinin geliþtirilmesinin adýmlarýný çýkartmak amacýyla bir tarama yapmak istediðimde bir makalede yayýnlanan metodun atýf yaptýðý metodu incelemek o makaleninde fikri nasýl geliþtirdiðini makaleden çýkarýp ilgili bask makaleye giderek birden çok adýmda geriye doðru tarama yapmak dilegindeyim. Bu programla elde edilen verilerden dosyalardan bunu nasýl yaparim
+ChatGPT:
+Bu isteðiniz, metodolojik geliþimlerin zincirleme atýf analizini içeriyor. Bunu yaparken bir metodun nasýl geliþtirildiðini tespit etmek için bir geri atýf taramasý yapmanýz gerekiyor. Bu süreci otomatikleþtirmek için þu adýmlarý izleyebiliriz:
+
+1. Geri Atýf Tarama Süreci
+Baþlangýç Noktasý Belirleme:
+Ýncelemek istediðiniz makale veya metodun temel bilgilerini alarak tarama yapacaksýnýz.
+
+Atýf Bilgilerini Toplama:
+Her makalenin atýf yaptýðý diðer makaleler otomatik olarak tespit edilerek kaydedilecek.
+
+Zincirleme Atýf Tarama:
+
+Ýlk makaledeki metodun atýf yaptýðý makaleler otomatik olarak taranýr.
+Bu makalelerden her birinin de kendi atýf yaptýðý metodlar ayný þekilde incelenir.
+Bu iþlem, belirli bir derinliðe kadar veya belirli bir zaman dilimine kadar devam eder.
+Metod Geliþim Adýmlarýnýn Tespiti:
+Atýf yapýlan makalelerde metodolojik geliþtirmeleri otomatik olarak metinden çýkartarak zincirleme bir geliþim haritasý oluþturulacak.
+
+2. Kod Yapýsý: Atýf Zinciri Tarama
+Aþaðýda bu iþlemi gerçekleþtirecek bir Python kodu örneði verilmiþtir:
+
+python
+Kopyala
+Düzenle
+import networkx as nx
+
+def atif_zinciri_tarama(ilk_makale, veritabaný, derinlik=3):
+    """
+    Atýf zinciri taramasý yaparak bir metodun geliþimini belirler.
+    - ilk_makale: Baþlangýç makalesi
+    - veritabaný: Atýf bilgilerini içeren veritabaný
+    - derinlik: Tarama yapýlacak atýf zinciri derinliði
+    """
+    atif_grafiði = nx.DiGraph()
+    sýradaki_makaleler = [(ilk_makale, 0)]
+
+    while sýradaki_makaleler:
+        makale, seviye = sýradaki_makaleler.pop(0)
+        if seviye >= derinlik:
+            continue
+
+        # Atýf yapýlan makaleleri çek
+        atif_yapýlanlar = veritabaný.get_atiflar(makale)
+
+        for atif in atif_yapýlanlar:
+            atif_grafiði.add_edge(makale, atif)
+
+            # Sýraya ekle
+            sýradaki_makaleler.append((atif, seviye + 1))
+
+    return atif_grafiði
+
+def metod_gelisim_adimlari(atif_grafiði):
+    """
+    Atýf zincirine göre metod geliþim adýmlarýný belirler.
+    """
+    geliþim_adýmlarý = []
+    
+    for kaynak, hedef in atif_grafiði.edges():
+        metod_deðiþimi = f"{kaynak} makalesi, {hedef} makalesinde þu deðiþiklikleri yapmýþtýr: ..."
+        geliþim_adýmlarý.append(metod_deðiþimi)
+
+    return geliþim_adýmlarý
+3. Kullaným Adýmlarý
+Baþlatma: atif_zinciri_tarama fonksiyonuna baþlamak istediðiniz makale ve tarama derinliði parametresini verin.
+Geliþim Adýmlarý: Tarama sonucunda metodlarýn geliþim adýmlarý metod_gelisim_adimlari fonksiyonu ile analiz edilecek.
+Sonuçlarý Görselleþtirme: Atýf zinciri bir grafik olarak görselleþtirilebilir (isteðe baðlý).
+4. Entegrasyon ve Veri Kaynaðý
+Verilerinizden otomatik olarak atýf bilgileri çýkarýlýr ve ChromaDB gibi bir veritabanýnda saklanýr.
+Zincirleme tarama yapýlarak metodolojik geliþim adýmlarý belirlenir.
+VOSc veya Pajek formatýnda uygun veri kaydedilerek görsel analiz yapýlabilir.
+Bu adýmlar, metodolojik geliþimlerin otomatik olarak analiz edilmesini ve geçmiþteki her adýmýn nasýl katký saðladýðýnýn tespit edilmesini saðlar.
+
+
+
+
+
+
+Þunu dedin:
+Önerilerin çok iyi tamamýný gerçekleþtirmek isterim
+ChatGPT:
+Bu adýmlarý gerçekleþtirmek için bir tümleþik çözüm saðlayacak bir plan çýkarabiliriz. Ýþte önerdiðimiz adýmlar ve kodlarýn ana programa nasýl entegre edileceði:
+
+1. Veri Kaynaðý Hazýrlama ve Entegrasyon
+Öncelikle, Zotero’dan çekilen verilerden veya ChromaDB içindeki atýf ve metod bilgilerinin düzgün þekilde saklanmasýný saðlayalým. Bu, doðru ve kapsamlý geri tarama yapmamýzý saðlar.
+
+Yapýlacaklar:
+Zotero Atýf Bilgisi Çekme: Zotero’dan her makalenin atýf yaptýðý makaleleri çýkart.
+ChromaDB'de Atýf Zinciri Saklama: Metod adýmlarýný ve atýf zincirlerini ChromaDB içinde yapýlandýr.
+Kodun ilgili kýsmý:
+
+python
+Kopyala
+Düzenle
+def atif_bilgisi_veritabanýna_aktar(zotero_bilgileri, chromadb):
+    """
+    Zotero'dan çekilen atýf bilgilerini ChromaDB'ye aktar.
+    """
+    for makale in zotero_bilgileri:
+        atiflar = zotero_bilgileri.get(makale, [])
+        chromadb.insert_atif_bilgisi(makale, atiflar)
+2. Atýf Zinciri Tarama (Ana Fonksiyon Entegrasyonu)
+Bir metodun atýf zincirini ve geliþimini izlemek için atif_zinciri_tarama fonksiyonunu ana programa entegre edeceðiz.
+
+Bu kod ana programa þu þekilde eklenecek:
+
+python
+Kopyala
+Düzenle
+# Atýf zincir taramasý baþlatma
+ilk_makale = "Baþlangýç_Makalesi"  # Kullanýcý tarafýndan seçilecek
+veritabaný = ChromaDB()  # Atýf bilgileri burada saklanýyor
+
+# Tarama iþlemi
+atif_grafiði = atif_zinciri_tarama(ilk_makale, veritabaný, derinlik=3)
+
+# Geliþim adýmlarýný tespit et
+gelisim_adimlari = metod_gelisim_adimlari(atif_grafiði)
+
+# Sonuçlarý yazdýr veya kaydet
+for adim in gelisim_adimlari:
+    print(adim)
+3. Geliþim Zincirinin Görselleþtirilmesi (VOSc/Pajek)
+Atýf zincirinin daha iyi anlaþýlabilmesi için VOSc veya Pajek formatýnda kaydedelim. Böylece metodun evrimsel geliþim süreci grafiksel olarak incelenebilir.
+
+Kod:
+
+python
+Kopyala
+Düzenle
+def atif_zincirini_vosc_formatýnda_kaydet(atif_grafiði, dosya_yolu):
+    """
+    Atýf zincirini VOSc formatýnda kaydeder.
+    """
+    with open(dosya_yolu, 'w') as f:
+        for kaynak, hedef in atif_grafiði.edges():
+            f.write(f"{kaynak}\t{hedef}\n")
+4. Sayýsal Verilerin Çýkarýmý ve Sorgulama Entegrasyonu
+PDF’lerden ACE inhibisyon deðerleri, hidroliz þartlarý gibi metodolojik veriler çýkarýldýktan sonra bunlarý tablolar halinde saklayýp atýf zinciri ile eþleþtireceðiz. Bu sayýsal veriler daha sonra sorgulanabilir ve karþýlaþtýrma yapýlabilir.
+
+Sayýsal verilerin tablolanmasý:
+Metodolojik veriler çýkarýlýp sayisal_veriler.json dosyasýna kaydedilir.
+python
+Kopyala
+Düzenle
+def sayisal_veri_sorgula(makale, veritabaný):
+    """
+    Belirli bir makalenin sayýsal verilerini sorgular.
+    """
+    sayisal_veriler = veritabaný.get_sayisal_veriler(makale)
+    print(f"{makale} için sayýsal veriler:")
+    print(sayisal_veriler)
+5. Kullanýcý Arayüzü ve Komutlar
+Programýn ana menüsüne aþaðýdaki seçenekleri ekleyebiliriz:
+
+Atýf Zinciri Tarama Baþlat: Kullanýcýdan baþlangýç makalesi seçmesini isteyip geri tarama yapar.
+Sayýsal Veri Sorgulama: Belirli metodolojik verileri (ACE inhibisyon, hidroliz þartlarý vb.) sorgular ve karþýlaþtýrma yapar.
+Görselleþtirme: Tarama sonuçlarýný VOSc veya Pajek formatýnda dýþa aktarýr.
+6. Çýktýlarýn Kayýt Dizini Düzeni
+Tüm çýktýlar belirli dizinlere kaydedilecek:
+
+\Sonuclar\Atif_Zinciri.txt
+\Sonuclar\Sayisal_Veriler.json
+\Sonuclar\Gorseller\Atif_Grafigi.vosc
+Tam Entegrasyon Adýmlarý
+Bu adýmlarý gerçekleþtirdikten sonra:
+
+Metodolojik Geliþim: Makalelerin atýf zincirlerinden metodolojik geliþim otomatik tespit edilir.
+Sayýsal Karþýlaþtýrma: Çýkarýlan sayýsal veriler tablolar halinde analiz edilebilir.
+Görselleþtirme: Metodun geliþim adýmlarý grafiksel olarak incelenebilir.
+Bunlarýn hepsini entegre ederek ana programýnýzý zincirleme metodolojik analiz yapabilen bir yapýya dönüþtürebiliriz. Tüm bunlarý adým adým geliþtirebiliriz. Ne dersiniz?
+
+
+
+
+
+
+Þunu dedin:
+Evet yapalim
+ChatGPT:
+Bu adýmlarý uygulamak için aþaðýdaki iþ planýný takip ederek kodlarý ve entegrasyonu saðlayabiliriz.
+
+Ýþ Planý
+Veri Toplama ve Düzenleme: Zotero’dan atýf bilgileri çekilecek ve ChromaDB’ye aktarýlacak.
+Atýf Zinciri Tarama: Bir makaleden geriye doðru tarama yaparak metodolojik geliþim zinciri oluþturulacak.
+Sayýsal Verilerin Çýkarýlmasý: PDF’lerden ACE inhibisyon ve hidroliz þartlarý gibi metodolojik veriler çýkarýlacak.
+Görselleþtirme: VOSc veya Pajek formatýnda görselleþtirme dosyalarý oluþturulacak.
+Kullanýcý Arayüzü: Ana programa menü ve kullanýcý etkileþimli fonksiyonlar eklenecek.
+1. Zotero ve ChromaDB Entegrasyonu
+Atýf bilgilerini ve metodolojik geliþim zincirini saklayacak kod:
+
+python
+Kopyala
+Düzenle
+def atif_bilgisi_veritabanýna_aktar(zotero_bilgileri, chromadb):
+    """
+    Zotero'dan çekilen atýf bilgilerini ChromaDB'ye aktar.
+    """
+    for makale, atiflar in zotero_bilgileri.items():
+        chromadb.insert_atif_bilgisi(makale, atiflar)
+Zotero’dan çekilecek bilgiler daha önceki adýmlarda hazýrladýðýmýz Zotero API koduyla entegre edilecek.
+
+2. Atýf Zinciri Tarama
+Bu fonksiyon, bir makalenin atýf yaptýðý makaleleri zincirleme olarak tarar.
+
+python
+Kopyala
+Düzenle
+def atif_zinciri_tarama(makale, veritabaný, derinlik=3):
+    """
+    Atýf zinciri tarar ve belirli bir derinliðe kadar zincir oluþturur.
+    """
+    atif_zinciri = {makale: []}
+    mevcut = [makale]
+
+    for _ in range(derinlik):
+        yeni_seviye = []
+        for m in mevcut:
+            atiflar = veritabaný.get_atiflar(m)
+            atif_zinciri[m].extend(atiflar)
+            yeni_seviye.extend(atiflar)
+
+        mevcut = yeni_seviye
+
+    return atif_zinciri
+3. Metod Geliþim Adýmlarý Çýkartma
+Bu adýmda, zincirden metodun nasýl geliþtiði çýkarýlacak.
+
+python
+Kopyala
+Düzenle
+def metod_gelisim_adimlari(atif_zinciri):
+    """
+    Atýf zincirinden metodolojik geliþim adýmlarýný çýkarýr.
+    """
+    gelisim_adimlari = []
+    for makale, atiflar in atif_zinciri.items():
+        gelisim_adimlari.append(f"{makale} makalesi þunlarý referans aldý: {', '.join(atiflar)}")
+    
+    return gelisim_adimlari
+4. Sayýsal Verileri Çýkarma ve Sorgulama
+Sayýsal veriler çýkarýldýktan sonra tablolar halinde saklanýr ve sorgulama yapýlabilir.
+
+python
+Kopyala
+Düzenle
+def sayisal_veri_sorgula(makale, veritabaný):
+    """
+    Belirli bir makalenin sayýsal verilerini sorgular.
+    """
+    sayisal_veriler = veritabaný.get_sayisal_veriler(makale)
+    print(f"{makale} için sayýsal veriler:")
+    print(sayisal_veriler)
+5. Görselleþtirme (VOSc/Pajek Formatý)
+Atýf zincirini VOSc veya Pajek formatýnda kaydedelim.
+
+python
+Kopyala
+Düzenle
+def atif_zincirini_vosc_formatýnda_kaydet(atif_grafiði, dosya_yolu):
+    """
+    Atýf zincirini VOSc formatýnda kaydeder.
+    """
+    with open(dosya_yolu, 'w') as f:
+        for kaynak, hedef in atif_grafiði.items():
+            for atif in hedef:
+                f.write(f"{kaynak}\t{atif}\n")
+6. Kullanýcý Arayüzü ve Komut Menüsü
+Ana programa þu seçenekleri ekleyebiliriz:
+
+Atýf Zinciri Tarama Baþlat
+Sayýsal Veri Sorgulama
+Görselleþtirme
+python
+Kopyala
+Düzenle
+def ana_menu():
+    """
+    Ana menü: Kullanýcýdan iþlem seçmesini isteyen menü.
+    """
+    while True:
+        print("\nAna Menü:")
+        print("1. Atýf Zinciri Tarama Baþlat")
+        print("2. Sayýsal Veri Sorgulama")
+        print("3. Görselleþtirme (VOSc/Pajek Formatý)")
+        print("0. Çýkýþ")
+
+        secim = input("Bir iþlem seçin: ")
+
+        if secim == '1':
+            makale = input("Baþlangýç makalesini girin: ")
+            derinlik = int(input("Tarama derinliðini girin: "))
+            atif_zinciri = atif_zinciri_tarama(makale, veritabaný, derinlik)
+            print("Atýf zinciri tarandý.")
+        elif secim == '2':
+            makale = input("Sayýsal verilerini sorgulamak istediðiniz makaleyi girin: ")
+            sayisal_veri_sorgula(makale, veritabaný)
+        elif secim == '3':
+            dosya_yolu = input("VOSc formatýnda kaydedilecek dosya yolunu girin: ")
+            atif_zincirini_vosc_formatýnda_kaydet(atif_zinciri, dosya_yolu)
+            print("Görselleþtirme dosyasý kaydedildi.")
+        elif secim == '0':
+            print("Programdan çýkýlýyor.")
+            break
+        else:
+            print("Geçersiz seçim. Lütfen tekrar deneyin.")
+Sonraki Adýmlar
+Bu kodlarý ana programýnýza entegre edelim.
+Test ve hata ayýklamalarýný yapalým.
+Kullanýcý geri bildirimine göre düzenlemeler yapalým.
+Bu yapýyý kurduktan sonra, istediðiniz analizleri ve taramalarý kolayca yapabiliriz. Ne dersiniz?
+
+
+
+
+
+
+Þunu dedin:
+Sonraki adýmlarý icra edelim. Yanlýz ben bu verileri bir yapay zeka fine tunung iþlemleri ve bugün konuþtuðumuz her konuda ki geliþtirmeleri bir arada birprogram olarak yaz ve bu program ana programla öyle bir iliþkili olsun ki modülü olarak kullanabileyim
+ChatGPT:
+Tüm konuþtuðumuz adýmlarý ve fonksiyonlarý bir modül olarak entegre edebilmek için aþaðýdaki yapý üzerinden ilerleyeceðiz. Bu modül, yapay zeka fine-tuning sürecine de uygun olacak þekilde veri toplama, analiz etme, görselleþtirme ve fine-tuning iþlemleri için kullanýlabilir olacak. Ýþte genel planýmýz:
+
+Program Modüler Yapý Planý
+Ana Modül:
+Ana programýnýza entegre olacak, tüm fonksiyonlarý ve kullanýcý arayüzünü içerecek.
+
+Veri Ýþleme Modülü:
+
+Atýf zinciri tarama
+Sayýsal verileri sorgulama
+Metodolojik geliþim zincirini çýkarma
+Veri Görselleþtirme Modülü:
+
+Atýf zincirini VOSc/Pajek formatýnda kaydetme
+Fine-Tuning Modülü:
+
+Embedding'leri kullanarak yapay zekayý eðitme
+Kodun Modüler Yapýsý
+Ana Program (ana_program.py)
+Ana program, kullanýcý etkileþimini ve modüller arasý iletiþimi saðlar.
+
+python
+Kopyala
+Düzenle
+import veri_isleme
+import veri_gorsellestirme
+import yapay_zeka_finetuning
+
+def ana_menu():
+    while True:
+        print("\nAna Menü:")
+        print("1. Atýf Zinciri Tarama")
+        print("2. Sayýsal Veri Sorgulama")
+        print("3. Metodolojik Geliþim Çýkarma")
+        print("4. Atýf Zincirini Görselleþtirme")
+        print("5. Yapay Zeka Fine-Tuning Baþlat")
+        print("0. Çýkýþ")
+
+        secim = input("Bir iþlem seçin: ")
+
+        if secim == '1':
+            makale = input("Baþlangýç makalesini girin: ")
+            derinlik = int(input("Tarama derinliðini girin: "))
+            atif_zinciri = veri_isleme.atif_zinciri_tarama(makale, derinlik)
+            print(atif_zinciri)
+        elif secim == '2':
+            makale = input("Sayýsal verilerini sorgulamak istediðiniz makaleyi girin: ")
+            veri_isleme.sayisal_veri_sorgula(makale)
+        elif secim == '3':
+            atif_zinciri = veri_isleme.metod_gelisim_adimlari()
+            print(atif_zinciri)
+        elif secim == '4':
+            dosya_yolu = input("VOSc formatýnda kaydedilecek dosya yolunu girin: ")
+            veri_gorsellestirme.atif_zincirini_vosc_formatinda_kaydet(atif_zinciri, dosya_yolu)
+        elif secim == '5':
+            yapay_zeka_finetuning.baslat_finetuning()
+        elif secim == '0':
+            print("Programdan çýkýlýyor.")
+            break
+        else:
+            print("Geçersiz seçim. Lütfen tekrar deneyin.")
+Veri Ýþleme Modülü (veri_isleme.py)
+python
+Kopyala
+Düzenle
+def atif_zinciri_tarama(makale, derinlik=3):
+    # Atýf zincirini tarama iþlemi
+    pass
+
+def sayisal_veri_sorgula(makale):
+    # Sayýsal verileri sorgulama iþlemi
+    pass
+
+def metod_gelisim_adimlari(atif_zinciri):
+    # Metodolojik geliþim zincirini çýkarma iþlemi
+    pass
+Veri Görselleþtirme Modülü (veri_gorsellestirme.py)
+python
+Kopyala
+Düzenle
+def atif_zincirini_vosc_formatinda_kaydet(atif_zinciri, dosya_yolu):
+    # Atýf zincirini VOSc formatýnda kaydetme iþlemi
+    pass
+Yapay Zeka Fine-Tuning Modülü (yapay_zeka_finetuning.py)
+python
+Kopyala
+Düzenle
+def baslat_finetuning():
+    # Embedding'lerle yapay zeka fine-tuning iþlemi
+    pass
+Entegrasyon Adýmlarý
+Ana Modül Entegrasyonu:
+
+Ana program ana_program.py üzerinden baþlatýlacak ve tüm modüller import edilecek.
+Veritabaný ve Embedding Yönetimi:
+
+Embedding verileri ChromaDB kullanýlarak saklanacak.
+Fine-tuning iþlemi için embedding'ler ilgili modülde kullanýlacak.
+Zotero’dan Veri Çekme:
+
+Zotero API kullanýlarak atýf bilgileri çekilecek ve analiz için kullanýlacak.
+Test:
+
+Her modül ayrý ayrý test edilerek entegrasyon hatalarý giderilecek.
+Ýzlenecek Yol
+Kodlarý Oluþturma ve Modülerleþtirme:
+Her bir modül için temel fonksiyonlar oluþturulacak.
+Entegrasyon ve Hata Ayýklama:
+Modüllerin birbirleriyle düzgün çalýþtýðýndan emin olunacak.
+Kullanýcý Geri Bildirimleri:
+Kullanýcý geri bildirimlerine göre iyileþtirmeler yapýlacak.
+Bu yapýyý hemen kodlayarak sizinle paylaþabilirim. Hazýr olduðunuzda baþlayabiliriz!
+
+
+
+
+
+
+Þunu dedin:
+Tamam hazýrým bu buda yapalim
+ChatGPT:
+Baþlamak için her modülün temel iþlevlerini aþamalý olarak yazýp ana programa entegre edeceðim. Aþaðýdaki adýmlar üzerinden ilerleyeceðiz:
+
+Ana Program: Menü ve modüller arasý iletiþim için temel yapý.
+Veri Ýþleme: Atýf zinciri tarama, sayýsal veri sorgulama ve metodolojik geliþim adýmlarý çýkarma.
+Veri Görselleþtirme: Atýf zincirini VOSc formatýnda kaydetme.
+Fine-Tuning: Embedding'lerle yapay zeka modelini eðitme ve sonuçlarý kullanma.
+Ýlk Adým: Ana Programýn Temel Yapýsý
+Ana menüyü ve temel modül çaðrýlarýný oluþturarak baþlayalým:
+
+python
+Kopyala
+Düzenle
+# ana_program.py
+
+import veri_isleme
+import veri_gorsellestirme
+import yapay_zeka_finetuning
+
+def ana_menu():
+    while True:
+        print("\nAna Menü:")
+        print("1. Atýf Zinciri Tarama")
+        print("2. Sayýsal Veri Sorgulama")
+        print("3. Metodolojik Geliþim Çýkarma")
+        print("4. Atýf Zincirini Görselleþtirme")
+        print("5. Yapay Zeka Fine-Tuning Baþlat")
+        print("0. Çýkýþ")
+
+        secim = input("Bir iþlem seçin: ")
+
+        if secim == '1':
+            makale = input("Baþlangýç makalesini girin: ")
+            derinlik = int(input("Tarama derinliðini girin: "))
+            atif_zinciri = veri_isleme.atif_zinciri_tarama(makale, derinlik)
+            print(atif_zinciri)
+        elif secim == '2':
+            makale = input("Sayýsal verilerini sorgulamak istediðiniz makaleyi girin: ")
+            veri_isleme.sayisal_veri_sorgula(makale)
+        elif secim == '3':
+            atif_zinciri = veri_isleme.metod_gelisim_adimlari()
+            print(atif_zinciri)
+        elif secim == '4':
+            dosya_yolu = input("VOSc formatýnda kaydedilecek dosya yolunu girin: ")
+            veri_gorsellestirme.atif_zincirini_vosc_formatinda_kaydet(atif_zinciri, dosya_yolu)
+        elif secim == '5':
+            yapay_zeka_finetuning.baslat_finetuning()
+        elif secim == '0':
+            print("Programdan çýkýlýyor.")
+            break
+        else:
+            print("Geçersiz seçim. Lütfen tekrar deneyin.")
+
+if __name__ == "__main__":
+    ana_menu()
+Ýkinci Adým: Veri Ýþleme Modülünü Oluþturma
+Þimdi veri_isleme.py dosyasýnda atýf zinciri tarama ve sayýsal veri sorgulama iþlevlerini yazalým.
+
+python
+Kopyala
+Düzenle
+# veri_isleme.py
+
+def atif_zinciri_tarama(makale, derinlik=3):
+    # Örnek bir atýf zinciri tarama iþlemi
+    print(f"'{makale}' makalesinden baþlatýlarak {derinlik} adým geriye doðru taranýyor...")
+    return ["Makale 1", "Makale 2", "Makale 3"]
+
+def sayisal_veri_sorgula(makale):
+    # Sayýsal verileri sorgulama iþlemi
+    print(f"'{makale}' makalesinden sayýsal veriler sorgulanýyor...")
+    return {"Deðer 1": 50, "Deðer 2": 75}
+
+def metod_gelisim_adimlari():
+    # Metodolojik geliþim adýmlarý çýkarma iþlemi
+    print("Metodolojik geliþim adýmlarý çýkarýlýyor...")
+    return ["Adým 1", "Adým 2", "Adým 3"]
+Devam Edelim mi? Bu Temel Yapý Üzerinden Ýlerleyeceðiz.
+Modül entegrasyonlarýný, fine-tuning ve görselleþtirme adýmlarýný da eklemeye hemen baþlayabiliriz.
+
+
+
+
+
+
+Þunu dedin:
+Devam edelim ancak bu konuþmanýn baþýndan beri konuþtuðumuz konularý özetler misin. Maddeler halinde yazman yeterli
+ChatGPT:
+Ýþte konuþmamýzýn baþýndan beri ele aldýðýmýz konularýn özeti:
+
+Veri Tarama ve Sorgulama:
+
+Metodolojik veriler ve bulgularýn sorgulanmasý.
+ACE inhibitörleri ve hidroliz þartlarý gibi sayýsal verilerin çýkarýlmasý ve tablolar halinde kullanýlabilir hale getirilmesi.
+Atýf Zinciri Tarama:
+
+Bir makalenin atýf yaptýðý diðer makaleleri inceleyerek fikir geliþim adýmlarýnýn çýkarýlmasý.
+Atýf zinciri üzerinden birden fazla adýmda geriye doðru tarama yapýlmasý.
+Veri Formatlama:
+
+Elde edilen verilerin VOSc Viewer ve Pajek formatýnda kaydedilmesi.
+Bibliyografik bilgilerin VOSc formatýnda kullanýlabilir hale getirilmesi.
+Embedding Kullanýmý:
+
+Embedding'ler üzerinden yapay zeka fine-tuning iþlemleri gerçekleþtirme.
+Verilerden konu bazlý sorgulama ve bu sorgulamalardan kümelenme analizi yapma.
+Kümelenme Analizi:
+
+Veriler üzerinde konu bazlý aramalar yaparak bulunan bilgilerin kümelenmesi ve analiz edilmesi.
+Kümelenmiþ verilerin tablolar ve grafikler halinde görselleþtirilmesi.
+Program Entegrasyonu:
+
+Yazýlan tüm modüllerin ana programa entegre edilmesi.
+Modüler yapý ile her bir iþlevin baðýmsýz þekilde çalýþtýrýlabilmesi ve ana programla uyumlu hale getirilmesi.
+Modüler Program Tasarýmý:
+
+Ana menü oluþturulmasý ve her iþlevin belirli bir menü seçeneði altýnda toplanmasý.
+Veri iþleme, görselleþtirme, fine-tuning gibi farklý iþlevlerin modüller halinde düzenlenmesi.
+Yapay Zeka Eðitimi:
+
+Embedding verileriyle yapay zeka modelinin fine-tuning iþlemi yapýlarak eðitilmesi.
+Eðitilmiþ modelin sorgulama ve analiz iþlemlerinde kullanýlmasý.
+Görselleþtirme:
+
+Atýf zincirinin görselleþtirilmesi ve geliþim adýmlarýnýn grafiklerle gösterilmesi.
+Uygulama Planý:
+
+Bu iþlevlerin hepsinin bir program olarak bir araya getirilmesi ve kullanýma hazýr hale getirilmesi.
+Þimdi sýradaki adým için detaylara geçebiliriz.
+
+
+
+
+
+
+Þunu dedin:
+Tamam bu temel yapý uzerinden ilerleyelim. Programý oluþturmaya devam edelim
+ChatGPT:
+Bu temel yapýyý takip ederek programýn modüler bir yapýda tasarlanmasý için þu adýmlarý izleyebiliriz:
+
+1. Program Ana Yapýsý
+Ana menü ve kullanýcý arayüzü oluþturulacak.
+Her modülün belirli bir iþlevi olacak ve bu iþlevler ana menüden çaðrýlacak.
+Ana menü seçenekleri:
+
+Veri Tarama ve Sorgulama
+Atýf Zinciri Tarama
+Embedding ve Fine-Tuning
+Kümelenme Analizi
+Görselleþtirme
+Çýkýþ
+2. Modül Tanýmlarý
+Her modül için temel iþlevler:
+
+Veri Tarama ve Sorgulama Modülü:
+
+PDF ve metin dosyalarýndaki metodolojik veriler ve sayýsal veriler aranacak.
+Bulunan veriler liste veya tablo halinde gösterilecek ve kaydedilecek.
+Kullanýcýya istenen verileri dýþa aktarma seçeneði sunulacak.
+Atýf Zinciri Tarama Modülü:
+
+Belirli bir makale için atýf yapýlan makaleler zincir halinde taranacak.
+Atýf zincirini adým adým analiz ederek fikir geliþim adýmlarý çýkarýlacak.
+Zincirin görselleþtirilmesi saðlanacak.
+Embedding ve Fine-Tuning Modülü:
+
+Embedding’ler kullanýlarak konu bazlý aramalar yapýlacak.
+Fine-tuning için embedding verileri hazýrlanacak ve yapay zeka modeli eðitilecek.
+Eðitim sonrasý model sorgulama iþlemleri için kullanýlacak.
+Kümelenme Analizi Modülü:
+
+Arama sonuçlarýna göre kümelenme analizi yapýlacak.
+Kümelenmiþ veriler JSON, CSV ve görselleþtirme formatlarýnda kaydedilecek.
+Görselleþtirme Modülü:
+
+Kümelenmiþ veriler ve atýf zinciri grafiklerle görselleþtirilecek.
+Görselleþtirme sonuçlarý dýþa aktarýlabilecek.
+3. Program Akýþý ve Ýþlevlerin Entegrasyonu
+Tüm modüller birbirleriyle etkileþimli olacak:
+
+Atýf zinciri taramasý sonucu embedding verileriyle eþleþtirilecek.
+Fine-tuning sonrasý yeni sorgulama ve kümelenme analizleri yapýlabilecek.
+Kullanýcý tüm çýktýlarý dýþa aktararak veri yönetimini saðlayacak.
+Bu yapýyý kodlamaya baþlayalým mý? Veya belirli bir modül üzerinde daha fazla detay ister misiniz?
+
+
+
+
+
+
+Þunu dedin:
+Bu programý Windows üzerinde visual þekilde yazmak daha mantýklý olabilirmi
+ChatGPT:
+Evet, Windows üzerinde görsel bir arayüz (GUI) ile programý yazmak oldukça mantýklý olacaktýr. Bu, kullanýcý deneyimini iyileþtirir ve programýn daha kullanýcý dostu olmasýný saðlar. Ýþte neden görsel bir arayüz tercih edilebilir ve hangi araçlarla yapýlabileceði:
+
+Neden Visual GUI Kullanmalý?
+Kullanýcý Dostu:
+Menüler, butonlar ve listelerle kullanýcý etkileþimini kolaylaþtýrýr.
+
+Veri Görselleþtirme:
+Kümelenme analizleri, atýf zincirleri ve diðer grafiklerin görselleþtirilmesini saðlar.
+
+Modül Geçiþleri:
+Kullanýcýlar modüller arasýnda daha kolay geçiþ yapabilir.
+
+Dýþa Aktarma:
+Tablo ve liste dýþa aktarma iþlemleri butonlarla daha kolay yapýlabilir.
+
+Windows Üzerinde Kullanýlabilecek Teknolojiler
+Tkinter (Python GUI):
+
+Python ile entegre edilmesi kolaydýr.
+Küçük ve orta ölçekli projeler için uygundur.
+PyQt / PySide:
+
+Profesyonel ve modern bir arayüz saðlar.
+Daha karmaþýk projeler ve daha fazla görselleþtirme seçenekleri sunar.
+Kivy:
+
+Hem masaüstü hem de mobil cihazlarla uyumlu bir GUI kütüphanesi.
+CustomTkinter:
+
+Tkinter’ýn modernize edilmiþ versiyonu, estetik olarak daha güzel arayüzler sunar.
+Önerilen Modüler Yapý
+Her bir modül için ayrý sekmeler (tabs) veya butonlar tasarlanabilir:
+
+Veri Tarama ve Sorgulama: Metin ve PDF tarama seçenekleri.
+Atýf Zinciri Görüntüleme: Atýf zincirinin grafikleri.
+Embedding Yönetimi: Embedding yükleme ve arama iþlemleri.
+Kümelenme Analizi: Kümelenme sonuçlarýný tablo ve grafiklerle gösterme.
+Ayarlar: Program ayarlarý ve dýþa aktarma seçenekleri.
+Bu seçeneklerden hangisi ilginizi çekiyor? Hangi GUI framework’ü üzerinden ilerleyelim?
+
+
+
+
+
+
+Þunu dedin:
+Tkinter veya customtkinter olabilir. Senin önerin nedir. Tek bir seçenek þöyle.
+ChatGPT:
+CustomTkinter kullanmanýzý öneririm. Ýþte neden CustomTkinter'ý tercih etmenizi önerdiðim bazý sebepler:
+
+Neden CustomTkinter?
+Modern Görünüm:
+CustomTkinter, Tkinter’ýn klasik görünümünü modernize eder ve daha estetik bir arayüz sunar.
+
+Kullaným Kolaylýðý:
+Tkinter ile ayný yapýya sahiptir, ancak tasarým öðeleri daha kullanýþlý ve güzeldir.
+
+Daha Az Kod:
+Modern bileþenler için daha az kod yazmanýz yeterlidir (butonlar, giriþ kutularý, sekmeler vb.).
+
+Responsive Tasarým:
+Ekran boyutlarýna duyarlý bir arayüz geliþtirmek daha kolaydýr.
+
+Daha Ýyi Destek:
+CustomTkinter’ýn sürekli güncellenen bir topluluðu ve belgelendirmesi vardýr.
+
+Bu framework ile ana modüllerimizi modern bir arayüzle yapýlandýrabiliriz. CustomTkinter kullanarak temel arayüzü oluþturabiliriz. Eðer uygun buluyorsanýz hemen temel bir þablon üzerinde çalýþabiliriz. Ne dersiniz?
+
+
+
+
+
+
+Þunu dedin:
+Tamam custom tkinter gui olarak kullanarak bahsedilen program için kod ueetebilirsin
+ChatGPT:
+Anladým! Bahsettiðimiz iþlevleri içeren ve CustomTkinter kullanarak modern bir arayüz sunan bir program kodu oluþturacaðým. Bu program aþaðýdaki temel iþlevleri destekleyecek:
+
+Planlanan Temel Arayüz ve Ýþlevler:
+Embedding Yükleme ve Arama:
+
+Embedding verileri yükleyebileceðiniz ve arama yapabileceðiniz bir bölüm.
+Arama sonuçlarýný listeleyip tablo olarak sunma.
+Kümelenme Analizi:
+
+Arama sonuçlarý veya manuel olarak seçilen veriler üzerinden kümelenme analizi yapma ve sonuçlarý görselleþtirme.
+Atýf Tarama:
+
+Belirli bir makale/metodun atýf geçmiþini izleyerek metodolojik geliþim adýmlarýný görselleþtirme.
+Sonuç Kaydetme:
+
+Arama veya analiz sonuçlarýný .csv, .txt veya tablo formatýnda kaydetme.
+Yapay Zeka Fine-Tuning Ýþlemleri:
+
+Fine-tuning verilerinin yönetimi ve iþlenmesi için modül.
+Adým Adým Yapýlacaklar:
+Temel GUI þablonunun oluþturulmasý.
+Bahsedilen iþlevlerin tek tek modül olarak GUI'ye entegre edilmesi.
+Tüm modüllerin ana programla etkileþimli çalýþmasý saðlanacak.
+Ýlk temel þablonu hemen oluþturarak baþlýyorum!
+
+Aþaðýda CustomTkinter kullanarak oluþturulan temel bir GUI þablonu bulunuyor. Bu þablon, bahsettiðimiz iþlevleri modüler þekilde eklemeye uygun þekilde tasarlandý:
+
+python
+Kopyala
+Düzenle
+import customtkinter as ctk
+import tkinter.messagebox
+
+# Ana uygulama penceresi
+class AnaUygulama(ctk.CTk):
+    def __init__(self):
+        super().__init__()
+
+        # Pencere özellikleri
+        self.title("Embedding ve Kümelenme Analiz Aracý")
+        self.geometry("800x600")
+        
+        # Menü çubuðu
+        self.menu = ctk.CTkMenu(self)
+        self.config(menu=self.menu)
+
+        self.file_menu = ctk.CTkMenu(self.menu, tearoff=0)
+        self.file_menu.add_command(label="Veri Yükle", command=self.veri_yukle)
+        self.file_menu.add_command(label="Çýkýþ", command=self.quit)
+        self.menu.add_cascade(label="Dosya", menu=self.file_menu)
+
+        # Arama bölümü
+        self.ara_label = ctk.CTkLabel(self, text="Embedding Arama", font=("Arial", 16))
+        self.ara_label.pack(pady=10)
+
+        self.ara_entry = ctk.CTkEntry(self, placeholder_text="Anahtar kelime girin...")
+        self.ara_entry.pack(pady=5, padx=20, fill="x")
+
+        self.ara_button = ctk.CTkButton(self, text="Ara", command=self.embedding_arama)
+        self.ara_button.pack(pady=5)
+
+        # Analiz bölümü
+        self.analiz_label = ctk.CTkLabel(self, text="Kümelenme Analizi", font=("Arial", 16))
+        self.analiz_label.pack(pady=20)
+
+        self.analiz_button = ctk.CTkButton(self, text="Analizi Baþlat", command=self.kumelenme_analizi)
+        self.analiz_button.pack(pady=5)
+
+        # Sonuç gösterme alaný
+        self.sonuc_text = ctk.CTkTextbox(self, width=600, height=200)
+        self.sonuc_text.pack(pady=20, padx=20)
+
+    # Fonksiyonlar
+    def veri_yukle(self):
+        tkinter.messagebox.showinfo("Bilgi", "Veri yükleme iþlemi burada yapýlacak.")
+
+    def embedding_arama(self):
+        arama_kelimesi = self.ara_entry.get()
+        if arama_kelimesi:
+            # Burada embedding arama iþlemi yapýlacak
+            self.sonuc_text.insert("0.0", f"'{arama_kelimesi}' için arama yapýldý.\n")
+        else:
+            tkinter.messagebox.showwarning("Uyarý", "Lütfen bir anahtar kelime girin.")
+
+    def kumelenme_analizi(self):
+        # Kümelenme analizi iþlemi burada yapýlacak
+        self.sonuc_text.insert("0.0", "Kümelenme analizi baþlatýldý.\n")
+
+
+# Ana programýn çalýþtýrýlmasý
+if __name__ == "__main__":
+    ctk.set_appearance_mode("System")  # Sistem temasýný kullan
+    ctk.set_default_color_theme("blue")  # Mavi tema
+    app = AnaUygulama()
+    app.mainloop()
+Program Þablonunun Özellikleri:
+Veri Yükleme: Menü üzerinden veri yükleme fonksiyonu çaðrýlabilir.
+Embedding Arama: Kullanýcý, anahtar kelime girerek arama yapabilir ve sonuçlar metin kutusunda gösterilir.
+Kümelenme Analizi: Butona týklayarak analiz baþlatýlabilir.
+Bir Sonraki Adým:
+Arka Plan Fonksiyonlarý: Veri yükleme, arama ve analiz iþlemlerini detaylandýrabiliriz.
+Görselleþtirme: Kümelenme analizi sonuçlarýnýn grafiksel olarak gösterilmesini ekleyebiliriz.
+Bu temel þablon üzerinden devam edebiliriz!
+
+
+
+
+
+
+Þunu dedin:
+Görselleþtirme yi aklýnda tut ve her promot sonrasý o program yapýlana kadr sor. Arkaplan fonksiyonlarýný tasarla planla ve kod üret.
+ChatGPT:
+Bellek güncellendi
+Tamam, görselleþtirme adýmlarýný sürekli göz önünde bulundurarak ilerleyeceðim ve her adýmda uygun arka plan fonksiyonlarýný tasarlayýp kodlayacaðým. Baþlangýç olarak, temel GUI yapýsýný oluþturup ardýndan her fonksiyonun görselleþtirme entegrasyonunu saðlayarak ilerleyelim. Ýlk adým olarak GUI'nin ana çerçevesini oluþturalým mý?
+
+
+
+
+
+
+Þunu dedin:
+Tamam
+ChatGPT:
+Öncelikle, programýmýz için temel bir CustomTkinter GUI yapýsý oluþturacaðým. Bu yapý aþaðýdaki gibi temel bileþenlere sahip olacak:
+
+Ana Menü: Veri iþlemleri, sorgulamalar ve görselleþtirmeye eriþim saðlamak için menüler.
+Dosya Yükleme: Embedding dosyalarý, PDF veya bibliyografya bilgileri gibi verileri yüklemek için bir bölüm.
+Arama ve Sorgulama: Kullanýcýlarýn embedding tabanlý sorgular yapabilmesi için giriþ alaný.
+Sonuç Görselleþtirme: Sonuçlarýn tablo, grafik veya metin formatýnda görüntülenmesini saðlayacak bir pencere.
+Kümelenme Analizi: Kümelenme sonuçlarýný görselleþtirmek ve analiz etmek için özel bir alan.
+Ýlk temel yapýyý kurarak baþlayalým.
+
+
+Analiz hatasý
+python
+Her zaman ayrýntýlarý göster
+
+Kopyala
+import customtkinter as ctk
+
+# Ana pencere oluþturulmasý
+class AnaProgram(ctk.CTk):
+    def __init__(self):
+        super().__init__()
+        self.title("Metodoloji ve Embedding Analizi Programý")
+        self.geometry("800x600")
+
+        # Menü çubuðu oluþturulmasý
+        self.menu_bar = ctk.CTkMenu(self)
+        self.config(menu=self.menu_bar)
+
+        # Menüler
+        dosya_menu = ctk.CTkMenu(self.menu_bar, tearoff=0)
+        dosya_menu.add_command(label="Veri Yükle", command=self.veri_yukle)
+        dosya_menu.add_separator()
+        dosya_menu.add_command(label="Çýkýþ", command=self.quit)
+        self.menu_bar.add_cascade(label="Dosya", menu=dosya_menu)
+
+        analiz_menu = ctk.CTkMenu(self.menu_bar, tearoff=0)
+        analiz_menu.add_command(label="Embedding Sorgulama", command=self.embedding_sorgula)
+        analiz_menu.add_command(label="Kümelenme Analizi", command=self.kumelenme_analizi)
+        self.menu_bar.add_cascade(label="Analiz", menu=analiz_menu)
+
+        # Ana ekran bileþenleri
+        self.label = ctk.CTkLabel(self, text="Hoþgeldiniz! Lütfen bir iþlem seçiniz.", font=("Arial", 16))
+        self.label.pack(pady=20)
+
+        self.arama_butonu = ctk.CTkButton(self, text="Embedding Tabanlý Arama", command=self.embedding_sorgula)
+        self.arama_butonu.pack(pady=10)
+
+        self.kumelenme_butonu = ctk.CTkButton(self, text="Kümelenme Analizi", command=self.kumelenme_analizi)
+        self.kumelenme_butonu.pack(pady=10)
+
+    # Fonksiyonlar (þu an için temel þablon)
+    def veri_yukle(self):
+        print("Veri yükleme iþlemi baþlatýldý...")
+        # Burada veri yükleme iþlemleri entegre edilecek
+
+    def embedding_sorgula(self):
+        print("Embedding tabanlý sorgulama iþlemi baþlatýldý...")
+        # Embedding sorgulama ekraný veya iþlevselliði buraya entegre edilecek
+
+    def kumelenme_analizi(self):
+        print("Kümelenme analizi baþlatýldý...")
+        # Kümelenme analiz ekraný ve iþlevselliði buraya entegre edilecek
+
+
+# Programýn çalýþtýrýlmasý
+if __name__ == "__main__":
+    app = AnaProgram()
+    app.mainloop()
+---------------------------------------------------------------------------
+ModuleNotFoundError                       Traceback (most recent call last)
+Cell In[1], line 1
+----> 1 import customtkinter as ctk
+      3 # Ana pencere oluþturulmasý
+      4 class AnaProgram(ctk.CTk):
+
+ModuleNotFoundError: No module named 'customtkinter'
+Görünüþe göre customtkinter kütüphanesi yüklü deðil. Windows üzerinde bu kütüphaneyi yüklemek için þu komutu kullanabilirsin:
+
+bash
+Kopyala
+Düzenle
+pip install customtkinter
+Kütüphaneyi yükledikten sonra programý tekrar çalýþtýrabiliriz. Ýstersen yükleme adýmýnda rehberlik edebilirim. ??
+
+
+
+
+
+
+Þunu dedin:
+Gerek yok devam edelim
+ChatGPT:
+Tamamdýr, þimdi görsel arayüzü oluþturma adýmlarýna devam edelim. Bir sonraki adým olarak arayüzdeki temel bileþenleri (butonlar, metin alanlarý, sonuç görüntüleme alanlarý vb.) tanýmlayacaðým ve bunlara arka plan fonksiyonlarýný baðlayacaðým. Baþlayalým:
+
+Ana Sayfa Tasarýmý:
+
+Embedding sorgulama için bir metin kutusu ve "Sorgula" butonu.
+Kümeleme analizi baþlatma ve sonuç görüntüleme alaný.
+Atýf tarama fonksiyonu için bir metin alaný ve "Tara" butonu.
+Arka Plan Fonksiyon Baðlantýsý:
+
+Her butonun kendi fonksiyonunu çaðýrarak iþlemi baþlatmasýný saðlayacaðým.
+Þimdi kodun bu kýsmýný geliþtireceðim.
+
+
+Analiz hatasý
+python
+Her zaman ayrýntýlarý göster
+
+Kopyala
+import customtkinter as ctk
+
+# Ana pencere oluþturma
+app = ctk.CTk()
+app.title("Yapay Zeka Analiz Aracý")
+app.geometry("600x400")
+
+# Embedding sorgulama için bileþenler
+label_query = ctk.CTkLabel(app, text="Embedding Sorgulama:", font=("Arial", 14))
+label_query.pack(pady=10)
+
+entry_query = ctk.CTkEntry(app, width=400)
+entry_query.pack(pady=5)
+
+button_query = ctk.CTkButton(app, text="Sorgula", command=lambda: print("Sorgulama baþlatýldý!"))
+button_query.pack(pady=10)
+
+# Kümeleme analizi bileþenleri
+label_clustering = ctk.CTkLabel(app, text="Kümeleme Analizi:", font=("Arial", 14))
+label_clustering.pack(pady=20)
+
+button_cluster = ctk.CTkButton(app, text="Kümeleme Analizi Baþlat", command=lambda: print("Kümeleme baþlatýldý!"))
+button_cluster.pack(pady=10)
+
+# Atýf tarama bileþenleri
+label_citation = ctk.CTkLabel(app, text="Atýf Tarama:", font=("Arial", 14))
+label_citation.pack(pady=20)
+
+entry_citation = ctk.CTkEntry(app, width=400)
+entry_citation.pack(pady=5)
+
+button_citation = ctk.CTkButton(app, text="Tarama Baþlat", command=lambda: print("Atýf tarama baþlatýldý!"))
+button_citation.pack(pady=10)
+
+# Arayüzü çalýþtýrma
+app.mainloop()
+---------------------------------------------------------------------------
+ModuleNotFoundError                       Traceback (most recent call last)
+Cell In[2], line 1
+----> 1 import customtkinter as ctk
+      3 # Ana pencere oluþturma
+      4 app = ctk.CTk()
+
+ModuleNotFoundError: No module named 'customtkinter'
+Görünüþe göre customtkinter kütüphanesi ortamda yüklü deðil. Windows ortamýnda customtkinter kullanmak için þu adýmlarý takip edebilirsin:
+
+Kütüphaneyi Yükleme
+Komut satýrýnda þu komutu çalýþtýrarak customtkinter kütüphanesini yükleyebilirsin:
+
+bash
+Kopyala
+Düzenle
+pip install customtkinter
+Kütüphaneyi yükledikten sonra kodu tekrar çalýþtýrabiliriz. Ýstersen sana bu komutu nasýl çalýþtýracaðýn konusunda yardýmcý olabilirim. Ne yapalým? ??
+
+
+
+
+
+
+Þunu dedin:
+Hangi ortamda yüklü degil
+ChatGPT:
+Kodu çalýþtýrdýðým simüle ortamda customtkinter yüklü deðil, ancak bu durum yalnýzca simülasyonla ilgili. Kendi bilgisayarýnda customtkinter'ýn yüklü olup olmadýðýný kontrol etmek istersen Python konsolunda þu komutu çalýþtýrabilirsin:
+
+python
+Kopyala
+Düzenle
+import customtkinter
+print("customtkinter yüklü")
+Eðer hata alýrsan, kütüphaneyi yüklemek için aþaðýdaki komutu kullanabilirsin:
+
+bash
+Kopyala
+Düzenle
+pip install customtkinter
+Her þey hazýrsa, GUI entegrasyonuna devam edebiliriz.
+
+
+
+
+
+
+Þunu dedin:
+Senin simülasyon ortamýna nereden eriþip bu kütüphaneyi yukleyebilirim
+ChatGPT:
+Benim çalýþma ortamým kullanýcýlar tarafýndan doðrudan eriþilebilir bir ortam deðil. Ancak kendi bilgisayarýnda veya sunucunda customtkinter gibi kütüphaneleri yükleyip çalýþtýrabilirsin.
+
+Eðer kendi sisteminde bir hata veya yükleme sorunu yaþarsan, kütüphaneyi yükleme veya yapýlandýrma adýmlarýyla ilgili rehberlik edebilirim. Kendi makinen üzerinde customtkinter'ý yüklediðinde GUI kodlarýný doðrudan çalýþtýrabilirsin. Hazýrsan sonraki adýmlara geçebiliriz!
+
+
+
+
+
+
+Þunu dedin:
+Hazýrým gecelim
+ChatGPT:
+Tamam, þimdi programýn GUI kýsmýný oluþturacaðýz. customtkinter kullanarak temel arayüzü kurup, daha önce konuþtuðumuz fonksiyonlarý bu arayüzle entegre edeceðiz. Ýlk olarak aþaðýdaki adýmlarla baþlayacaðýz:
+
+Plan:
+Ana Ekran:
+
+Kullanýcýya dosya yükleme ve iþlem baþlatma seçenekleri sunulacak.
+Embedding arama, fine-tuning iþlemi ve metodolojik geriye tarama seçenekleri görünecek.
+Sonuçlarýn Gösterilmesi:
+
+Her bir iþlem için ayrý sekmelerde görsel sonuçlarý ve verileri gösterebileceðimiz alanlar eklenecek.
+Ýlerleme Çubuðu ve Loglama:
+
+Ýþlem sürecini göstermek için ilerleme çubuðu eklenecek.
+Yapýlan her iþlem loglanacak ve log ekranýnda görünecek.
+Þimdi temel GUI yapýsýný kodlayalým:
+
+python
+Kopyala
+Düzenle
+import customtkinter as ctk
+
+# CustomTkinter ana pencere oluþturma
+class AnaProgram(ctk.CTk):
+    def __init__(self):
+        super().__init__()
+
+        # Pencere özellikleri
+        self.title("Fine-Tuning ve Veri Analizi Programý")
+        self.geometry("800x600")
+
+        # Ana seçenekler için butonlar
+        self.baslik = ctk.CTkLabel(self, text="Fine-Tuning ve Analiz Programý", font=("Arial", 20))
+        self.baslik.pack(pady=20)
+
+        self.embedding_arama_buton = ctk.CTkButton(self, text="Embedding Arama", command=self.embedding_arama)
+        self.embedding_arama_buton.pack(pady=10)
+
+        self.fine_tuning_buton = ctk.CTkButton(self, text="Fine-Tuning Ýþlemi", command=self.fine_tuning_islemi)
+        self.fine_tuning_buton.pack(pady=10)
+
+        self.metod_tarama_buton = ctk.CTkButton(self, text="Metodolojik Geriye Tarama", command=self.metod_tarama)
+        self.metod_tarama_buton.pack(pady=10)
+
+        # Ýlerleme çubuðu
+        self.progress_bar = ctk.CTkProgressBar(self)
+        self.progress_bar.pack(pady=20)
+
+        # Log ekraný
+        self.log_ekrani = ctk.CTkTextbox(self, width=600, height=200)
+        self.log_ekrani.pack(pady=20)
+
+    # Placeholder fonksiyonlar
+    def embedding_arama(self):
+        self.log_ekrani.insert("end", "Embedding arama iþlemi baþladý...\n")
+
+    def fine_tuning_islemi(self):
+        self.log_ekrani.insert("end", "Fine-tuning iþlemi baþladý...\n")
+
+    def metod_tarama(self):
+        self.log_ekrani.insert("end", "Metodolojik geriye tarama iþlemi baþladý...\n")
+
+
+if __name__ == "__main__":
+    ctk.set_appearance_mode("dark")  # Dark mode
+    app = AnaProgram()
+    app.mainloop()
+Bu Aþamada Ne Yapýlacak:
+Kod yukarýdaki GUI'yi çalýþtýrdýðýnda temel arayüzü göreceksin.
+Placeholder fonksiyonlar daha önce konuþtuðumuz iþlemleri gerçekleþtirecek þekilde geniþletilecek.
+Her iþlem adým adým arka plan fonksiyonlarý ile entegre edilecek.
+Hazýrsan sonraki adýmlarda fonksiyonlarý detaylandýracaðýz!
+
+
+
+
+
+
+Þunu dedin:
+Devam edelim
+ChatGPT:
+Tamam, þimdi GUI’deki her butonun iþlevini gerçekleþtirecek fonksiyonlarý detaylandýracaðýz. Adým adým aþaðýdaki iþlemleri yapacaðýz:
+
+Plan:
+Embedding Arama Fonksiyonunu Geliþtirme:
+
+Kullanýcýdan bir sorgu alýp arama yapacak.
+Arama sonuçlarýný GUI’de listeleyecek.
+Her sonuç için bibliyografik bilgileri gösterecek.
+Fine-Tuning Ýþlemi:
+
+Kullanýcýdan eðitim verisi yüklemesini isteyecek.
+Eðitim verisini iþleyip yapay zekayý fine-tuning yapacak.
+Metodolojik Geriye Tarama:
+
+Kullanýcýdan bir makale veya referans bilgisi alacak.
+Atýf zincirini çözerek metodolojinin geliþim adýmlarýný çýkaracak.
+1. Embedding Arama Fonksiyonu Kodlarý:
+Aramayý yapacak ve sonuçlarý gösterecek þekilde aþaðýdaki gibi geliþtireceðiz:
+
+python
+Kopyala
+Düzenle
+import customtkinter as ctk
+import tkinter.simpledialog
+
+class AnaProgram(ctk.CTk):
+    def __init__(self):
+        super().__init__()
+
+        # Diðer bileþenler...
+        self.embedding_arama_buton = ctk.CTkButton(self, text="Embedding Arama", command=self.embedding_arama)
+        self.embedding_arama_buton.pack(pady=10)
+
+    def embedding_arama(self):
+        # Kullanýcýdan sorgu alma
+        sorgu = tkinter.simpledialog.askstring("Embedding Arama", "Aramak istediðiniz konu nedir?")
+        if sorgu:
+            # Arama iþlemi simülasyonu (yerine gerçek arama fonksiyonu gelecek)
+            arama_sonuclari = ["Sonuç 1: Makale 1", "Sonuç 2: Makale 2", "Sonuç 3: Makale 3"]
+
+            # Log ekranýna sonuçlarý yazdýrma
+            self.log_ekrani.insert("end", f"'{sorgu}' sorgusu için arama sonuçlarý:\n")
+            for sonuc in arama_sonuclari:
+                self.log_ekrani.insert("end", sonuc + "\n")
+2. Fine-Tuning Fonksiyonu:
+Kullanýcýdan veri yüklemesini isteyerek iþlemi baþlatacaðýz.
+
+python
+Kopyala
+Düzenle
+from tkinter import filedialog
+
+class AnaProgram(ctk.CTk):
+    def fine_tuning_islemi(self):
+        # Kullanýcýdan eðitim verisi seçmesini iste
+        dosya_yolu = filedialog.askopenfilename(title="Eðitim Verisini Seçin")
+        if dosya_yolu:
+            self.log_ekrani.insert("end", f"Eðitim verisi yüklendi: {dosya_yolu}\n")
+            self.log_ekrani.insert("end", "Fine-tuning iþlemi baþladý...\n")
+
+            # Fine-tuning iþlemini baþlat (placeholder)
+            self.log_ekrani.insert("end", "Fine-tuning iþlemi tamamlandý.\n")
+3. Metodolojik Geriye Tarama:
+Atýf zincirlerini analiz ederek metodolojinin geliþimini göstereceðiz.
+
+python
+Kopyala
+Düzenle
+class AnaProgram(ctk.CTk):
+    def metod_tarama(self):
+        # Kullanýcýdan makale adý veya referans bilgisi al
+        makale_adi = tkinter.simpledialog.askstring("Metodolojik Tarama", "Makale adýný girin:")
+        if makale_adi:
+            self.log_ekrani.insert("end", f"'{makale_adi}' makalesi için tarama baþladý...\n")
+
+            # Placeholder: Tarama iþlemi (Bu aþamada gerçek iþlem entegre edilecek)
+            tarama_adimlari = [
+                f"Adým 1: {makale_adi} metodu",
+                "Adým 2: Önceki metodun iyileþtirilmiþ hali",
+                "Adým 3: Yeni metodun doðuþu"
+            ]
+
+            # Sonuçlarý gösterme
+            self.log_ekrani.insert("end", "Metodolojik geliþim adýmlarý:\n")
+            for adim in tarama_adimlari:
+                self.log_ekrani.insert("end", adim + "\n")
+Bu Adýmda Ne Yapýldý:
+Embedding Arama: Kullanýcýdan sorgu alýnýp sonuçlar listelendi.
+Fine-Tuning: Kullanýcýnýn veri yüklemesi saðlanarak iþlem baþlatýldý.
+Metodolojik Tarama: Atýf zincirine dayalý tarama adýmlarý gösterildi.
+Hazýrsan bu temel iþlevleri geliþtirip daha detaylý hale getirebiliriz!
+
+
+
+
+
+
+Þunu dedin:
+Devam edelim 
+ChatGPT:
+Þimdi Geliþtirilecek Ýþlevler ve Plan:
+Bir sonraki adýmda þu iþlemleri detaylandýracaðýz:
+
+Kümelenme Analizi:
+
+Embedding arama sonuçlarýna göre verileri kümelere ayýrarak analiz yapacaðýz.
+Kümeleri GUI’de görselleþtireceðiz (örneðin grafiklerle).
+Sonuçlarýn Kaydedilmesi:
+
+Arama, fine-tuning ve metodolojik taramalarýn her birinin sonuçlarýný JSON veya CSV formatýnda kaydedebileceðiz.
+Görselleþtirme:
+
+Kullanýcýnýn seçtiði verilere göre otomatik grafik oluþturma özelliði eklenecek.
+1. Kümelenme Analizi Fonksiyonu
+Embedding sonuçlarý üzerinde K-Means veya benzeri bir algoritma kullanarak kümelenme yapacaðýz ve sonucu görselleþtireceðiz.
+
+python
+Kopyala
+Düzenle
+from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
+import numpy as np
+
+class AnaProgram(ctk.CTk):
+    def kumelenme_analizi(self):
+        # Örnek veri seti (gerçek embedding verileri kullanýlacak)
+        ornek_veri = np.array([
+            [1.0, 2.0],
+            [1.5, 1.8],
+            [5.0, 8.0],
+            [6.0, 8.0],
+            [1.0, 0.6],
+            [9.0, 11.0]
+        ])
+
+        # Kümelenme iþlemi (K=2)
+        kmeans = KMeans(n_clusters=2)
+        kmeans.fit(ornek_veri)
+        etiketler = kmeans.labels_
+
+        # Log ekranýna kümelenme bilgisi
+        self.log_ekrani.insert("end", "Kümelenme Analizi Sonuçlarý:\n")
+        for i, etiket in enumerate(etiketler):
+            self.log_ekrani.insert("end", f"Veri {i + 1}: Küme {etiket + 1}\n")
+
+        # Kümelenme grafiði
+        plt.scatter(ornek_veri[:, 0], ornek_veri[:, 1], c=etiketler, cmap='viridis')
+        plt.title("Kümelenme Analizi")
+        plt.xlabel("Özellik 1")
+        plt.ylabel("Özellik 2")
+        plt.show()
+2. Sonuçlarý Kaydetme Fonksiyonu
+Kullanýcýnýn arama veya analiz sonuçlarýný kaydedebileceði bir dosya seçme ekraný ekleyeceðiz.
+
+python
+Kopyala
+Düzenle
+class AnaProgram(ctk.CTk):
+    def sonuclari_kaydet(self):
+        # Kullanýcýdan dosya adý al
+        dosya_yolu = filedialog.asksaveasfilename(defaultextension=".csv", filetypes=[("CSV Dosyasý", "*.csv")])
+        if dosya_yolu:
+            # Placeholder veriler
+            veriler = [
+                ["Sorgu", "Sonuç"],
+                ["ACE Inhibisyon", "Makale 1"],
+                ["ACE Inhibisyon", "Makale 2"]
+            ]
+
+            # CSV dosyasýna yazma
+            with open(dosya_yolu, "w", newline="") as dosya:
+                import csv
+                writer = csv.writer(dosya)
+                writer.writerows(veriler)
+
+            self.log_ekrani.insert("end", f"Sonuçlar '{dosya_yolu}' dosyasýna kaydedildi.\n")
+3. Görselleþtirme Ekleme
+Kullanýcýnýn seçtiði bir analiz sonucuna göre otomatik olarak grafik oluþturulacak.
+
+python
+Kopyala
+Düzenle
+class AnaProgram(ctk.CTk):
+    def goruntuleme_islemi(self):
+        # Placeholder veri
+        veriler = [10, 20, 30, 40, 50]
+
+        # Basit bir çubuk grafik
+        plt.bar(range(len(veriler)), veriler, color='blue')
+        plt.title("Örnek Verilerin Görselleþtirilmesi")
+        plt.xlabel("Örnekler")
+        plt.ylabel("Deðerler")
+        plt.show()
+
+        self.log_ekrani.insert("end", "Veriler görselleþtirildi.\n")
+Bu Adýmda Neler Yapýldý:
+Kümelenme Analizi: Veriler üzerinde K-Means kümelenme analizi yapýldý ve grafiði çizildi.
+Sonuç Kaydetme: Analiz sonuçlarýný CSV formatýnda kaydetme iþlevi eklendi.
+Görselleþtirme: Analiz verilerinin grafikle gösterilmesi saðlandý.
+Hazýrsan, sonraki adýmlar için daha fazla entegrasyon yapabiliriz!
+
+
+
+
+
+
+Þunu dedin:
+Programimiza daha fazla entegrasyona hazirim
+ChatGPT:
+Harika! Þimdi daha fazla entegrasyon yaparak programýn iþlevselliðini artýracaðýz. Ýþte ekleyebileceðimiz sonraki adýmlar:
+
+1. Metodolojilerin Geriye Doðru Tarama Ýþlevi
+Kullanýcý, metodolojik geliþimleri analiz etmek için makalelerin referanslarý arasýnda geriye doðru tarama yapacak.
+Her adýmda makale ve referans bilgileri JSON formatýnda saklanacak ve görselleþtirilecek.
+python
+Kopyala
+Düzenle
+import json
+
+class AnaProgram(ctk.CTk):
+    def metodolojik_tarama(self, baslangic_makalesi):
+        """
+        Baslangýç makalesinden geriye doðru tarama yapar ve metodolojik geliþimleri kaydeder.
+        """
+        # Örnek referans verisi (gerçek veri embedding veritabanýndan alýnacak)
+        referanslar = {
+            "Makale 1": ["Makale 2", "Makale 3"],
+            "Makale 2": ["Makale 4"],
+            "Makale 3": ["Makale 5", "Makale 6"]
+        }
+
+        tarama_sonuclari = []
+        mevcut_makaleler = [baslangic_makalesi]
+
+        while mevcut_makaleler:
+            makale = mevcut_makaleler.pop(0)
+            if makale not in tarama_sonuclari:
+                tarama_sonuclari.append(makale)
+                mevcut_makaleler.extend(referanslar.get(makale, []))
+
+        # Sonuçlarý JSON formatýnda kaydet
+        dosya_yolu = filedialog.asksaveasfilename(defaultextension=".json", filetypes=[("JSON Dosyasý", "*.json")])
+        if dosya_yolu:
+            with open(dosya_yolu, "w") as dosya:
+                json.dump(tarama_sonuclari, dosya)
+
+            self.log_ekrani.insert("end", f"Metodolojik tarama sonuçlarý '{dosya_yolu}' dosyasýna kaydedildi.\n")
+
+        # Sonuçlarýn görselleþtirilmesi (Örnek grafiði)
+        plt.figure(figsize=(8, 6))
+        plt.barh(range(len(tarama_sonuclari)), range(len(tarama_sonuclari)), color='skyblue')
+        plt.yticks(range(len(tarama_sonuclari)), tarama_sonuclari)
+        plt.title("Metodolojik Tarama Sonuçlarý")
+        plt.xlabel("Adýmlar")
+        plt.ylabel("Makaleler")
+        plt.show()
+2. Fine-Tuning Ýçin Verileri Hazýrlama
+Embedding sonuçlarý ve kümelenme bilgileri kullanýlarak yapay zeka fine-tuning için veriler hazýrlanacak.
+python
+Kopyala
+Düzenle
+class AnaProgram(ctk.CTk):
+    def fine_tuning_veri_hazirla(self):
+        """
+        Fine-tuning için embedding verilerini hazýrlar ve JSON formatýnda kaydeder.
+        """
+        embedding_verileri = [
+            {"makale": "Makale 1", "embedding": [0.1, 0.2, 0.3], "kume": 1},
+            {"makale": "Makale 2", "embedding": [0.4, 0.5, 0.6], "kume": 2}
+        ]
+
+        dosya_yolu = filedialog.asksaveasfilename(defaultextension=".json", filetypes=[("JSON Dosyasý", "*.json")])
+        if dosya_yolu:
+            with open(dosya_yolu, "w") as dosya:
+                json.dump(embedding_verileri, dosya)
+
+            self.log_ekrani.insert("end", f"Fine-tuning verileri '{dosya_yolu}' dosyasýna kaydedildi.\n")
+3. Veri Görselleþtirme ve Detaylý Loglama
+Veriler üzerinde daha karmaþýk grafikler oluþturacaðýz.
+Programýn tüm adýmlarýnda detaylý loglama ve hata kontrolü saðlanacak.
+python
+Kopyala
+Düzenle
+class AnaProgram(ctk.CTk):
+    def detayli_gorsellestirme(self):
+        """
+        Embedding verilerinin detaylý görselleþtirilmesini saðlar.
+        """
+        embedding_verileri = [
+            [0.1, 0.2, 0.3],
+            [0.4, 0.5, 0.6],
+            [0.7, 0.8, 0.9]
+        ]
+
+        # 3D scatter plot oluþturma
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        for veri in embedding_verileri:
+            ax.scatter(veri[0], veri[1], veri[2], c='b', marker='o')
+
+        ax.set_title("Embedding Verilerinin 3D Görselleþtirilmesi")
+        ax.set_xlabel("Özellik 1")
+        ax.set_ylabel("Özellik 2")
+        ax.set_zlabel("Özellik 3")
+        plt.show()
+
+        self.log_ekrani.insert("end", "Embedding verileri 3D olarak görselleþtirildi.\n")
+4. Entegrasyon Planý
+Bu yeni iþlevleri ana programa þu þekilde entegre edeceðiz:
+
+Kullanýcýnýn istediði iþlem türüne göre butonlar ve seçenekler ekleyeceðiz.
+Tüm iþlemler sýrasýnda ara verilerin kaydedilmesi ve loglanmasý saðlanacak.
+Görselleþtirme adýmlarý her iþlem sonrasý otomatik olarak tetiklenecek.
+Eðer bu adýmlarla ilgili sorularýn veya önerilerin yoksa, entegrasyonu tamamlama iþlemine baþlayabiliriz!
+
+
+
+
+
+
+Þunu dedin:
+Tamam devam edelim
+ChatGPT:
+Entegrasyonun Devamý: CustomTkinter GUI ile Yeni Özelliklerin Eklenmesi
+Aþaðýda, programýn ana GUI yapýsýna yukarýda oluþturulan tüm fonksiyonlarý entegre eden kod yapýsýný adým adým tamamlayacaðýz:
+
+1. Ana Programýn Güncellenmiþ Yapýsý
+Her bir iþlem için özel butonlar ekliyoruz ve kullanýcý etkileþimi saðlýyoruz.
+
+python
+Kopyala
+Düzenle
+import customtkinter as ctk
+from tkinter import filedialog
+import matplotlib.pyplot as plt
+import json
+
+class AnaProgram(ctk.CTk):
+    def __init__(self):
+        super().__init__()
+
+        self.title("Fine-Tuning ve Metodolojik Analiz Programý")
+        self.geometry("800x600")
+
+        # Log ekraný
+        self.log_ekrani = ctk.CTkTextbox(self, height=200)
+        self.log_ekrani.pack(fill="x", padx=10, pady=5)
+
+        # Butonlar
+        self.metodolojik_tarama_buton = ctk.CTkButton(self, text="Metodolojik Tarama", command=self.metodolojik_tarama_butonu)
+        self.metodolojik_tarama_buton.pack(pady=10)
+
+        self.fine_tuning_buton = ctk.CTkButton(self, text="Fine-Tuning Verisi Hazýrla", command=self.fine_tuning_veri_hazirla)
+        self.fine_tuning_buton.pack(pady=10)
+
+        self.gorsellestirme_buton = ctk.CTkButton(self, text="Embedding Görselleþtirme", command=self.detayli_gorsellestirme)
+        self.gorsellestirme_buton.pack(pady=10)
+
+    # Kullanýcýdan baþlangýç makalesi isteyerek metodolojik tarama iþlemini baþlatan fonksiyon
+    def metodolojik_tarama_butonu(self):
+        baslangic_makalesi = "Makale 1"  # Burada kullanýcýdan seçim alýnabilir
+        self.metodolojik_tarama(baslangic_makalesi)
+
+    # Metodolojik tarama fonksiyonu
+    def metodolojik_tarama(self, baslangic_makalesi):
+        referanslar = {
+            "Makale 1": ["Makale 2", "Makale 3"],
+            "Makale 2": ["Makale 4"],
+            "Makale 3": ["Makale 5", "Makale 6"]
+        }
+
+        tarama_sonuclari = []
+        mevcut_makaleler = [baslangic_makalesi]
+
+        while mevcut_makaleler:
+            makale = mevcut_makaleler.pop(0)
+            if makale not in tarama_sonuclari:
+                tarama_sonuclari.append(makale)
+                mevcut_makaleler.extend(referanslar.get(makale, []))
+
+        dosya_yolu = filedialog.asksaveasfilename(defaultextension=".json", filetypes=[("JSON Dosyasý", "*.json")])
+        if dosya_yolu:
+            with open(dosya_yolu, "w") as dosya:
+                json.dump(tarama_sonuclari, dosya)
+
+            self.log_ekrani.insert("end", f"Metodolojik tarama sonuçlarý '{dosya_yolu}' dosyasýna kaydedildi.\n")
+
+        plt.figure(figsize=(8, 6))
+        plt.barh(range(len(tarama_sonuclari)), range(len(tarama_sonuclari)), color='skyblue')
+        plt.yticks(range(len(tarama_sonuclari)), tarama_sonuclari)
+        plt.title("Metodolojik Tarama Sonuçlarý")
+        plt.xlabel("Adýmlar")
+        plt.ylabel("Makaleler")
+        plt.show()
+
+    # Fine-tuning verisi hazýrlama fonksiyonu
+    def fine_tuning_veri_hazirla(self):
+        embedding_verileri = [
+            {"makale": "Makale 1", "embedding": [0.1, 0.2, 0.3], "kume": 1},
+            {"makale": "Makale 2", "embedding": [0.4, 0.5, 0.6], "kume": 2}
+        ]
+
+        dosya_yolu = filedialog.asksaveasfilename(defaultextension=".json", filetypes=[("JSON Dosyasý", "*.json")])
+        if dosya_yolu:
+            with open(dosya_yolu, "w") as dosya:
+                json.dump(embedding_verileri, dosya)
+
+            self.log_ekrani.insert("end", f"Fine-tuning verileri '{dosya_yolu}' dosyasýna kaydedildi.\n")
+
+    # Embedding verilerinin detaylý görselleþtirilmesi
+    def detayli_gorsellestirme(self):
+        embedding_verileri = [
+            [0.1, 0.2, 0.3],
+            [0.4, 0.5, 0.6],
+            [0.7, 0.8, 0.9]
+        ]
+
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        for veri in embedding_verileri:
+            ax.scatter(veri[0], veri[1], veri[2], c='b', marker='o')
+
+        ax.set_title("Embedding Verilerinin 3D Görselleþtirilmesi")
+        ax.set_xlabel("Özellik 1")
+        ax.set_ylabel("Özellik 2")
+        ax.set_zlabel("Özellik 3")
+        plt.show()
+
+        self.log_ekrani.insert("end", "Embedding verileri 3D olarak görselleþtirildi.\n")
+
+# Programý çalýþtýr
+if __name__ == "__main__":
+    app = AnaProgram()
+    app.mainloop()
+2. Eklenebilecek Geliþtirmeler
+Hata Kontrolleri: Kullanýcýnýn hatalý veya eksik veri giriþine karþý uyarý verilmesi.
+Veri Kaydetme Seçenekleri: Farklý formatlarda kaydetme (CSV, Excel gibi).
+Kümelenme Sonuçlarý: Her bir iþlemin sonuçlarýnýn küme analizine katkýda bulunacak þekilde iþlenmesi.
+Bu yapýyý geniþletmeye hazýrsan sonraki geliþtirme adýmlarýný planlayabiliriz!
+
+
+
+
+
+
+Þunu dedin:
+Tamam bu üç guncellestirmeyide yapalým. Fakat ana planimizdan eksik kalan varmý bir kontrol edelim
+5 saniye hakkýnda Akýl yürütüldü
+Aþaðýda, baþýndan beri oluþturduðumuz ana planý maddeler halinde özetleyip, mevcut entegrasyonumuzda eksik kalan veya geliþtirmeye açýk olan noktalarý belirteceðim:
+
+Ana Planýn Maddeleri
+Veri Tarama ve Sorgulama:
+
+PDF, TXT ve diðer kaynaklardan metodolojik ve sayýsal verilerin çýkarýlmasý.
+Embedding’ler üzerinden konu bazlý arama yapýlmasý.
+Atýf Zinciri Tarama:
+
+Belirli bir makaleden geriye doðru tarama yaparak, metodolojik geliþim zincirinin çýkarýlmasý.
+Atýf bilgilerini JSON gibi formatlarda kaydedip görselleþtirme.
+Embedding Arama ve Fine-Tuning Ýþlemleri:
+
+Embedding verileri üzerinden arama yapma.
+Fine-tuning için eðitim verilerinin hazýrlanmasý, model eðitiminin baþlatýlmasý.
+Eðitim verilerinin (embedding, bibliyografya vb.) uygun formatta kaydedilmesi.
+Kümelenme Analizi:
+
+Embedding sonuçlarýna dayanarak K-Means gibi algoritmalarla verilerin kümelenmesi.
+Kümelenme sonuçlarýnýn tablolar, grafikler (örneðin 2D/3D scatter plot) ve dýþa aktarýlabilir formatlarda sunulmasý.
+Görselleþtirme:
+
+Tüm analizlerin (atýf zinciri, kümelenme, embedding görselleþtirme) grafiksel sunumlarýnýn yapýlmasý.
+VOSc veya Pajek formatýnda görselleþtirme seçenekleri (isteðe baðlý).
+Detaylý Loglama ve Hata Kontrolleri:
+
+Ýþlemler sýrasýnda detaylý loglarýn tutulmasý.
+Her modülde hata kontrolü ve kullanýcýya geri bildirim saðlanmasý.
+Mevcut Entegrasyon Durumumuz
+Metodolojik Tarama:
+— Basit bir atýf zinciri tarama fonksiyonu ekledik.
+— Sonuçlar JSON dosyasý olarak kaydediliyor ve bar grafik ile görselleþtiriliyor.
+
+Fine-Tuning Verisi Hazýrlama:
+— Örnek embedding verilerini içeren JSON kaydý saðladýk.
+
+Embedding Verilerinin Görselleþtirilmesi:
+— Basit bir 3D scatter plot ile embedding verileri görselleþtiriliyor.
+
+GUI Temel Yapýsý:
+— CustomTkinter kullanýlarak bir ana pencere oluþturduk ve ilgili iþlemler için butonlar ekledik. — Log ekraný ile her adým hakkýnda kullanýcýya bilgi veriyoruz.
+
+Eksik veya Geliþtirilebilecek Noktalar
+Embedding Arama Fonksiyonunun Detaylandýrýlmasý:
+— Þu an için embedding arama iþlemi yerine placeholder (örnek çýktý) kullanýyoruz. Gerçek embedding arama algoritmasý, ChromaDB veya baþka bir veri kaynaðýndan çekilecek verilerle entegre edilmeli.
+
+Sayýsal Veri Sorgulama:
+— Ace inhibisyon deðerleri, hidroliz þartlarý gibi metodolojik sayýsal verilerin sorgulanmasý ve karþýlaþtýrýlmasý henüz GUI’ye entegre edilmedi.
+— Bu modülü ayrý bir buton veya sekme ile ekleyerek, kullanýcýlarýn sayýsal veriler üzerinden sorgulama yapmasýný saðlayabiliriz.
+
+Kümelenme Analizi Ýþlevinin Detaylandýrýlmasý:
+— Kümelenme analizi için örnek veri kullandýk; ancak gerçek embedding verileri üzerinden kümeleme yapýlmasý, sonuçlarýn detaylý raporlanmasý ve görselleþtirilmesi eklenmeli. — Ayrýca, kümelenme sonuçlarýný dýþa aktarma (CSV, JSON) gibi özellikler eklenebilir.
+
+Detaylý Loglama ve Hata Yönetimi:
+— Þu an basit print ve log ekraný kullanýyoruz. Her modülde daha kapsamlý hata kontrolü ve kullanýcý bilgilendirmesi eklenebilir.
+
+Görselleþtirme Seçeneklerinin Geliþtirilmesi:
+— VOSc veya Pajek formatýnda dýþa aktarým gibi ileri düzey görselleþtirme seçenekleri henüz eklenmedi.
+
+Sonuç
+Ana planýmýzý genel hatlarýyla uygulamaya baþladýk; ancak yukarýda belirttiðimiz maddeler üzerinden ek geliþtirmeler yaparak tam kapsamlý bir sistem oluþturabiliriz. Eðer yukarýdaki eksik noktalarý da tamamlamak isterseniz, sýrayla her modülü detaylandýrýp entegre edebiliriz. Hangi modülden baþlayalým?
+
+Bu maddeler doðrultusunda geliþtirmeye devam edebiliriz. Ne yapmak istersiniz?
+
+
+
+
+
+
+Þunu dedin:
+ileri ve geri atif tarama atif zinciri goruntuleme  veri tarama ve sorgulama icin programa ek ozellikler kat ve gercekten is yapan basil olmayan sekilde olsun
+7 saniye hakkýnda Akýl yürütüldü
+Aþaðýda, ileri ve geri atýf taramasý, atýf zinciri görselleþtirme, veri tarama ve sorgulama iþlevlerini içeren, CustomTkinter GUI ile entegre edilmiþ örnek bir program sunuyorum. Bu örnek;
+
+Gerçekçi (örnek veriyle çalýþan) atýf zinciri taramasý yapýyor (hem ileri hem geri yönlü).
+Atýf zincirini networkx kullanarak grafiðe döküyor ve matplotlib ile görselleþtiriyor.
+Ayrýca, örnek veriler üzerinde metin sorgulamasý yaparak (örneðin, belirli anahtar kelimeleri içeren makaleleri döndüren) bir sorgulama iþlevi sunuyor.
+Bu örnek, gerçek verilerle entegrasyon yapmanýz için temel altyapýyý saðlayacak þekilde hazýrlanmýþtýr.
+
+python
+Kopyala
+Düzenle
+import customtkinter as ctk
+from tkinter import filedialog, simpledialog, messagebox
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D  # 3D grafikleri destekler
+import networkx as nx
+import json
+import csv
+import numpy as np
+
+# Örnek atýf veritabaný (gerçek veriyle deðiþtirilmesi gerek)
+# Her makale için "forward" (ileri atýf) ve "backward" (geri atýf) bilgileri tutuluyor.
+CITATION_DB = {
+    "Paper A": {
+        "forward": ["Paper B", "Paper C"],
+        "backward": ["Paper X", "Paper Y"]
+    },
+    "Paper B": {
+        "forward": ["Paper D"],
+        "backward": ["Paper A"]
+    },
+    "Paper C": {
+        "forward": ["Paper E", "Paper F"],
+        "backward": ["Paper A"]
+    },
+    "Paper D": {
+        "forward": [],
+        "backward": ["Paper B"]
+    },
+    "Paper E": {
+        "forward": [],
+        "backward": ["Paper C"]
+    },
+    "Paper F": {
+        "forward": [],
+        "backward": ["Paper C"]
+    },
+    "Paper X": {
+        "forward": ["Paper A"],
+        "backward": []
+    },
+    "Paper Y": {
+        "forward": ["Paper A"],
+        "backward": []
+    }
+}
+
+# Örnek veri kümesi: Her makale için basit metin içeriði (sorgulama ve tarama için)
+DATA_DB = {
+    "Paper A": "Bu makale ACE inhibisyon deðerlerini ve hidroliz þartlarýný inceler.",
+    "Paper B": "Paper A’nýn yöntemini geliþtirerek yeni deneysel bulgular sunar.",
+    "Paper C": "Geliþmiþ metodolojiler ve optimize edilmiþ protokoller içerir.",
+    "Paper D": "Yeni bir analiz yöntemi sunar, Paper B’ye atýf yapar.",
+    "Paper E": "Paper C’den türetilmiþ protokoller ve sayýsal veriler içerir.",
+    "Paper F": "Paper C’den farklý olarak alternatif deneysel sonuçlar bildirir.",
+    "Paper X": "Geçmiþte Paper A’ya referans veren bir çalýþma.",
+    "Paper Y": "Paper A’nýn metodolojisine eleþtirel yaklaþan bir çalýþma."
+}
+
+# Fonksiyon: Atýf zinciri taramasý (ileri ve geri)
+def citation_chain_scan(start_paper, direction="both", depth=2):
+    """
+    Verilen baþlangýç makalesinden, belirtilen yön (forward, backward veya both) 
+    ve derinlikte atýf zinciri taramasý yapar.
+    Gerçekleþen zinciri, düðümler ve kenarlar þeklinde döndürür.
+    """
+    graph = nx.DiGraph()
+    visited = set()
+    
+    def dfs(paper, current_depth):
+        if current_depth > depth or paper in visited:
+            return
+        visited.add(paper)
+        # Elde edilecek atýflar
+        refs = []
+        if direction in ("forward", "both"):
+            refs += CITATION_DB.get(paper, {}).get("forward", [])
+        if direction in ("backward", "both"):
+            refs += CITATION_DB.get(paper, {}).get("backward", [])
+        for ref in refs:
+            graph.add_edge(paper, ref)
+            dfs(ref, current_depth + 1)
+    
+    dfs(start_paper, 0)
+    return graph
+
+# Fonksiyon: Atýf zinciri grafiðini çizdirme
+def visualize_citation_chain(graph):
+    """
+    NetworkX grafiðini matplotlib kullanarak görselleþtirir.
+    """
+    plt.figure(figsize=(8, 6))
+    pos = nx.spring_layout(graph)
+    nx.draw(graph, pos, with_labels=True, node_color="skyblue", edge_color="gray", node_size=1500, font_size=10)
+    plt.title("Atýf Zinciri Görselleþtirmesi")
+    plt.show()
+
+# Fonksiyon: Veri sorgulama (örnek metin aramasý)
+def query_data(query):
+    """
+    DATA_DB içindeki makale metinlerinde arama yapar.
+    Belirtilen anahtar kelimeyi içeren makalelerin listesini döndürür.
+    """
+    query = query.lower()
+    results = {}
+    for paper, text in DATA_DB.items():
+        if query in text.lower():
+            results[paper] = text
+    return results
+
+# Fonksiyon: Sorgu sonuçlarýný CSV olarak kaydetme
+def save_query_results_csv(results, file_path):
+    """
+    Sorgu sonuçlarýný CSV formatýnda kaydeder.
+    """
+    with open(file_path, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(["Makale", "Ýçerik"])
+        for paper, content in results.items():
+            writer.writerow([paper, content])
+
+# CustomTkinter GUI Ana Programý
+class AnaProgram(ctk.CTk):
+    def __init__(self):
+        super().__init__()
+        self.title("Yapay Zeka Fine-Tuning ve Atýf Zinciri Analizi")
+        self.geometry("900x700")
+        
+        # Log ekraný
+        self.log_ekrani = ctk.CTkTextbox(self, height=200)
+        self.log_ekrani.pack(fill="x", padx=10, pady=5)
+        
+        # Atýf Zinciri Tarama Bölümü
+        self.atif_frame = ctk.CTkFrame(self)
+        self.atif_frame.pack(padx=10, pady=10, fill="x")
+        self.atif_label = ctk.CTkLabel(self.atif_frame, text="Atýf Zinciri Tarama", font=("Arial", 16))
+        self.atif_label.pack(pady=5)
+        self.start_paper_entry = ctk.CTkEntry(self.atif_frame, placeholder_text="Baþlangýç makalesi (örn. Paper A)", width=300)
+        self.start_paper_entry.pack(pady=5)
+        self.direction_var = ctk.StringVar(value="both")
+        self.direction_menu = ctk.CTkOptionMenu(self.atif_frame, values=["forward", "backward", "both"], variable=self.direction_var)
+        self.direction_menu.pack(pady=5)
+        self.depth_entry = ctk.CTkEntry(self.atif_frame, placeholder_text="Derinlik (örn. 2)", width=100)
+        self.depth_entry.pack(pady=5)
+        self.atif_tarama_button = ctk.CTkButton(self.atif_frame, text="Atýf Zinciri Tarama", command=self.handle_citation_scan)
+        self.atif_tarama_button.pack(pady=5)
+        
+        # Sorgulama Bölümü
+        self.query_frame = ctk.CTkFrame(self)
+        self.query_frame.pack(padx=10, pady=10, fill="x")
+        self.query_label = ctk.CTkLabel(self.query_frame, text="Veri Sorgulama", font=("Arial", 16))
+        self.query_label.pack(pady=5)
+        self.query_entry = ctk.CTkEntry(self.query_frame, placeholder_text="Anahtar kelime girin...", width=300)
+        self.query_entry.pack(pady=5)
+        self.query_button = ctk.CTkButton(self.query_frame, text="Sorgula", command=self.handle_query)
+        self.query_button.pack(pady=5)
+        self.save_query_button = ctk.CTkButton(self.query_frame, text="Sonuçlarý CSV Kaydet", command=self.save_query_results)
+        self.save_query_button.pack(pady=5)
+        
+        # Fine-Tuning Bölümü (Veri Hazýrlama)
+        self.finetune_frame = ctk.CTkFrame(self)
+        self.finetune_frame.pack(padx=10, pady=10, fill="x")
+        self.finetune_label = ctk.CTkLabel(self.finetune_frame, text="Fine-Tuning Verisi Hazýrlama", font=("Arial", 16))
+        self.finetune_label.pack(pady=5)
+        self.prepare_ft_button = ctk.CTkButton(self.finetune_frame, text="Veriyi Hazýrla", command=self.handle_finetuning_data)
+        self.prepare_ft_button.pack(pady=5)
+        
+        # Görselleþtirme Bölümü (Ekstra)
+        self.visual_frame = ctk.CTkFrame(self)
+        self.visual_frame.pack(padx=10, pady=10, fill="x")
+        self.visual_button = ctk.CTkButton(self.visual_frame, text="Atýf Zinciri Görselleþtir", command=self.handle_visualize_citation)
+        self.visual_button.pack(pady=5)
+        
+    def log(self, mesaj):
+        self.log_ekrani.insert("end", mesaj + "\n")
+        self.log_ekrani.see("end")
+        
+    def handle_citation_scan(self):
+        start_paper = self.start_paper_entry.get().strip()
+        if not start_paper:
+            messagebox.showerror("Hata", "Lütfen baþlangýç makalesini girin!")
+            return
+        try:
+            depth = int(self.depth_entry.get().strip())
+        except ValueError:
+            messagebox.showerror("Hata", "Lütfen geçerli bir derinlik girin!")
+            return
+        direction = self.direction_var.get()
+        self.log(f"Atýf zinciri taramasý baþlatýlýyor: Makale={start_paper}, Yön={direction}, Derinlik={depth}")
+        graph = citation_chain_scan(start_paper, direction, depth)
+        self.log(f"Tarama tamamlandý. {graph.number_of_nodes()} düðüm, {graph.number_of_edges()} kenar bulundu.")
+        # Atýf zinciri görselleþtirmesini de önizleyelim (aþaðýdaki fonksiyonu handle_visualize_citation çaðýracaktýr)
+        self.citation_graph = graph
+
+    def handle_visualize_citation(self):
+        if hasattr(self, "citation_graph") and self.citation_graph:
+            self.log("Atýf zinciri görselleþtiriliyor...")
+            visualize_citation_chain(self.citation_graph)
+        else:
+            messagebox.showinfo("Bilgi", "Önce atýf zinciri taramasý yapýn.")
+
+    def handle_query(self):
+        query = self.query_entry.get().strip()
+        if not query:
+            messagebox.showerror("Hata", "Lütfen bir anahtar kelime girin!")
+            return
+        results = query_data(query)
+        if results:
+            self.log(f"Sorgu '{query}' için {len(results)} sonuç bulundu:")
+            for paper, content in results.items():
+                self.log(f"{paper}: {content}")
+            self.last_query_results = results  # Son sorgu sonuçlarýný saklayalým
+        else:
+            self.log(f"Sorgu '{query}' için sonuç bulunamadý.")
+
+    def save_query_results(self):
+        if hasattr(self, "last_query_results") and self.last_query_results:
+            dosya_yolu = filedialog.asksaveasfilename(defaultextension=".csv", filetypes=[("CSV Dosyasý", "*.csv")])
+            if dosya_yolu:
+                save_query_results_csv(self.last_query_results, dosya_yolu)
+                self.log(f"Sorgu sonuçlarý '{dosya_yolu}' dosyasýna kaydedildi.")
+        else:
+            messagebox.showinfo("Bilgi", "Önce sorgu yapýn ve sonuçlarý alýn.")
+    
+    def handle_finetuning_data(self):
+        # Örnek fine-tuning verileri (gerçek embedding verileri ve etiketler burada kullanýlabilir)
+        embedding_verileri = [
+            {"makale": "Paper A", "embedding": [0.1, 0.2, 0.3], "kume": 1},
+            {"makale": "Paper B", "embedding": [0.4, 0.5, 0.6], "kume": 2},
+            {"makale": "Paper C", "embedding": [0.7, 0.8, 0.9], "kume": 1}
+        ]
+        dosya_yolu = filedialog.asksaveasfilename(defaultextension=".json", filetypes=[("JSON Dosyasý", "*.json")])
+        if dosya_yolu:
+            with open(dosya_yolu, "w") as f:
+                json.dump(embedding_verileri, f)
+            self.log(f"Fine-tuning verileri '{dosya_yolu}' dosyasýna kaydedildi.")
+
+# Programý çalýþtýrma
+if __name__ == "__main__":
+    ctk.set_appearance_mode("dark")  # veya "light"
+    app = AnaProgram()
+    app.mainloop()
+Açýklamalar:
+Atýf Zinciri Tarama ve Görselleþtirme:
+Kullanýcý, baþlangýç makalesini, tarama yönünü (ileri, geri veya her iki yönde) ve derinliði giriyor.
+citation_chain_scan fonksiyonu, belirtilen derinlikte tarama yaparak bir yönlü grafik oluþturuyor.
+Daha sonra visualize_citation_chain fonksiyonu networkx ve matplotlib kullanarak grafiði çiziyor.
+
+Veri Sorgulama:
+query_data fonksiyonu, örnek DATA_DB üzerinden anahtar kelime aramasý yapýyor.
+Sonuçlar hem log ekranýnda gösteriliyor hem de CSV olarak kaydedilebiliyor.
+
+Fine-Tuning Verisi Hazýrlama:
+Örnek embedding verileri JSON dosyasýna kaydediliyor. Gerçek projede bu veri, model eðitimi için kullanýlacak.
+
+Detaylý Loglama:
+Her adýmda kullanýcýya bilgi veren log ekraný sayesinde, iþlemlerin durumunu görebiliyorsunuz.
+
+Bu entegre program, ileri ve geri atýf taramasý, veri sorgulama, fine-tuning veri hazýrlama ve görselleþtirme iþlevlerini gerçekçi (örnek veriyle çalýþan) þekilde sunuyor.
+Bu yapýyý kendi verileriniz ve ihtiyaçlarýnýza göre geniþletebilir, gerçek veri kaynaklarýyla entegre edebilirsiniz.

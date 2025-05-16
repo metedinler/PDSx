@@ -1,0 +1,18 @@
+CLASS Komutu ve Özellikleri
+pdsXu’da CLASS komutu, nesne yönelimli programlamayý desteklemek için kullanýlýr ve oldukça güçlü bir altyapýya sahiptir. CLAZZ diye ayrý bir komut bulunmuyor, bu yüzden analiz tamamen CLASS üzerine odaklanýyor. Aþaðýda, CLASS komutunun tüm özelliklerini ve detaylarýný tablo ve açýklamalarla sunuyorum.
+
+1.1. CLASS Komutunun Özellikleri
+Özellik	Açýklama
+Sözdizimi	CLASS isim veya ABSTRACT CLASS isim [EXTENDS ebeveyn_isim] ile sýnýf tanýmlanýr, END CLASS ile kapanýr.
+Normal Sýnýf	CLASS isim: Örneklenabilir (instantiable) sýnýflar oluþturur.
+Soyut Sýnýf	ABSTRACT CLASS isim: Doðrudan örneklenemez, soyut metodlar (@abstractmethod) desteklenir.
+Kalýtým (Inheritance)	EXTENDS ebeveyn_isim: Ebeveyn sýnýfýn metodlarý ve statik deðiþkenleri miras alýnýr.
+Özel Metodlar (Private)	PRIVATE SUB veya PRIVATE FUNCTION: Yalnýzca sýnýf içinden eriþilebilir metodlar, private_methods sözlüðünde saklanýr.
+Statik Deðiþkenler	STATIC var AS tip: Sýnýf seviyesinde ortak deðiþkenler, _static_vars sözlüðünde tutulur.
+Örnek Deðiþkenler (Fields)	DIM var AS tip: Nesneye özgü deðiþkenler, _vars sözlüðünde saklanýr.
+Metodlar	SUB veya FUNCTION: Sýnýfýn genel metodlarý, doðrudan sýnýf tanýmýna eklenir.
+Soyut Metodlar	Soyut sýnýflarda, metodlar _ ile baþlarsa otomatik olarak @abstractmethod ile iþaretlenir.
+Dinamik Sýnýf Oluþturma	Python’un type() fonksiyonu ile sýnýflar dinamik olarak oluþturulur.
+Eriþim Kontrolü	Özel metodlar için zayýf kapsülleme (private_methods ile), deðiþkenler için tam kapsülleme yok.
+Desteklenen Veri Türleri	INTEGER, DOUBLE, STRING, STRUCT, UNION, ENUM, STREAM, FLOAT128, FLOAT256, FLOAT512, VECTOR, MATRIX, TENSOR, vb.
+Bellek Yönetimi	MemoryManager ile uyumlu, _vars ve _static_vars bellekte tutulur.

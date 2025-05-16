@@ -1,0 +1,52 @@
+# pdsXv13u Ultimate Interpreter - Tam ve Eksiksiz Plan
+
+| No | BÖLÜM | AÇIKLAMA |
+|:--|:--|:--|
+| 0 | **Genel Yapý** | `pdsXv12u` ve `pdsXv12c`'den tüm kod ve özellikler tam olarak aktarýlacak.  |
+| 1 | **Interpreter Temel** | Dosyadan çalýþtýrma, repl (etkileþimli mod), argparse destekli çalýþtýrýcý. |
+| 2 | **Memory Management** | Hafýza yönetimi, Garbage Collection, Memory Pool |
+| 3 | **LibXCore Yardýmcý Fonksiyonlar** | 100+ sistem, dosya, matematik, NLP, API, PDF, veritabaný iþlemleri fonksiyonlarý |
+| 4 | **Event Sistemi** | 64 event slotu, öncelik, zamanlayýcý, interrupt, delay destekli. |
+| 5 | **PIPELINE Sistemi** | Pipe start-end, pipe içinde SQL sorgusu, MAP, FILTER, SAVE, LOAD iþlemleri. |
+| 6 | **SQL-ISAM Sistemi** | Open/Create/Insert/Update/Delete/Close DB destekleri, otomatik baðlanma. |
+| 7 | **INLINE Bloklar** | INLINE ASM / INLINE C / INLINE REPLY kod bloklarý desteði. |
+| 8 | **Save/Load Sýkýþtýrmalý Destek** | Program, state ve pipe verilerinin `.gz`, `.zip` sýkýþtýrmalý ve düz kaydý. |
+| 9 | **ARRAY/STRUCT/UNION/CLASS Veri Yapýlarý** | Komple destek: StructInstance, UnionInstance, ClassInstance, ArrayInstance. |
+| 10 | **STACK/QUEUE Veri Yapýlarý** | Push, Pop, Enqueue, Dequeue, Peek, Swap, Duplicate, Clear komutlarý. |
+| 11 | **ENUM/TUPLE Veri Yapýlarý** | Temel veri koleksiyon yapýlarý (enum-tuple destekli). |
+| 12 | **NLP ve AI Fonksiyonlarý** | Text preprocessing, tokenization, ner extraction, summarization, embedding. |
+| 13 | **PROLOG V3 Motoru** | Facts, Rules, Query, pAND, pOR, pNOT, pXOR, pIMP, pBI-COND destekli mantýksal motor. |
+| 14 | **PROLOG V3 BASIC Entegrasyonu** | pQUERY, pASSERT, pRETRACT, pCLEAR, pCOUNT, pFORALL, pEXISTS komutlarý interpreter içinde. |
+| 15 | **PROLOG V3 Tree ve Graph Veri Yapýlarý** | Mantýksal aðaç ve grafik yapý destekleri. |
+| 16 | **Backtracking Mekanizmasý** | PROLOG motorunda tam geri izleme algoritmasý. |
+| 17 | **Meta Programlama** | Gamma, Omega, Lambda gibi dinamik fonksiyonlar, BASIC içinde meta-programlama desteði. |
+| 18 | **Exception Management** | PdsXException sýnýfý ile tüm interpreter hatalarý yönetilecek. |
+| 19 | **Execute Line Yapýsý** | Tüm komutlarý destekleyen profesyonel `execute_line` fonksiyonu (komut adlarýna göre dispatch). |
+| 20 | **Lang.json Sistemi** | Çok dilli yardým sistemi: Türkçe, Ýngilizce, Almanca JSON dosyalarýndan help desteði. |
+| 21 | **Tree/Graph Koleksiyon Komutlarý** | YENÝ: Aðaç ve Grafik iþlemleri için düðüm ekleme, arama, gezme, kaldýrma iþlemleri. |
+| 22 | **Zaman bazlý Event/State/Timer Mekanizmalarý** | Event'lara baðlý zaman tetiklemeleri. |
+| 23 | **INLINE HEADER ve C Compilation** | C programlarý yazma, header tanýmlama, dosyadan compile edip çalýþtýrma sistemi. |
+| 24 | **Multi-Encoding Desteði** | UTF-8 baþta olmak üzere 20+ encoding desteði (set/get encoding). |
+| 25 | **Tam Koleksiyon Ýþlemleri** | Union, Intersection, Difference, All, Any, Exists iþlemleri. |
+| 26 | **Program Save/Load/Checkpoint** | Program hafýzasýný kaydetme/yükleme (state snapshot). |
+| 27 | **Threading ve Async Destekleri** | Async function çalýþtýrma, threading event ve iþlemleri. |
+| 28 | **System Information Fonksiyonlarý** | CPU, RAM, Disk info, network info çekme fonksiyonlarý. |
+| 29 | **Web + API Fonksiyonlarý** | HTTP GET, POST, API request, Response parse fonksiyonlarý. |
+| 30 | **Hata ve Loglama Sistemleri** | Log kayýt dosyasý ve hata yakalama yönetimi. |
+
+
+
+Kategori	Örnek?Fonksiyon / Komut	Kaynak Dosya / Konuþma
+Matematik / Ýstatistik (43)	SIN, ACOSH, EXP, SQRT, MEAN, STD	v11grok, pdsXv12c, part3 konuþmasý
+Metin & NLP (31)	TXT_SEARCH, TXT_ANALYZE, TOKENIZE, STEM, SUMMARY	chatgpt_grok_manus, part3
+Veri Bilimi (33)	ARRAY, DATAFRAME, GROUPBY, DROPNA, VSTACK, MERGE	pdsx_v10_manus, v12chatgpt
+Dosya & OS (28)	COPY, MOVE, HASH, EXISTS, LISTFILE, MKDIR	v13ultimate, part4 konuþmasý
+Web / HTTP (24)	WEB_GET, WEB_POST, API, SCRAPE_LINKS, DOWNLOAD	pdsXv11c, part4
+Sistem Bilgisi (17)	CPU_INFO, RAM_INFO, DISK_INFO, NET_INFO	part4 SysInfo planý
+Þifreleme & Hash (12)	MD5, SHA256, ENCODE64, DECODE64	v11grok, talk 27-Apr
+Tarih & Saat (10)	NOW, PARSE_DATE, FORMAT_DATE, SLEEP_MS	v10 & v12
+DB & SQL - ISAM (14)	SQL_CREATE, SQL_INSERT, SQL_UPDATE, SQL_SELECT	v12c, plan madde-6
+Event & Timer (9)	SET_TIMER, DELAY, AFTER	part4 EVENT geniþlemesi
+Pipeline Helpers (8)	MAP, FILTER, REDUCE, SAVE, LOAD	part4
+Graf & Aðaç (7)	GRAPH_PATH, TSEARCH, TREEMAP	part3
+Misc / Util (40)	RANDOM, CLIP, TRIM, UPPER, LOWER, SELF	tüm sürümler

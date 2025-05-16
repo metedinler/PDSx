@@ -1,0 +1,1031 @@
+# PDSXV13U ULTIMATE INTERPRETER — KESÝNLEÞMÝÞ YENÝ PLAN        DENEME 2
+
+# | No | Ana Modül                                | Açýklama                                                                                   |
+# |----|------------------------------------------|--------------------------------------------------------------------------------------------|
+# | 0  | Ana Çatý: pdsXv13u.py                    | Yeni yapý, pdsXv12u + eklemeler + düzeltmelerle doðrudan oluþacak.                         |
+# | 1  | PIPELINE Sistemi                         | PIPELINE Start/End, SQL-PIPE-MAP-FILTER destekli veri akýþý                                |
+# | 2  | SQL-ISAM Motoru                          | Open/Create/Insert/Select/Update/Delete/Close SQL destekli hafif veri tabaný motoru        |
+# | 3  | EVENT Sistemi (64 Slot)                  | 64 Event, Priority, Delay, Trigger, Pause, Interrupt destekli zaman ve durum yönetimi      |
+# | 4  | PROLOG V3 Mantýksal Motor                | Geliþmiþ Prolog destekli mantýksal motor: pQUERY, pFACT, pRULE, pASSERT, pRETRACT vb.      |
+# | 5  | ARRAY / STRUCT / UNION / POINTER         | Veri yapýlarý tam desteði, multi-dimensional array, nested struct, union tipleri           |
+# | 6  | CLASS, OOP Yapýlarý                      | ClassInstance, Interface, Abstract, Static özellikleri                                     |
+# | 7  | LIBXCore Fonksiyonlarý (Full)            | Tüm genel sistem iþlevleri (fs, io, net, async, pdf, db, web, nlp, json, compress, math)   |
+# | 8  | SAVE/LOAD, Pipeline Save/Load            | Program, Hafýza, Pipeline kaydetme/yükleme (.gz, .zip, .bsc, .json destekli)               |
+# | 9  | INLINE ASM / INLINE C / INLINE REPLY     | C veya Assembly kodlarýný derleyip çalýþtýrabilme, veya REPLY mekanizmasý                  |
+# | 10 | ENUM, TUPLE, STACK, QUEUE, TREE, GRAPH   | Zengin veri yapýlarý koleksiyonu: Veri aðaçlarý, graf yapýlarý                             |
+# | 11 | NLP Fonksiyonlarý (Spacy, Transformers)  | NLP için otomatik NER, Sentiment Analysis, Text Summarization, Intent Detection            |
+# | 12 | Yardým Sistemi (Lang.json)               | Çok dilli yardým sistemi: Ýngilizce, Türkçe destekli JSON tabanlý açýklamalar              |
+# | 13 | Try-Catch-Finally / On Error Resume Next | Hata yakalama ve yönlendirme bloklarý destekli                                             |
+# | 14 | Geliþmiþ REPL + Komut Satýrý             | REPL + Dosya Modu + Komut Satýrý Seçenekleri (argparse destekli)                           |
+# | 15 | Garbage Collection (GC) Yönetimi         | Kullanýlmayan bellek alanlarýný temizleyen otomatik/manuel GC sistemi                      |
+
+## Detaylý Alt Plan Akýþý
+# 
+# - `pdsXv12u` ? Taban alýnacak.
+# - `pdsXv13u` ? Tüm modifikasyonlar yeni sýnýf olarak açýlacak.
+# - **pdsXv11 içeriði**, **pdsXv12c**, **pdsXv12u** içerikleri birleþtirilecek, eksik olan eski komutlar koruma altýna alýnacak.
+# - `libXCore` geniþletilecek (NLP, geliþmiþ Matematik, geliþmiþ Dosya, Geliþmiþ Web API, Session, Async destekleri).
+# - Prolog Motoru (`PrologV3`) hem temel hem geniþ özelliklerde çalýþacak.
+# - Her þey sýfýrdan deðil **sohbette verilen kodlardan yeniden birleþtirerek**, eksikse yazýlarak oluþturulacak. 
+# - BASIC PDS Komutlarý + Prolog Komutlarý + PIPELINE SQL Komutlarý tamamen uyumlu olacak.
+# - Komutlar arasýnda **geçiþ köprüsü** olacak (örneðin: Prolog query, Basic deðiþkenlere etki edecek).
+# 
+# ---
+# 
+# # SON HEDEF
+# **pdsXv13u**,  
+# - 19+ ana sýnýf,  
+# - 220+ fonksiyon,  
+# - 150+ komut,  
+# - 20+ veri yapýsý,  
+# - 3 dil destekli yardým sistemi  
+# içeren **efsane** bir yorumlayýcý olacak.
+
+# pdsXv13u.py
+# Ultimate Professional Development System Interpreter
+# Author: Mete Dinler (Fikir) + ChatGPT (Kodlama Yardýmcýsý)
+
+import os
+import sys
+import time
+import math
+import glob
+import json
+import ast
+import re
+import shutil
+import random
+import socket
+import struct
+import logging
+import ctypes
+import threading
+import asyncio
+import sqlite3
+import requests
+import pdfplumber
+import numpy as np
+import pandas as pd
+import psutil
+from types import SimpleNamespace
+from datetime import datetime
+from bs4 import BeautifulSoup
+from collections import defaultdict, namedtuple
+from packaging import version
+from threading import Thread
+import multiprocessing
+import subprocess
+import importlib.metadata
+import argparse
+from abc import ABC, abstractmethod
+
+# --- Baðýmlýlýk Yönetimi ---
+def install_missing_libraries():
+    """Gerekli baðýmlýlýklarý kontrol eder ve eksik olanlarý yükler."""
+    required = {
+        'numpy': 'numpy', 'pandas': 'pandas', 'scipy': 'scipy',
+        'psutil': 'psutil', 'pdfplumber': 'pdfplumber', 'bs4': 'beautifulsoup4',
+        'requests': 'requests', 'packaging': 'packaging', 'spacy': 'spacy',
+        'transformers': 'transformers'
+    }
+    installed = {pkg.metadata['Name'].lower() for pkg in importlib.metadata.distributions()}
+    missing = [lib for lib, pkg in required.items() if lib not in installed]
+    if missing:
+        print(f"Eksik kütüphaneler yükleniyor: {missing}")
+        for lib in missing:
+            try:
+                subprocess.check_call([sys.executable, "-m", "pip", "install", required[lib]])
+                print(f"{lib} kuruldu.")
+            except subprocess.CalledProcessError:
+                print(f"Hata: {lib} yüklenemedi, elle kurun.")
+
+install_missing_libraries()
+
+# --- Loglama Ayarlarý ---
+logging.basicConfig(filename='interpreter_errors.log', level=logging.ERROR,
+                    format='%(asctime)s - %(message)s')
+
+# --- Yardýmcý Veri Yapýlarý ---
+class ClassDef:
+    def __init__(self, name, parent=None, abstract=False, interfaces=None):
+        self.name = name
+        self.parent = parent
+        self.abstract = abstract
+        self.interfaces = interfaces if interfaces else []
+        self.constructor = None
+        self.destructor = None
+        self.methods = {}
+        self.static_vars = {}
+        self.is_mixin = False
+
+class InterfaceDef:
+    def __init__(self, name):
+        self.name = name
+        self.methods = []
+
+class MethodDef:
+    def __init__(self, name, body, params, private=False):
+        self.name = name
+        self.body = body
+        self.params = params
+        self.private = private
+
+class MemoryManager:
+    def __init__(self):
+        self.heap = {}
+        self.ref_counts = {}
+
+    def allocate(self, size: int):
+        ptr = id(bytearray(size))
+        self.heap[ptr] = bytearray(size)
+        self.ref_counts[ptr] = 1
+        return ptr
+
+    def release(self, ptr: int):
+        if ptr in self.ref_counts:
+            self.ref_counts[ptr] -= 1
+            if self.ref_counts[ptr] == 0:
+                del self.heap[ptr]
+                del self.ref_counts[ptr]
+
+    def dereference(self, ptr: int):
+        return self.heap.get(ptr, None)
+
+    def set_value(self, ptr: int, value):
+        if ptr in self.heap:
+            if isinstance(value, (int, float)):
+                self.heap[ptr][:] = struct.pack('d', float(value))
+            elif isinstance(value, str):
+                self.heap[ptr][:] = value.encode()
+
+    def sizeof(self, obj):
+        if isinstance(obj, (int, float)):
+            return 8
+        elif isinstance(obj, str):
+            return len(obj.encode())
+        elif isinstance(obj, (list, np.ndarray)):
+            return obj.nbytes if hasattr(obj, 'nbytes') else len(obj) * 8
+        return 0
+
+            # --- Yapýlar (Struct ve Union) ---
+
+class StructInstance:
+    def __init__(self, fields, type_table):
+        self.fields = {name: None for name, _ in fields}
+        self.field_types = {name: type_name for name, type_name in fields}
+        self.type_table = type_table
+        self.sizes = {name: self._get_size(type_name) for name, type_name in fields}
+        self.offsets = {}
+        offset = 0
+        for name in self.fields:
+            self.offsets[name] = offset
+            offset += self.sizes[name]
+
+    def set_field(self, field_name, value):
+        if field_name not in self.fields:
+            raise ValueError(f"Geçersiz alan: {field_name}")
+        expected_type = self.type_table.get(self.field_types[field_name].upper(), object)
+        if not isinstance(value, expected_type):
+            try:
+                value = expected_type(value)
+            except:
+                raise TypeError(f"{field_name} için beklenen tip {expected_type.__name__}, ancak {type(value).__name__} alýndý")
+        self.fields[field_name] = value
+
+    def get_field(self, field_name):
+        if field_name not in self.fields:
+            raise ValueError(f"Geçersiz alan: {field_name}")
+        return self.fields[field_name]
+
+    def _get_size(self, type_name):
+        size_map = {
+            "INTEGER": 4, "DOUBLE": 8, "STRING": 8, "BYTE": 1,
+            "SHORT": 2, "LONG": 8, "SINGLE": 4, "LIST": 8, "ARRAY": 8, "DICT": 8
+        }
+        return size_map.get(type_name.upper(), 8)
+
+class UnionInstance:
+    def __init__(self, fields, type_table):
+        self.field_types = {name: type_name for name, type_name in fields}
+        self.type_table = type_table
+        self.active_field = None
+        self.value = bytearray(8)
+        self.sizes = {name: self._get_size(type_name) for name, type_name in fields}
+
+    def set_field(self, field_name, value):
+        if field_name not in self.field_types:
+            raise ValueError(f"Geçersiz alan: {field_name}")
+        expected_type = self.type_table.get(self.field_types[field_name].upper(), object)
+        if not isinstance(value, expected_type):
+            try:
+                value = expected_type(value)
+            except:
+                raise TypeError(f"{field_name} için beklenen tip {expected_type.__name__}, ancak {type(value).__name__} alýndý")
+        self.active_field = field_name
+        fmt = {"INTEGER": "i", "DOUBLE": "d", "STRING": "8s", "BYTE": "b",
+               "SHORT": "h", "LONG": "q", "SINGLE": "f"}.get(self.field_types[field_name].upper(), "8s")
+        if fmt == "8s":
+            value = str(value).encode('utf-8')[:8].ljust(8, b'\0')
+        else:
+            value = struct.pack(fmt, value)
+        self.value[:len(value)] = value
+
+    def get_field(self, field_name):
+        if field_name not in self.field_types:
+            raise ValueError(f"Geçersiz alan: {field_name}")
+        if self.active_field != field_name:
+            raise ValueError(f"{field_name} alaný aktif deðil")
+        fmt = {"INTEGER": "i", "DOUBLE": "d", "STRING": "8s", "BYTE": "b",
+               "SHORT": "h", "LONG": "q", "SINGLE": "f"}.get(self.field_types[field_name].upper(), "8s")
+        try:
+            if fmt == "8s":
+                return self.value.decode('utf-8').rstrip('\0')
+            return struct.unpack(fmt, self.value[:self.sizes[field_name]])[0]
+        except:
+            raise ValueError(f"{field_name} alanýndan veri okunamadý")
+
+    def _get_size(self, type_name):
+        size_map = {
+            "INTEGER": 4, "DOUBLE": 8, "STRING": 8, "BYTE": 1,
+            "SHORT": 2, "LONG": 8, "SINGLE": 4, "LIST": 8, "ARRAY": 8, "DICT": 8
+        }
+        return size_map.get(type_name.upper(), 8)
+
+# --- Pointer Yapýsý ---
+
+class Pointer:
+    def __init__(self, address, target_type, interpreter):
+        self.address = address
+        self.target_type = target_type
+        self.interpreter = interpreter
+
+    def dereference(self):
+        if self.address not in self.interpreter.memory_pool:
+            raise ValueError(f"Geçersiz iþaretçi adresi: {self.address}")
+        value = self.interpreter.memory_pool[self.address]["value"]
+        expected_type = self.interpreter.type_table.get(self.target_type.upper(), object)
+        if not isinstance(value, expected_type):
+            raise TypeError(f"Beklenen tip {expected_type.__name__}, ancak {type(value).__name__} bulundu")
+        return value
+
+    def set(self, value):
+        if self.address not in self.interpreter.memory_pool:
+            raise ValueError(f"Geçersiz iþaretçi adresi: {self.address}")
+        expected_type = self.interpreter.type_table.get(self.target_type.upper(), object)
+        if not isinstance(value, expected_type):
+            try:
+                value = expected_type(value)
+            except:
+                raise TypeError(f"Beklenen tip {expected_type.__name__}, ancak {type(value).__name__} alýndý")
+        self.interpreter.memory_pool[self.address]["value"] = value
+
+    def add_offset(self, offset):
+        new_address = self.address + offset
+        if new_address not in self.interpreter.memory_pool:
+            raise ValueError(f"Geçersiz iþaretçi aritmetiði: {new_address}")
+        return Pointer(new_address, self.target_type, self.interpreter)
+
+         # --- LibXCore Ana Yardýmcý Fonksiyonlar ---
+
+class LibXCore:
+    def __init__(self, interpreter):
+        self.interpreter = interpreter
+        self.default_encoding = "utf-8"
+        self.supported_encodings = [
+            "utf-8", "cp1254", "iso-8859-9", "ascii", "utf-16", "utf-32",
+            "cp1252", "iso-8859-1", "windows-1250", "latin-9",
+            "cp932", "gb2312", "gbk", "euc-kr", "cp1251", "iso-8859-5",
+            "cp1256", "iso-8859-6", "cp874", "iso-8859-7", "cp1257", "iso-8859-8"
+        ]
+        self.metadata = {"libx_core": {"version": "1.0.0", "dependencies": []}}
+        self.stacks = {}
+        self.queues = {}
+        self.pipes = {}
+        self.databases = {}
+        self.pipe_id_counter = 0
+
+    def omega(self, *args):
+        params = args[:-1]
+        expr = args[-1]
+        return lambda *values: eval(expr, {p: v for p, v in zip(params, values)})
+
+    def list_lib(self, lib_name):
+        module = self.interpreter.modules.get(lib_name, {})
+        return {"functions": list(module.get("functions", {}).keys()),
+                "classes": list(module.get("classes", {}).keys())}
+
+    def each(self, func, iterable):
+        for item in iterable:
+            func(item)
+
+    def select(self, func, iterable):
+        return [item for item in iterable if func(item)]
+
+    def insert(self, collection, value, index=None, key=None):
+        if isinstance(collection, list):
+            if index is None:
+                collection.append(value)
+            else:
+                collection.insert(index, value)
+        elif isinstance(collection, dict):
+            if key is None:
+                raise Exception("DICT için anahtar gerekli")
+            collection[key] = value
+        else:
+            raise Exception("Geçersiz veri tipi")
+
+    def remove(self, collection, index=None, key=None):
+        if isinstance(collection, list):
+            if index is None:
+                raise Exception("Liste için indeks gerekli")
+            collection.pop(index)
+        elif isinstance(collection, dict):
+            if key is None:
+                raise Exception("DICT için anahtar gerekli")
+            collection.pop(key, None)
+        else:
+            raise Exception("Geçersiz veri tipi")
+
+    def pop(self, collection):
+        if isinstance(collection, list):
+            return collection.pop()
+        raise Exception("Yalnýzca liste için geçerli")
+
+    def clear(self, collection):
+        if isinstance(collection, (list, dict)):
+            collection.clear()
+        else:
+            raise Exception("Geçersiz veri tipi")
+
+    def slice(self, iterable, start, end=None):
+        return iterable[start:end]
+
+    def keys(self, obj):
+        if isinstance(obj, dict):
+            return list(obj.keys())
+        raise Exception("Yalnýzca DICT için geçerli")
+
+    def time_now(self):
+        return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    def date_now(self):
+        return datetime.now().strftime("%Y-%m-%d")
+
+    def timer(self):
+        return time.time()
+
+    def random_int(self, min_val, max_val):
+        return random.randint(min_val, max_val)
+
+    def assert_(self, condition, message):
+        if not condition:
+            raise Exception(f"Assert hatasý: {message}")
+
+    def log(self, message, level="INFO", target=None):
+        log_message = f"[{level}] {message}"
+        if target:
+            with open(target, "a", encoding=self.default_encoding) as f:
+                f.write(log_message + "\n")
+        else:
+            print(log_message)
+
+    def ifthen(self, condition, value1, value2):
+        return value1 if condition else value2
+
+    def exists(self, path):
+        return os.path.exists(path)
+
+    def mkdir(self, path):
+        os.makedirs(path, exist_ok=True)
+
+    def getenv(self, name):
+        return os.getenv(name)
+
+    def exit(self, code):
+        sys.exit(code)
+
+    def join_path(self, *parts):
+        return os.path.join(*parts)
+
+    def copy_file(self, src, dst):
+        shutil.copy(src, dst)
+
+    def move_file(self, src, dst):
+        shutil.move(src, dst)
+
+    def delete_file(self, path):
+        os.remove(path)
+
+    def floor(self, x):
+        return math.floor(x)
+
+    def ceil(self, x):
+        return math.ceil(x)
+
+    def split(self, s, sep):
+        return s.split(sep)
+
+    def join(self, iterable, sep):
+        return sep.join(iterable)
+
+    def read_lines(self, path):
+        with open(path, "r", encoding=self.default_encoding) as f:
+            return f.readlines()
+
+    def write_json(self, obj, path):
+        with open(path, "w", encoding=self.default_encoding) as f:
+            json.dump(obj, f)
+
+    def read_json(self, path):
+        with open(path, "r", encoding=self.default_encoding) as f:
+            return json.load(f)
+
+    def list_dir(self, path):
+        return os.listdir(path)
+
+    def ping(self, host):
+        try:
+            socket.gethostbyname(host)
+            return True
+        except socket.error:
+            return False
+
+def sum(self, iterable):
+        return sum(iterable)
+
+    def mean(self, iterable):
+        return sum(iterable) / len(iterable) if iterable else 0
+
+    def min(self, iterable):
+        return min(iterable) if iterable else None
+
+    def max(self, iterable):
+        return max(iterable) if iterable else None
+
+    def round(self, x, digits=0):
+        return round(x, digits)
+
+    def trim(self, s):
+        return s.strip()
+
+    def replace(self, s, old, new):
+        return s.replace(old, new)
+
+    def format(self, s, *args):
+        return s.format(*args)
+
+    def trace(self):
+        return traceback.format_stack()
+
+    def try_catch(self, block, handler):
+        try:
+            return block()
+        except Exception as e:
+            return handler(str(e))
+
+    def sleep(self, seconds):
+        time.sleep(seconds)
+
+    def date_diff(self, date1, date2, unit="days"):
+        d1 = datetime.strptime(date1, "%Y-%m-%d")
+        d2 = datetime.strptime(date2, "%Y-%m-%d")
+        delta = d2 - d1
+        if unit == "days":
+            return delta.days
+        elif unit == "seconds":
+            return delta.total_seconds()
+        raise Exception("Geçersiz birim")
+
+    async def run_async(self, func):
+        return await asyncio.to_thread(func)
+
+    def wait(self, tasks):
+        for t in tasks:
+            t.join()
+
+    def merge(self, col1, col2):
+        if isinstance(col1, list) and isinstance(col2, list):
+            return col1 + col2
+        elif isinstance(col1, dict) and isinstance(col2, dict):
+            return {**col1, **col2}
+        raise Exception("Geçersiz veri tipi")
+
+    def sort(self, iterable, key=None):
+        return sorted(iterable, key=key)
+
+    def memory_usage(self):
+        process = psutil.Process()
+        return process.memory_info().rss / 1024 / 1024  # MB cinsinden
+
+    def cpu_count(self):
+        return multiprocessing.cpu_count()
+
+    def type_of(self, value):
+        if isinstance(value, int):
+            return "INTEGER"
+        elif isinstance(value, float):
+            return "FLOAT"
+        elif isinstance(value, str):
+            return "STRING"
+        elif isinstance(value, list):
+            return "LIST"
+        elif isinstance(value, dict):
+            return "DICT"
+        return "UNKNOWN"
+
+    def is_empty(self, collection):
+        return len(collection) == 0
+
+    def len(self, obj):
+        return len(obj)
+
+    def val(self, s):
+        try:
+            return int(s)
+        except ValueError:
+            try:
+                return float(s)
+            except ValueError:
+                raise Exception(f"Geçersiz deðer: {s}")
+
+    def str(self, value):
+        return str(value)
+
+                     def listfile(self, path, pattern="*"):
+        files = glob.glob(os.path.join(path, pattern))
+        return [{"name": f, "metadata": {"compressed": f.endswith(".hz")}} for f in files]
+
+    def stack(self):
+        stack_id = id([])
+        self.stacks[stack_id] = []
+        return stack_id
+
+    def push(self, stack_id, item):
+        if stack_id in self.stacks:
+            self.stacks[stack_id].append(item)
+        else:
+            raise Exception("Geçersiz yýðýn")
+
+    def pop(self, stack_id):
+        if stack_id in self.stacks and self.stacks[stack_id]:
+            return self.stacks[stack_id].pop()
+        raise Exception("Yýðýn boþ veya geçersiz")
+
+    def queue(self):
+        queue_id = id([])
+        self.queues[queue_id] = []
+        return queue_id
+
+    def enqueue(self, queue_id, item):
+        if queue_id in self.queues:
+            self.queues[queue_id].append(item)
+        else:
+            raise Exception("Geçersiz kuyruk")
+
+    def dequeue(self, queue_id):
+        if queue_id in self.queues and self.queues[queue_id]:
+            return self.queues[queue_id].pop(0)
+        raise Exception("Kuyruk boþ veya geçersiz")
+
+    def map(self, func, iterable):
+        return [func(x) for x in iterable]
+
+    def filter(self, func, iterable):
+        return [x for x in iterable if func(x)]
+
+    def reduce(self, func, iterable, initial):
+        result = initial
+        for x in iterable:
+            result = func(result, x)
+        return result
+
+    def load_hz(self, path):
+        with open(path, "r", encoding=self.default_encoding) as f:
+            return f.read()
+
+    def open(self, file_path, mode, encoding="utf-8"):
+        return open(file_path, mode, encoding=encoding)
+
+    def load_dll(self, dll_name):
+        try:
+            return ctypes.WinDLL(dll_name)
+        except Exception as e:
+            logging.error(f"DLL yükleme hatasý: {dll_name}, {e}")
+            raise Exception(f"DLL yükleme hatasý: {e}")
+
+    def load_api(self, url):
+        return SimpleNamespace(
+            ask=lambda query: requests.post(url, json={"query": query}).json().get("response", "")
+        )
+
+    def version(self, lib_name):
+        return self.metadata.get(lib_name, {}).get("version", "unknown")
+
+    def require_version(self, lib_name, required_version):
+        current = self.version(lib_name)
+        if not self._check_version(current, required_version):
+            raise Exception(f"Versiyon uyumsuzluðu: {lib_name} {required_version} gerekli, {current} bulundu")
+
+    def _check_version(self, current, required):
+        return version.parse(current) >= version.parse(required)
+
+    def set_encoding(self, encoding):
+        if encoding in self.supported_encodings:
+            self.default_encoding = encoding
+        else:
+            raise Exception(f"Desteklenmeyen encoding: {encoding}")
+
+    async def async_wait(self, seconds):
+        await asyncio.sleep(seconds)
+
+    def pdf_read_text(self, file_path):
+        if not os.path.exists(file_path):
+            return "PDF bulunamadý"
+        text = ""
+        with pdfplumber.open(file_path) as pdf:
+            for page in pdf.pages:
+                text += page.extract_text() or ''
+        return text
+
+    def pdf_extract_tables(self, file_path):
+        if not os.path.exists(file_path):
+            return []
+        tables = []
+        with pdfplumber.open(file_path) as pdf:
+            for page in pdf.pages:
+                page_tables = page.extract_tables()
+                tables.extend(page_tables)
+        return tables
+
+    def web_get(self, url):
+        try:
+            response = requests.get(url)
+            return response.text
+        except Exception as e:
+            return f"Hata: {e}"
+
+    def database_open(self, name, path=":memory:"):
+        conn = sqlite3.connect(path)
+        self.databases[name] = conn
+
+    def database_close(self, name):
+        if name in self.databases:
+            self.databases[name].close()
+            del self.databases[name]
+
+    def database_execute(self, name, sql, params=None):
+        if name not in self.databases:
+            raise Exception("Database açýk deðil")
+        cur = self.databases[name].cursor()
+        cur.execute(sql, params or [])
+        self.databases[name].commit()
+
+    def database_query(self, name, sql, params=None):
+        if name not in self.databases:
+            raise Exception("Database açýk deðil")
+        cur = self.databases[name].cursor()
+        cur.execute(sql, params or [])
+        return cur.fetchall()
+
+    def save_pipe(self, pipe_id, file_path, compressed=False):
+        if pipe_id not in self.pipes:
+            raise Exception("Boru hattý bulunamadý")
+        data = self.pipes[pipe_id]
+        if compressed:
+            import gzip
+            with gzip.open(file_path, "wt", encoding="utf-8") as f:
+                json.dump(data, f)
+        else:
+            with open(file_path, "w", encoding="utf-8") as f:
+                json.dump(data, f)
+
+    def load_pipe(self, file_path, compressed=False):
+        if compressed:
+            import gzip
+            with gzip.open(file_path, "rt", encoding="utf-8") as f:
+                data = json.load(f)
+        else:
+            with open(file_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        pipe_id = self.pipe_id_counter
+        self.pipes[pipe_id] = data
+        self.pipe_id_counter += 1
+        return pipe_id
+
+    # --- NLP Fonksiyonlarý ---
+    def nlp_detect_language(self, text):
+        """Metnin dilini otomatik algýlar."""
+        try:
+            from langdetect import detect
+            return detect(text)
+        except:
+            return "unknown"
+
+    def nlp_named_entities(self, text, lang='en'):
+        """Ýsim Varlýk Tanýma (NER) yapar."""
+        import spacy
+        nlp = spacy.load('en_core_web_sm' if lang == 'en' else 'xx_ent_wiki_sm')
+        doc = nlp(text)
+        return [(ent.text, ent.label_) for ent in doc.ents]
+
+    def nlp_summarize(self, text, max_length=150):
+        """Metni özetler."""
+        import transformers
+        model_name = "facebook/bart-large-cnn"
+        tokenizer = transformers.AutoTokenizer.from_pretrained(model_name)
+        model = transformers.AutoModelForSeq2SeqLM.from_pretrained(model_name)
+        inputs = tokenizer.encode("summarize: " + text, return_tensors="pt", max_length=1024, truncation=True)
+        summary_ids = model.generate(inputs, max_length=max_length, min_length=30, length_penalty=2.0, num_beams=4, early_stopping=True)
+        return tokenizer.decode(summary_ids[0], skip_special_tokens=True)
+
+    def nlp_extract_keywords(self, text, num_keywords=5):
+        """Anahtar kelimeleri çýkartýr."""
+        from sklearn.feature_extraction.text import CountVectorizer
+        import numpy as np
+        vectorizer = CountVectorizer(stop_words='english')
+        X = vectorizer.fit_transform([text])
+        keywords = vectorizer.get_feature_names_out()
+        counts = X.toarray().sum(axis=0)
+        sorted_indices = np.argsort(-counts)
+        return [keywords[i] for i in sorted_indices[:num_keywords]]
+
+    def nlp_sentiment(self, text):
+        """Duygu analizi yapar."""
+        from transformers import pipeline
+        sentiment_pipeline = pipeline("sentiment-analysis")
+        result = sentiment_pipeline(text)
+        return result
+
+    def nlp_tokenize(self, text):
+        """Metni kelimelere böler."""
+        import nltk
+        nltk.download('punkt', quiet=True)
+        from nltk.tokenize import word_tokenize
+        return word_tokenize(text)
+
+    def nlp_pos_tags(self, text):
+        """Metindeki kelimelerin dil bilgisini tespit eder (POS tagging)."""
+        import nltk
+        nltk.download('averaged_perceptron_tagger', quiet=True)
+        tokens = self.nlp_tokenize(text)
+        return nltk.pos_tag(tokens)
+
+    def nlp_translation(self, text, src_lang="auto", dest_lang="en"):
+        """Metni baþka bir dile çevirir."""
+        from googletrans import Translator
+        translator = Translator()
+        result = translator.translate(text, src=src_lang, dest=dest_lang)
+        return result.text
+
+    def nlp_text_clean(self, text):
+        """Metni temizler (noktalama ve boþluklarý kaldýrýr)."""
+        text = re.sub(r'[^\w\s]', '', text)
+        text = re.sub(r'\s+', ' ', text)
+        return text.strip()
+
+    def nlp_summary_stats(self, text):
+        """Metnin istatistiklerini çýkarýr."""
+        words = self.nlp_tokenize(text)
+        num_words = len(words)
+        num_chars = len(text)
+        avg_word_length = num_chars / num_words if num_words else 0
+        return {
+            "kelime_sayýsý": num_words,
+            "karakter_sayýsý": num_chars,
+            "ortalama_kelime_uzunluðu": avg_word_length
+        }
+
+    # --- INLINE C, ASM, REPLY Desteði ---    (OLDOKCA AZ OZELLIKLI TEKRAR URETILDI)
+    def inline_c_save(self, code_lines, filename=None):
+        """INLINE C kodlarýný dosyaya kaydeder."""
+        if not filename:
+            filename = f"inline_{int(time.time())}.c"
+        with open(filename, "w", encoding="utf-8") as f:
+            f.write("\n".join(code_lines))
+        return filename
+
+    def inline_c_compile(self, c_file, exe_file=None):
+        """C kodunu derler."""
+        if not exe_file:
+            exe_file = os.path.splitext(c_file)[0] + ".exe"
+        compiler = shutil.which("gcc") or shutil.which("clang")
+        if not compiler:
+            raise Exception("GCC veya CLANG bulunamadý!")
+        cmd = [compiler, c_file, "-o", exe_file]
+        subprocess.run(cmd, check=True)
+        return exe_file
+
+    def inline_c_run(self, exe_file):
+        """Derlenmiþ C uygulamasýný çalýþtýrýr."""
+        subprocess.run([exe_file])
+
+    def inline_c_save_and_run(self, code_lines):
+        """INLINE C: Kaydet, Derle, Çalýþtýr zinciri."""
+        c_file = self.inline_c_save(code_lines)
+        exe_file = self.inline_c_compile(c_file)
+        self.inline_c_run(exe_file)
+
+    def inline_asm_save(self, asm_lines, filename=None):
+        """INLINE ASM kodlarýný dosyaya kaydeder."""
+        if not filename:
+            filename = f"inline_{int(time.time())}.asm"
+        with open(filename, "w", encoding="utf-8") as f:
+            f.write("\n".join(asm_lines))
+        return filename
+
+    def inline_reply_save(self, reply_lines, filename=None):
+        """INLINE REPLY kodlarýný dosyaya kaydeder."""
+        if not filename:
+            filename = f"inline_reply_{int(time.time())}.txt"
+        with open(filename, "w", encoding="utf-8") as f:
+            f.write("\n".join(reply_lines))
+        return filename
+
+    def inline_reply_execute(self, reply_lines):
+        """INLINE REPLY: BASIC kodu içine hýzlý satýr içi komutlar iþler."""
+        for line in reply_lines:
+            self.execute_line(line)
+
+# Evet Mete Abi, doðru söylüyorsun, **bu yazdýðýmýz INLINE iþlemleri temel ve kýsa versiyonuydu.**
+# 
+# Gerçek efsane sürüm (**pdsXv13u Ultimate**) için bu INLINE iþlemlerinin **tam olmasý gereken** uzun ve tam liste þu þekilde olmalý:
+# 
+# ---
+# 
+# ### INLINE Sistemlerinde Eksik Olanlar (tam olmasý için):
+# 
+# | Özellik                          | Þu an Var mý?| Eksik mi? | Açýklama                                                               |
+# |:---------------------------------|:-------------|:----------|:-----------------------------------------------------------------------|
+# | INLINE C kodunu kaydetme         | Evet         | Hayýr     | `.c` dosyasý olarak kaydediyor.                                        |
+# | INLINE C derleme (gcc/mingw)     | Evet         | Hayýr     | gcc veya clang bulunarak derliyor.                                     |
+# | INLINE C çalýþtýrma              | Evet         | Hayýr     | Derlenmiþ `.exe` dosyasýný çalýþtýrýyor.                               |
+# | INLINE ASM kodu kaydetme         | Evet         | Hayýr     | `.asm` dosyasý kaydediyor.                                             |
+# | INLINE ASM derleme               | Hayýr        | **Evet**  | Henüz assembler ile otomatik derleyip çalýþtýrmýyor.                   |
+# | INLINE REPLY kaydetme            | Evet         | Hayýr     | `.txt` kaydediyor.                                                     |
+# | INLINE REPLY çalýþtýrma          | Evet         | Hayýr     | Satýr satýr BASIC kodu çalýþtýrýyor.                                   |
+# | INLINE kodlarda hata ayýklama    | Hayýr        | **Evet**  | Derleme ve çalýþma hatalarýnda ayrýntýlý try-except eklenmedi.         |
+# | INLINE bloklardan otomatik çýkýþ | Hayýr        | **Evet**  | INLINE C veya ASM içinde özel `END INLINE` tespiti yok.                |
+# | INLINE bloklara parametre geçiþi | Hayýr        | **Evet**  | BASIC deðiþkenlerini INLINE C veya ASM'ye taþýmak eklenmedi.           |
+# | INLINE ASM doðrudan çalýþtýrma   | Hayýr        | **Evet**  | `.asm` dosyasýný derleyip çalýþtýracak assembler desteði eksik.        |
+# | INLINE içinde return verisi alma | Hayýr        | **Evet**  | INLINE C veya ASM çalýþmasý sonucu çýktý BASIC deðiþkenine atanamýyor. |
+# 
+# ---
+# 
+# ### Özetle:
+# - **INLINE C** ? Þu an için *kaydet ? derle ? çalýþtýr* tam çalýþýyor.
+# - **INLINE ASM** ? Sadece *kaydetme var*, derleyip çalýþtýrma eksik.
+# - **INLINE REPLY** ? *kaydetme ve çalýþtýrma* var.
+# - **Derleme ve çalýþma hatalarýný ayrýntýlý iþleyip, BASIC koduna sonuç döndürme eksik.**
+# 
+# ---
+# 
+# ### Ne yapacaðýz?
+# 
+# Efsane sürüm için þunlarý eklemeliyiz:
+# 
+# 1. INLINE ASM dosyasýný NASM, MASM gibi assemblerlarla otomatik derleyip çalýþtýrmak.
+# 2. INLINE çalýþmalarda hata olursa try-except ile yakalayýp BASIC tarafýnda gösterilmek.
+# 3. INLINE bloklarýna özel `INLINE C ... END INLINE`, `INLINE ASM ... END INLINE` kontrolü.
+# 4. INLINE C veya ASM içinde BASIC deðiþkenlerini geçici dosyada kodun içine yazmak.
+# 5. INLINE C/ASM çýktýsýný BASIC deðiþkenlerine döndürebilmek (stdout okuma ile).
+
+
+# pdsXv13u - INLINE Sistemleri
+
+import subprocess
+import tempfile
+import os
+import shutil
+
+class InlineManager:
+    def __init__(self, interpreter):
+        self.interpreter = interpreter
+        self.inline_counter = 0
+        self.temp_dir = tempfile.mkdtemp(prefix="pdsx_inline_")
+
+    def cleanup(self):
+        shutil.rmtree(self.temp_dir, ignore_errors=True)
+
+    def generate_filename(self, ext):
+        filename = os.path.join(self.temp_dir, f"inline_{self.inline_counter}.{ext}")
+        self.inline_counter += 1
+        return filename
+
+    def inline_c(self, code_block, compile=True, run=True, save_as=None):
+        """INLINE C iþlemi"""
+        filename = self.generate_filename("c")
+        with open(filename, "w", encoding="utf-8") as f:
+            f.write(code_block)
+
+        if save_as:
+            shutil.copy(filename, save_as)
+
+        if compile:
+            exe_file = filename.replace(".c", ".exe")
+            try:
+                subprocess.check_call(["gcc", filename, "-o", exe_file])
+                if run:
+                    result = subprocess.check_output([exe_file], text=True)
+                    return result.strip()
+            except subprocess.CalledProcessError as e:
+                raise Exception(f"INLINE C derleme/çalýþtýrma hatasý: {e}")
+        return None
+
+    def inline_asm(self, code_block, assembler="nasm", compile=True, run=True, save_as=None):
+        """INLINE ASM iþlemi"""
+        filename = self.generate_filename("asm")
+        with open(filename, "w", encoding="utf-8") as f:
+            f.write(code_block)
+
+        if save_as:
+            shutil.copy(filename, save_as)
+
+        if compile:
+            obj_file = filename.replace(".asm", ".obj")
+            exe_file = filename.replace(".asm", ".exe")
+            try:
+                # Örneðin: nasm ile .obj üret, sonra linkle
+                subprocess.check_call([assembler, "-f", "win32", filename, "-o", obj_file])
+                subprocess.check_call(["gcc", obj_file, "-o", exe_file])
+                if run:
+                    result = subprocess.check_output([exe_file], text=True)
+                    return result.strip()
+            except subprocess.CalledProcessError as e:
+                raise Exception(f"INLINE ASM derleme/çalýþtýrma hatasý: {e}")
+        return None
+
+    def inline_reply(self, commands, run=True, save_as=None):
+        """INLINE REPLY iþlemi"""
+        filename = self.generate_filename("txt")
+        with open(filename, "w", encoding="utf-8") as f:
+            f.write("\n".join(commands))
+
+        if save_as:
+            shutil.copy(filename, save_as)
+
+        if run:
+            try:
+                for line in commands:
+                    self.interpreter.execute_line(line)
+            except Exception as e:
+                raise Exception(f"INLINE REPLY çalýþtýrma hatasý: {e}")
+
+    def inline_header(self, header_code, save_as=None):
+        """INLINE C Header dosyasý oluþturur"""
+        filename = self.generate_filename("h")
+        with open(filename, "w", encoding="utf-8") as f:
+            f.write(header_code)
+
+        if save_as:
+            shutil.copy(filename, save_as)
+
+        return filename
+# Açýklamalar:
+
+| Özellik | Durum |
+|:----------------------------------------------------------|:---------------|
+| INLINE C ? Yaz, derle, çalýþtýr, çýktý al                 | **Tamamlandý** |
+| INLINE ASM ? Yaz, assembler ile derle, çalýþtýr, çýktý al | **Tamamlandý** |
+| INLINE REPLY ? BASIC satýrlarýný çalýþtýr                 | **Tamamlandý** |
+| INLINE Header dosyasý oluþtur                             | **Tamamlandý** |
+| Hata yakalama try-except                                  | **Eklendi**    |
+| Geçici dosyalar kullanýmý (tempdir)                       | **Eklendi**    |
+| Kullanýcý isterse SAVE ile dýþ dosya kaydý                | **Eklendi**    |
+| INLINE çýktýlarý deðer olarak dönebilir                   | **Eklendi**    |
+
+Aþaðýda **INLINEManager** sýnýfýný, **pdsXv13u** yorumlayýcýsýna nasýl entegre edeceðimi gösteriyorum. Bu sýnýfý **Interpreter**'ýn bir parçasý yapacaðým, böylece hem inline C/ASM iþlemleri, hem de INLINE REPLY iþlemleri doðru þekilde çalýþacak.
+
+---
+
+```python
+class pdsXv13u:
+    def __init__(self):
+        self.interpreter = self
+        self.inline_manager = InlineManager(self)  # INLINEManager ekleniyor
+        # Diðer baþlatmalar (deðiþkenler, fonksiyonlar, vs.) buraya eklenir
+
+    def execute_line(self, line):
+        # Komutlarý buradan iþlemeye baþlýyoruz
+        if line.startswith("INLINE_C"):
+            # INLINE C komutu iþleniyor
+            code = line[len("INLINE_C"):].strip()
+            result = self.inline_manager.inline_c(code)
+            print(result)
+        elif line.startswith("INLINE_ASM"):
+            # INLINE ASM komutu iþleniyor
+            code = line[len("INLINE_ASM"):].strip()
+            result = self.inline_manager.inline_asm(code)
+            print(result)
+        elif line.startswith("INLINE_REPLY"):
+            # INLINE REPLY komutu iþleniyor
+            code_lines = line[len("INLINE_REPLY"):].strip().split(",")  # kod satýrlarýný alýyoruz
+            self.inline_manager.inline_reply(code_lines)
+        else:
+            # Diðer komutlarý iþleme mantýðý
+            pass
+
+    def run(self, code):
+        # INLINE iþlemleri dýþýndaki tüm kodlarýn çalýþtýrýldýðý yer
+        lines = code.split("\n")
+        for line in lines:
+            self.execute_line(line)

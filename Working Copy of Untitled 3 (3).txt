@@ -1,0 +1,329 @@
+'''
+clazz.py
+
+Geliþmiþ, saf Python ile yazýlmýþ deneysel OOP modülü:
+- Metaclass, final & sealed sýnýflar
+- Statik ve dinamik sýnýf tanýmý (define_class)
+- Descriptors & Property, cachedmethod
+- C3 MRO tabanlý kalýtým, MRO çatýþma uyarýlarý
+- Encapsulation (public/protected/private) & eriþim denetimi
+- Polymorphism & Operator overloading
+- Mix-in & Interface desteði, conflict resolution
+- Multiple Dispatch (@multidispatch) & dispatch caching
+- Event / Hook sistemi, hata korumalý callback
+- Yapýcý (__init__) & Yýkýcý (__del__) yaþam döngüsü
+- Type Checking / Validation & @typechecked
+- Aspect-Oriented before/after advice
+- Serialization / Clone / to_dict/from_dict
+- Final & Sealed sýnýf mekanizmalarý
+- Asenkron metod desteði & coroutine binding
+- Thread-safe nesne eriþimi
+- Custom Exception sýnýflarý & logging
+'''
+
+import threading, logging, inspect, asyncio, functools
+
+# Logging yapýlandýrmasý
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger('clazz')
+
+# ---------- Özel Exception Sýnýflarý ----------
+class ClazzError(Exception): pass
+class MROError(ClazzError): pass
+class InterfaceError(ClazzError): pass
+class DispatchError(ClazzError): pass
+class ValidationError(ClazzError): pass
+class HookError(ClazzError): pass
+
+# ---------- Global Kayýtlar & Event Sistemi ----------
+type_registry = {}
+interface_registry = {}
+event_listeners = {}
+_lock = threading.RLock()
+
+def on_event(event, name=None, callback=None):
+    key = (event, name)
+    event_listeners.setdefault(key, []).append(callback)
+
+async def _fire_async(cbs, *args, **kwargs):
+    for cb in cbs:
+        try:
+            if inspect.iscoroutinefunction(cb):
+                await cb(*args, **kwargs)
+            else:
+                cb(*args, **kwargs)
+        except Exception as e:
+            logger.exception(f"Error in hook {cb}: {e}")
+
+def fire_event(event, name, *args, **kwargs):
+    cbs = event_listeners.get((event, None), []) + event_listeners.get((event, name), [])
+    try:
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            asyncio.ensure_future(_fire_async(cbs, *args, **kwargs))
+        else:
+            loop.run_until_complete(_fire_async(cbs, *args, **kwargs))
+    except RuntimeError:
+        for cb in cbs:
+            try: cb(*args, **kwargs)
+            except Exception as e: logger.exception(f"Error in hook {cb}: {e}")
+
+# ---------- Final & Sealed ----------
+def final(cls):
+    setattr(cls, '__is_final__', True)
+    return cls
+
+def sealed(cls):
+    setattr(cls, '__is_sealed__', True)
+    return cls
+
+# ---------- Metaclass Desteði ----------
+class MetaClassDef(type):
+    def __new__(mcs, name, bases, namespace):
+        for b in bases:
+            if getattr(b, '__is_final__', False):
+                raise ClazzError(f"Cannot subclass final class {b.__name__}")
+            if getattr(b, '__is_sealed__', False) and b.__module__!=namespace.get('__module__'):
+                raise ClazzError(f"Cannot extend sealed class {b.__name__}")
+        cls_def = ClassDef(name, list(bases), namespace)
+        return cls_def
+
+# ---------- Core ClassDef ----------
+class ClassDef:
+    def __init__(self, name, bases, attrs):
+        self.name, self.bases = name, bases
+        self.raw_attrs = attrs.copy()
+        self.attrs = {}
+        self.mro = []
+        self._process_attrs()
+        self._compute_mro()
+        type_registry[name] = self
+
+    def _process_attrs(self):
+        for key, val in self.raw_attrs.items():
+            mangled = key
+            if key.startswith('__') and not key.endswith('__'):
+                mangled = f"_{self.name}{key}"
+            self.attrs[mangled] = val
+
+    def _compute_mro(self):
+        seqs = [[self]] + [b.mro[:] for b in self.bases] + [self.bases[:]]
+        mro = []
+        while True:
+            non_empty = [s for s in seqs if s]
+            if not non_empty: break
+            for seq in non_empty:
+                cand = seq[0]
+                if not any(cand in s[1:] for s in non_empty): break
+            else:
+                raise MROError(f"MRO conflict in {self.name}")
+            mro.append(cand)
+            for s in seqs:
+                if s and s[0] is cand: s.pop(0)
+        self.mro = mro
+        logger.debug(f"MRO for {self.name}: {[c.name for c in mro]}")
+
+    def lookup(self, attr):
+        for cls in self.mro:
+            if attr in cls.attrs:
+                return cls.attrs[attr]
+        raise AttributeError(f"{self.name} has no attribute {attr}")
+
+# Statik / Dinamik sýnýf tanýmý
+
+def define_class(name, bases=None, attrs=None, metaclass=None):
+    bases = bases or []
+    attrs = attrs or {}
+    if metaclass:
+        return metaclass(name, bases, attrs)
+    return ClassDef(name, bases, attrs)
+
+# ---------- Interface & Mix-in ----------
+class Interface:
+    def __init__(self, name, methods):
+        interface_registry[name] = set(methods)
+
+    def __call__(self, cls_def):
+        missing = [m for m in interface_registry[self.name] if m not in cls_def.attrs]
+        if missing:
+            raise InterfaceError(f"{cls_def.name} missing interface methods {missing}")
+        return cls_def
+
+# ---------- Instance ----------
+class Instance:
+    def __init__(self, cls_def, **kwargs):
+        object.__setattr__(self, '_clazz', cls_def)
+        object.__setattr__(self, '_data', {})
+        fire_event('on_create', None, self)
+        init = cls_def.attrs.get('__init__')
+        if callable(init):
+            try: init(self, **kwargs)
+            except Exception as e: raise ClazzError(f"Error in __init__: {e}")
+
+    def __getattribute__(self, name):
+        if name in ('_clazz','_data'): return object.__getattribute__(self,name)
+        fire_event('before_get', name, self)
+        with _lock:
+            cls = object.__getattribute__(self, '_clazz')
+            if name.startswith('__') and not name.endswith('__'):
+                name = f"_{cls.name}{name}"
+            data = object.__getattribute__(self, '_data')
+            if name in data:
+                val = data[name]
+            else:
+                func = cls.lookup(name)
+                if inspect.iscoroutinefunction(func):
+                    async def coro(*a,**k): return await func(self,*a,**k)
+                    val = coro
+                elif callable(func):
+                    val = functools.partial(_invoke, self, func)
+                else:
+                    val = func
+        fire_event('after_get', name, self, val)
+        return val
+
+    def __setattr__(self, name, value):
+        fire_event('before_set', name, self, value)
+        with _lock:
+            cls = object.__getattribute__(self, '_clazz')
+            if name.startswith('__') and not name.endswith('__'):
+                name = f"_{cls.name}{name}"
+            object.__getattribute__(self, '_data')[name] = value
+        fire_event('after_set', name, self, value)
+
+    def __del__(self):
+        dtor = self._clazz.attrs.get('__del__')
+        if callable(dtor): dtor(self)
+        fire_event('on_destroy', None, self)
+
+    # Operatör yükleme
+    def __add__(self, o): return self._binary('__add__', o)
+    def __eq__(self, o): return self._binary('__eq__', o)
+    def _binary(self, op, other):
+        fn = self._clazz.lookup(op)
+        try: return fn(self, other)
+        except Exception as e: raise ClazzError(f"Error in {op}: {e}")
+
+    def __repr__(self):
+        return f"<{self._clazz.name} {self._data}>"
+
+    def to_dict(self): return dict(self._data)
+    @classmethod
+    def from_dict(cls, cdef, data):
+        inst = cls(cdef)
+        for k,v in data.items(): setattr(inst,k,v)
+        return inst
+    def clone(self): return self.from_dict(self._clazz, self.to_dict())
+
+# Instantiation helper
+
+def new_instance(cls_def, **kwargs): return Instance(cls_def, **kwargs)
+
+# ---------- AOP Invocation ----------
+def _invoke(self, func, *args, **kwargs):
+    name = func.__name__
+    fire_event('before_call', name, self, *args, **kwargs)
+    try: result = func(self, *args, **kwargs)
+    except Exception as e: raise HookError(f"Error in method {name}: {e}")
+    fire_event('after_call', name, self, result)
+    return result
+
+# ---------- Descriptors & Property ----------
+class Descriptor:
+    def __set_name__(self, owner, name): self.name = name
+
+    def __get__(self, inst, owner): raise NotImplementedError
+    def __set__(self, inst, val): raise NotImplementedError
+    def __delete__(self, inst): raise NotImplementedError
+
+class Property(Descriptor):
+    def __init__(self, fget=None, fset=None): self.fget, self.fset = fget, fset
+    def __get__(self, inst, owner): return self.fget(inst)
+    def __set__(self, inst, val): return self.fset(inst,val)
+    def getter(self,f): self.fget=f; return self
+    def setter(self,f): self.fset=f; return self
+
+# Cached method
+class cachedmethod(Descriptor):
+    def __init__(self, func): self.func=func; functools.update_wrapper(self,func)
+    def __get__(self, inst, owner):
+        cache = inst._data.setdefault('_cache', {})
+        if self.func.__name__ not in cache:
+            cache[self.func.__name__] = self.func(inst)
+        return cache[self.func.__name__]
+
+# ---------- Type Checking ----------
+class TypeChecked(Descriptor):
+    def __init__(self, typ): self.typ=typ
+    def __get__(self, inst, owner): return getattr(inst,'_'+self.name)
+    def __set__(self, inst, val):
+        if not isinstance(val,self.typ): raise ValidationError(f"{self.name} must be {self.typ}")
+        setattr(inst,'_'+self.name,val)
+    def __delete__(self, inst): delattr(inst,'_'+self.name)
+
+# Typechecked decorator
+def typechecked(func):
+    sig = inspect.signature(func)
+    @functools.wraps(func)
+    def wrapper(*a,**k):
+        ba = sig.bind(*a,**k)
+        for n,v in ba.arguments.items():
+            ann = func.__annotations__.get(n)
+            if ann and not isinstance(v,ann):
+                raise ValidationError(f"{n} must be {ann}")
+        return func(*a,**k)
+    return wrapper
+
+# ---------- Multiple Dispatch ----------
+def multidispatch(func):
+    registry = {}
+    @functools.wraps(func)
+    def wrapper(*args,**kwargs):
+        types = tuple(type(x) for x in args)
+        f = registry.get(types)
+        if not f: raise DispatchError(f"No overload for {types}")
+        return f(*args,**kwargs)
+    def register(*types):
+        def dec(f): registry[types]=f; return f
+        return dec
+    wrapper.register=register
+    return wrapper
+
+# ---------- Introspection Utils ----------
+def get_class(name): return type_registry.get(name)
+def list_methods(c): return [m for m in c.attrs if callable(c.attrs[m])]
+def list_fields(c): return [f for f in c.attrs if not callable(c.attrs[f])]
+def is_instance(obj,name): return isinstance(obj,Instance) and obj._clazz.name==name
+
+# ---------- Deneysel Kullaným Örneði ----------
+if __name__=='__main__':
+    @final
+    @sealed
+    class Core(metaclass=MetaClassDef):
+        def __init__(self): self.val=42
+    try:
+        class Sub(Core): pass
+    except ClazzError as e:
+        print(e)
+
+    class X: pass
+    X = MetaClassDef('X',[],dict(X.__dict__))
+    inst = new_instance(X)
+    print(inst.val if hasattr(inst,'val') else 'no val')
+
+    # cachedmethod örneði
+    class C:
+        @cachedmethod
+        def heavy(self):
+            print('compute')
+            return 999
+    C = MetaClassDef('C',[],dict(C.__dict__))
+    ci=new_instance(C)
+    print(ci.heavy, ci.heavy)
+    
+    # async hook
+    def on_create(obj): print('created',obj)
+    on_event('on_create',None,on_create)
+    A = define_class('A',[],{'__init__':lambda self: setattr(self,'v',5)})
+    a=new_instance(A)
+    print(a.v)

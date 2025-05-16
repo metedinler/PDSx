@@ -1,0 +1,421 @@
+import sys
+import re
+import math
+import struct
+import random
+import numpy as np
+from collections import namedtuple, defaultdict
+
+class PdsXInterpreter:
+    def __init__(self):
+        # Veri yapýlarý ve bellek yönetimi
+        self.types = {}  # TYPE tanýmlarý
+        self.structs = {}  # STRUCT tanýmlarý
+        self.classes = {}  # CLASS tanýmlarý
+        self.variables = {}  # Deðiþkenler
+        self.memory_manager = MemoryManager()  # Bellek yönetimi
+        self.operator_table = self._init_operator_table()  # Operatör tablosu
+        self.function_table = self._init_function_table()  # Fonksiyon tablosu
+        self.program_counter = 0  # Program sayacý
+        self.call_stack = []  # GOSUB, SUB, FUNCTION için yýðýn
+        self.loop_stack = []  # Döngüler için yýðýn
+        self.current_scope = {}  # Mevcut kapsam
+
+    def _init_operator_table(self):
+        """C tarzý operatörleri içeren tablo"""
+        return {
+            '++': self._increment,
+            '--': self._decrement,
+            '<<': lambda x, y: x << y,
+            '>>': lambda x, y: x >> y,
+            '&': lambda x, y: x & y,
+            '|': lambda x, y: x | y,
+            '^': lambda x, y: x ^ y,
+            '~': lambda x: ~x,
+            'AND': lambda x, y: x and y,
+            'OR': lambda x, y: x or y,
+            'XOR': lambda x, y: bool(x) != bool(y),
+            'NOT': lambda x: not x,
+            '+=': lambda x, y: x + y,
+            '-=': lambda x, y: x - y,
+            '*=': lambda x, y: x * y,
+            '/=': lambda x, y: x / y,
+            '%=': lambda x, y: x % y,
+            '&=': lambda x, y: x & y,
+            '|=': lambda x, y: x | y,
+            '^=': lambda x, y: x ^ y,
+            '<<=': lambda x, y: x << y,
+            '>>=': lambda x, y: x >> y
+        }
+
+    def _init_function_table(self):
+        """Matematiksel ve diðer fonksiyonlar"""
+        funcs = {
+            # Hiperbolik fonksiyonlar
+            'SINH': math.sinh,
+            'COSH': math.cosh,
+            'TANH': math.tanh,
+            'ASINH': math.asinh,
+            'ACOSH': math.acosh,
+            'ATANH': math.atanh,
+            # Derece cinsinden trigonometri
+            'SIND': lambda x: math.sin(math.radians(x)),
+            'COSD': lambda x: math.cos(math.radians(x)),
+            'TAND': lambda x: math.tan(math.radians(x)),
+            # Sabitler
+            'PI': math.pi,
+            'E': math.e,
+            # Bitwise yardýmcýlarý
+            'BIN': bin,
+            'HEX': hex,
+            'OCT': oct,
+            # Bellek iþlemleri
+            'ADDR': lambda x: id(x),
+            'SIZEOF': lambda x: self.memory_manager.sizeof(x),
+            # Yýðýn iþlemleri
+            'NEW': self.memory_manager.allocate,
+            'DELETE': self.memory_manager.release
+        }
+        # Temel matematik fonksiyonlarýný ekle
+        for name in ['sin', 'cos', 'tan', 'log', 'exp', 'sqrt', 'ceil', 'floor']:
+            funcs[name.upper()] = getattr(math, name)
+        return funcs
+
+    def _increment(self, var: str, prefix: bool = False):
+        """++ operatörü implementasyonu"""
+        value = self.variables.get(var, 0)
+        if prefix:
+            self.variables[var] = value + 1
+            return value + 1
+        else:
+            self.variables[var] = value + 1
+            return value
+
+    def _decrement(self, var: str, prefix: bool = False):
+        """-- operatörü implementasyonu"""
+        value = self.variables.get(var, 0)
+        if prefix:
+            self.variables[var] = value - 1
+            return value - 1
+        else:
+            self.variables[var] = value - 1
+            return value
+
+    def parse_type_definition(self, lines: list):
+        """TYPE veya STRUCT tanýmýný ayrýþtýr"""
+        type_info = {
+            'name': lines[0].split()[1],
+            'fields': [],
+            'is_struct': 'STRUCT' in lines[0],
+            'size': 0
+        }
+        for line in lines[1:-1]:  # BEGIN ve END arasý
+            line = line.strip()
+            if not line:
+                continue
+            match = re.match(r'(\*?)(\w+)(?:\(([^)]+)\))?\s+AS\s+(\w+)(?:\s*=\s*(.+))?', line)
+            if match:
+                is_ptr, name, array_dims, type_, default = match.groups()
+                field = {
+                    'name': name,
+                    'type': type_,
+                    'is_pointer': bool(is_ptr),
+                    'array_dims': self._parse_array_dims(array_dims),
+                    'default': self._parse_default_value(default, type_)
+                }
+                type_info['fields'].append(field)
+        if type_info['is_struct']:
+            self._create_struct(type_info)
+        else:
+            self._create_type(type_info)
+
+    def _create_struct(self, type_info: dict):
+        """C uyumlu struct oluþtur"""
+        struct_fields = []
+        offset = 0
+        for field in type_info['fields']:
+            field_size = self._get_type_size(field['type'])
+            if field['array_dims']:
+                field_size *= np.prod(field['array_dims'])
+            struct_fields.append((field['name'], field['type'], offset, field_size))
+            offset += field_size
+        type_info['size'] = offset
+        self.structs[type_info['name']] = type_info
+
+    def _create_type(self, type_info: dict):
+        """Esnek TYPE yapýsý oluþtur"""
+        field_names = [f['name'] for f in type_info['fields']]
+        defaults = [f['default'] for f in type_info['fields']]
+        new_type = namedtuple(type_info['name'], field_names)
+        self.types[type_info['name']] = new_type
+        type_info['defaults'] = defaults
+
+    def _parse_array_dims(self, dim_str: str):
+        """Dizi boyutlarýný ayrýþtýr"""
+        if not dim_str:
+            return []
+        return [int(d.strip()) for d in dim_str.split(',')]
+
+    def _parse_default_value(self, value_str: str, type_name: str):
+        """Varsayýlan deðeri ayrýþtýr"""
+        if not value_str:
+            return self._get_type_default(type_name)
+        try:
+            if type_name == 'INTEGER':
+                return int(value_str)
+            elif type_name == 'SINGLE':
+                return float(value_str)
+            elif type_name == 'STRING':
+                return value_str.strip('"')
+            elif type_name == 'BOOLEAN':
+                return value_str.upper() == 'TRUE'
+            else:
+                return value_str
+        except ValueError:
+            return self._get_type_default(type_name)
+
+    def _get_type_default(self, type_name: str):
+        """Tip için varsayýlan deðer döndür"""
+        defaults = {
+            'INTEGER': 0,
+            'SINGLE': 0.0,
+            'DOUBLE': 0.0,
+            'STRING': '',
+            'BOOLEAN': False,
+            'BYTE': b'\x00'
+        }
+        return defaults.get(type_name.upper(), None)
+
+    def _get_type_size(self, type_name: str):
+        """Tip boyutunu byte cinsinden döndür"""
+        sizes = {
+            'INTEGER': 4,
+            'SINGLE': 4,
+            'DOUBLE': 8,
+            'BYTE': 1,
+            'BOOLEAN': 1
+        }
+        return sizes.get(type_name.upper(), 0)
+
+    def evaluate_expression(self, expr: str):
+        """Geliþmiþ ifade deðerlendirici"""
+        expr = self._process_special_operators(expr)
+        if expr.startswith('*'):
+            ptr = self.evaluate_expression(expr[1:])
+            return self.memory_manager.dereference(ptr)
+        if expr.startswith('&'):
+            var_name = expr[1:]
+            if var_name in self.variables:
+                return id(self.variables[var_name])
+            raise NameError(f"Variable not found: {var_name}")
+        try:
+            return eval(expr, {'__builtins__': None}, {
+                **self.variables,
+                **self.function_table,
+                **self.operator_table
+            })
+        except Exception as e:
+            raise ValueError(f"Expression evaluation error: {str(e)}")
+
+    def _process_special_operators(self, expr: str):
+        """++, --, += gibi operatörleri iþle"""
+        expr = re.sub(r'(\w+)\+\+', r'_increment("\1")', expr)
+        expr = re.sub(r'\+\+(\w+)', r'_increment("\1", True)', expr)
+        expr = re.sub(r'(\w+)--', r'_decrement("\1")', expr)
+        expr = re.sub(r'--(\w+)', r'_decrement("\1", True)', expr)
+        for op in ['+=', '-=', '*=', '/=', '%=', '&=', '|=', '^=', '<<=', '>>=']:
+            if op in expr:
+                var, val = expr.split(op, 1)
+                expr = f"{var} = {var} {op[0]} {val}"
+        return expr
+
+    def execute_statement(self, statement: str):
+        """PDSX komutlarýný çalýþtýr"""
+        if statement.startswith(('TYPE ', 'STRUCT ')):
+            self._parse_type_block(statement)
+            return
+        if statement.startswith(('DIM ', 'GLOBAL ')):
+            self._process_declaration(statement)
+            return
+        if '=' in statement:
+            var, expr = statement.split('=', 1)
+            value = self.evaluate_expression(expr.strip())
+            self.variables[var.strip()] = value
+            return
+        if statement.startswith(('IF ', 'FOR ', 'WHILE ', 'DO ')):
+            self._process_control_structure(statement)
+            return
+        if '(' in statement and ')' in statement:
+            func_name = statement.split('(', 1)[0]
+            if func_name in self.function_table:
+                args = self._parse_args(statement[statement.find('(')+1:-1])
+                return self.function_table[func_name](*args)
+        raise NotImplementedError(f"Statement not implemented: {statement}")
+
+    def _parse_type_block(self, first_line: str):
+        """TYPE/STRUCT bloðunu ayrýþtýr"""
+        block_lines = [first_line]
+        while not block_lines[-1].strip().startswith('END '):
+            next_line = self._get_next_line()
+            block_lines.append(next_line)
+        self.parse_type_definition(block_lines)
+
+    def _process_declaration(self, statement: str):
+        """Deðiþken tanýmlama iþlemi"""
+        parts = statement.split()
+        if parts[0] in ('DIM', 'GLOBAL'):
+            var_type = parts[parts.index('AS')+1]
+            var_name = parts[1]
+            if '(' in var_name and ')' in var_name:
+                name_part, dim_part = var_name.split('(', 1)
+                dims = [int(d) for d in dim_part[:-1].split(',')]
+                self._create_array_variable(name_part, var_type, dims)
+            else:
+                self.variables[var_name] = self._get_type_default(var_type)
+
+    def _create_array_variable(self, name: str, type_name: str, dims: list):
+        """Dizi deðiþkeni oluþtur"""
+        if len(dims) == 1:
+            self.variables[name] = [self._get_type_default(type_name) for _ in range(dims[0])]
+        else:
+            self.variables[name] = np.zeros(dims, dtype=self._get_numpy_type(type_name))
+
+    def _get_numpy_type(self, type_name: str):
+        """PDSX tipinden NumPy tipine dönüþüm"""
+        type_map = {
+            'INTEGER': np.int32,
+            'SINGLE': np.float32,
+            'DOUBLE': np.float64,
+            'BYTE': np.uint8,
+            'BOOLEAN': np.bool_
+        }
+        return type_map.get(type_name.upper(), np.object_)
+
+    def _process_control_structure(self, statement: str):
+        """Kontrol yapýlarýný iþle"""
+        if statement.startswith('IF '):
+            condition = statement[3:statement.find('THEN')].strip()
+            if self.evaluate_expression(condition):
+                self._execute_block()
+            else:
+                self._skip_to('END IF')
+        elif statement.startswith('FOR '):
+            parts = statement[4:].split()
+            var_name = parts[0]
+            start = self.evaluate_expression(parts[2])
+            end = self.evaluate_expression(parts[4])
+            step = self.evaluate_expression(parts[6]) if 'STEP' in parts else 1
+            self.variables[var_name] = start
+            self.loop_stack.append({
+                'var': var_name,
+                'end': end,
+                'step': step,
+                'start_line': self.program_counter
+            })
+        elif statement.startswith('WHILE '):
+            condition = statement[6:].strip()
+            if self.evaluate_expression(condition):
+                self.loop_stack.append({
+                    'condition': condition,
+                    'start_line': self.program_counter
+                })
+            else:
+                self._skip_to('WEND')
+        elif statement.startswith('DO '):
+            self.loop_stack.append({
+                'start_line': self.program_counter
+            })
+
+    def _execute_block(self):
+        """Blok içindeki komutlarý çalýþtýr"""
+        while True:
+            line = self._get_next_line()
+            if line.strip().startswith('END '):
+                break
+            self.execute_statement(line)
+
+    def _skip_to(self, end_marker: str):
+        """Belirli bir iþaretleyiciye kadar atla"""
+        while True:
+            line = self._get_next_line()
+            if line.strip().startswith(end_marker):
+                break
+
+    def _get_next_line(self):
+        """Bir sonraki program satýrýný getir"""
+        self.program_counter += 1
+        return self.program[self.program_counter]
+
+    def _parse_args(self, arg_str: str):
+        """Fonksiyon argümanlarýný ayrýþtýr"""
+        if not arg_str.strip():
+            return []
+        return [self.evaluate_expression(arg.strip()) for arg in arg_str.split(',')]
+
+
+class MemoryManager:
+    """Bellek yönetimi ve iþaretçi aritmetiði"""
+    def __init__(self):
+        self.heap = {}
+        self.ref_counts = {}
+
+    def allocate(self, size: int):
+        """Bellek ayýrma"""
+        ptr = id(bytearray(size))
+        self.heap[ptr] = bytearray(size)
+        self.ref_counts[ptr] = 1
+        return ptr
+
+    def release(self, ptr: int):
+        """Bellek serbest býrakma"""
+        if ptr in self.ref_counts:
+            self.ref_counts[ptr] -= 1
+            if self.ref_counts[ptr] == 0:
+                del self.heap[ptr]
+                del self.ref_counts[ptr]
+
+    def dereference(self, ptr: int):
+        """Ýþaretçi dereferansý"""
+        return self.heap.get(ptr, None)
+
+    def set_value(self, ptr: int, value: Any):
+        """Ýþaretçi konumuna deðer yaz"""
+        if ptr in self.heap:
+            if isinstance(value, (int, float)):
+                self.heap[ptr][:] = struct.pack('d', float(value))
+            elif isinstance(value, str):
+                self.heap[ptr][:] = value.encode()
+
+    def sizeof(self, obj: Any):
+        """Nesne boyutunu byte cinsinden döndür"""
+        if isinstance(obj, (int, float)):
+            return 8
+        elif isinstance(obj, str):
+            return len(obj.encode())
+        elif isinstance(obj, (list, np.ndarray)):
+            return obj.nbytes if hasattr(obj, 'nbytes') else len(obj) * 8
+        return 0
+
+
+def main():
+    interpreter = PdsXInterpreter()
+    if len(sys.argv) > 1:
+        with open(sys.argv[1], 'r') as f:
+            program = f.read().splitlines()
+        interpreter.program = program
+        interpreter.execute_program()
+    else:
+        print("pdsX Interpreter (v2.0)")
+        print("Type 'EXIT' to quit")
+        while True:
+            try:
+                line = input("> ").strip()
+                if line.upper() == 'EXIT':
+                    break
+                interpreter.execute_statement(line)
+            except Exception as e:
+                print(f"Error: {str(e)}")
+
+
+if __name__ == "__main__":
+    main()

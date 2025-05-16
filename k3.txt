@@ -1,0 +1,92 @@
+Bu programýn iþlevsel ve yapýsal özelliklerini detaylýca inceleyip daha önceki önerilere göre geliþtirme ve farklýlýklarý aþaðýdaki gibi açýklayabiliriz.
+
+1. Programýn Yapýsal Ýncelemesi:
+a. Dizin ve Dosya Yönetimi:
+Belirli dizinler (örneðin TEMIZ_TABLO_DIZIN, TEMIZ_KAYNAKCA_DIZIN) oluþturularak veri düzenleniyor.
+Dosyalar txt, json, csv ve excel formatlarýna dönüþtürülerek saklanýyor.
+b. Metin Ýþleme:
+PDF'den metin çýkarma iþlemi fitz kütüphanesi ile yapýlýyor.
+Metin temizleme (clean_text) ve sütun ayýrma iþlemleri optimize edilmiþ.
+c. Tablolar ve Referans Çýkarma:
+Tablolar, baþlýklarýna ve iç yapýlarýna göre çýkarýlýyor.
+Kaynakçalar farklý dillerdeki baþlýklarla tespit edilip ayrý bir listeye alýnýyor.
+d. ChromaDB ve API Kullanýmý:
+Zotero API ile bibliyografik bilgiler çekiliyor ve ChromaDB'ye kaydediliyor.
+OpenAI API kullanýlarak metinler embedding parçalarýna ayrýlýyor.
+e. Loglama:
+Geliþmiþ loglama sistemi (renkli ve dosyaya kayýt) eklenmiþ.
+Bellek kullanýmý ve iþlem ilerleme durumlarý da loglanýyor.
+f. Hata Yönetimi:
+Hatalar detaylý bir þekilde loglanarak hata ayýklama kolaylaþtýrýlmýþ.
+2. Daha Önceki Önerilerle Karþýlaþtýrma ve Geliþtirme Önerileri:
+Bu program daha önce sunduðumuz önerilerin çoðunu kapsýyor ve þu özellikleri barýndýrýyor:
+
+Metin Temizleme:
+
+Beyaz boþluklar, sayfa numaralarý temizleniyor.
+Gereksiz karakterlerin silinmesi daha geliþmiþ.
+Sütun ve Tablo Tespiti:
+
+Tablolar ve sütunlar daha doðru þekilde algýlanýp JSON formatýnda saklanýyor.
+Sütunlu metinlerin birleþtirme hatalarýný önlemek için yeni yöntemler eklenmiþ.
+Kaynakça Yönetimi:
+
+Kaynakçalar doðru þekilde çýkarýlýp ayrý dosyalara kaydediliyor.
+Satýr baþýna yýl, yazar ve kaynak bilgileri ayýklanýyor.
+Hata ve Loglama:
+
+Loglama sisteminde renkli çýktýlar ve dosya kayýtlarý mevcut.
+Bellek kullanýmý ve iþlem ilerlemesi loglanýyor.
+3. Eksik ve Geliþtirilebilecek Alanlar:
+Yeni Öneriler:
+Sütun Tespiti:
+
+Daha karmaþýk sütunlu metinlerde cümle birleþtirme hatalarýný önlemek için iyileþtirme yapýlabilir.
+Tablo Ayrýmý:
+
+Daha fazla tablo formatýný algýlayabilmek için makine öðrenimi kullanýlabilir.
+Hata Ayýklama:
+
+Her hata için ayrý bir hata sýnýfý oluþturularak detaylý raporlama yapýlabilir.
+4. 40 Maddelik Detaylý Geliþtirme Listesi:
+Sütun tespiti için daha karmaþýk yapýlar analiz edilmeli.
+"Tablo" baþlýklarý farklý yazým formatlarýnda tanýmlanmalý.
+Çizelge ve þekil tespiti daha iyi hale getirilmeli.
+Kaynakça metni tamamen metinden çýkarýlmalý.
+Tablolarýn JSON formatýnda saklanmasý saðlanmalý.
+Tablo içindeki boþ satýrlarý ve gereksiz boþluklarý temizlemeli.
+PDF’den metin çýkarýrken hatalý karakterler düzeltilebilmeli.
+Kaynakçalar Excel formatýnda da saklanmalý.
+Zotero API’den alýnan veriler eksiksiz olmalý.
+Loglama sistemi, iþlem adýmlarýný daha detaylý göstermeli.
+Her tablo veya referans için benzersiz bir ID atanmalý.
+Bibliyografik veriler OpenAI API kullanýlarak iyileþtirilmeli.
+Bellek kullanýmý minimum düzeye çekilmeli.
+Bellek sýzýntýlarýný önlemek için testler yapýlmalý.
+Tüm dosyalar için genel bir hata log dosyasý tutulmalý.
+Tablo tespitindeki hücre ayrýmlarý daha iyi yapýlmalý.
+Referans tespiti için yýl bazlý yeni algoritmalar geliþtirilmeli.
+Programýn durdurulmasý için özel bir tuþ atanmalý.
+Tablolardaki dipnotlar da tespit edilmeli.
+Bellek kullanýmý periyodik olarak kontrol edilmeli.
+Metinlerden e-posta adresleri temizlenmeli.
+Metinlerdeki fazla boþluklar temizlenmeli.
+Zotero API verilerinin ChromaDB’ye eksiksiz aktarýlmasý saðlanmalý.
+OpenAI API’ye veri gönderirken bibliyografik bilgiler çýkarýlmalý.
+Kýsa baþlýklar otomatik kýsaltýlmalý.
+Tablo baþlýklarýndaki numaralar hatalýysa düzeltilebilmeli.
+Gereksiz karakterler regex ile temizlenmeli.
+Referanslarýn doðruluðu kontrol edilmeli.
+Programda her adýmýn zamanlamasý ölçülmeli.
+Çýkartýlan tablolar için bir görsel önizleme oluþturulmalý.
+Tüm loglar JSON formatýnda da kaydedilmeli.
+Zotero’dan alýnan yazar bilgileri daha detaylý analiz edilmeli.
+Hatalý dosyalar için ayrý bir klasör kullanýlmalý.
+Her iþlem için geri dönüþ kodlarý olmalý.
+Çoklu iþlem sýrasýnda çakýþmalarý önlemek için kilitleme kullanýlmalý.
+Bellek aþýmýný önlemek için dosya boyutlarý kontrol edilmeli.
+Dipnotlar özel bir alan olarak tespit edilmeli.
+Program, kullanýcý dostu bir arayüzle entegre edilmeli.
+Tablolardan çýkartýlan hücre verileri CSV’ye eksiksiz kaydedilmeli.
+PDF iþlem sýrasýnda OCR kullanýlarak daha doðru metin çýkarýmý saðlanmalý.
+Bu detaylý inceleme ve öneriler, mevcut programý daha güçlü, verimli ve hatasýz bir hale getirebilir.

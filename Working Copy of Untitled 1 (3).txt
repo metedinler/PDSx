@@ -1,0 +1,75 @@
+Genel Kullaným için Diðer Geliþtirmeler
+TYPE, UNION, ENUM ve düþük seviyeli özelliklerin ötesinde, interpreter'ý genel amaçlý bir araç olarak güçlendirmek için aþaðýdaki alanlarda iyileþtirmeler öneriyorum:
+
+Modül Sistemi:
+Sorun: Mevcut IMPORT komutu, modülleri ayrýþtýrýyor ama kapsamlý bir isim alaný (namespace) yönetimi yok.
+Öneri: Her modül için ayrý bir namespace oluþturun ve module.function gibi nitelikli eriþim saðlayýn. Örnek:
+basX
+
+Kopyala
+IMPORT "math.basX" AS math
+CALL math.sin(3.14)
+Uygulama: self.modules sözlüðünü geniþletin ve evaluate_expression içinde modül nitelikli isimleri destekleyin.
+Hata Yönetimi:
+Sorun: Hata mesajlarý bazen yetersiz (örneðin, yalnýzca "Bilinmeyen komut"). Ayrýca, hata yýðýný (stack trace) yok.
+Öneri: Hata mesajlarýna satýr numarasý, komut içeriði ve çaðrý yýðýný ekleyin. Örnek:
+text
+
+Kopyala
+PDSX Hatasý: Geçersiz iþaretçi adresi: 1000, Satýr 10, Komut: PRINT *ptr
+Çaðrý yýðýný: main -> sub1 -> sub2
+Uygulama: execute_command içinde hata yakalama bloðunu güncelleyin ve traceback modülünü kullanýn.
+Performans Optimizasyonu:
+Sorun: eval kullanýmý (evaluate_expression) ve sýk sözlük aramalarý performansý düþürüyor.
+Öneri:
+Ýfadeleri önbelleðe alýn (ast modülüyle AST oluþturun).
+Deðiþken eriþimleri için bir önbellek tablosu (self.variable_cache) kullanýn.
+Kritik bölümleri Cython veya Numba ile derleyin.
+Uygulama: evaluate_expression metodunu yeniden yazýn:
+python
+
+Kopyala
+import ast
+def evaluate_expression(self, expr, scope_name=None):
+    cache_key = (expr, scope_name)
+    if cache_key not in self.expr_cache:
+        tree = ast.parse(expr, mode='eval')
+        self.expr_cache[cache_key] = compile(tree, '<string>', 'eval')
+    return eval(self.expr_cache[cache_key], {}, self.current_scope())
+Standart Kütüphane:
+Sorun: Interpreter, yalnýzca sýnýrlý fonksiyonlarý (self.function_table) destekliyor.
+Öneri: Genel kullaným için bir standart kütüphane ekleyin (örneðin, dosya I/O, að, matematik, veri yapýlarý).
+Uygulama: self.function_table'ý geniþletin ve ayrý bir stdlib.basX modülü oluþturun:
+basX
+
+Kopyala
+FUNCTION FileRead(path AS STRING) AS STRING
+    ...
+END FUNCTION
+Çoklu Dil Desteði:
+** Sorun:** Hata mesajlarý ve anahtar kelimeler yalnýzca Ýngilizce.
+Öneri: Anahtar kelimeler ve mesajlar için bir dil dosyasý (lang.json) kullanýn. Örnek:
+json
+
+Kopyala
+{
+    "en": {"PRINT": "PRINT", "ERROR": "Error"},
+    "tr": {"PRINT": "YAZ", "ERROR": "Hata"}
+}
+Uygulama: execute_command içinde komutlarý dil dosyasýna göre eþleþtirin.
+Paralel Programlama:
+Sorun: Þu an tek iþ parçacýðý (thread) destekleniyor.
+Öneri: THREAD ve ASYNC komutlarý ekleyerek paralel yürütme saðlayýn. Örnek:
+basX
+
+Kopyala
+THREAD worker AS SUB
+    FOR i = 1 TO 100
+        PRINT i
+    NEXT i
+END SUB
+Uygulama: threading veya asyncio modüllerini entegre edin.
+Derleyici Desteði:
+Sorun: Interpreter, kodu doðrudan çalýþtýrýyor; bu, büyük programlarda yavaþ.
+Öneri: Bir bayt kodu derleyicisi ekleyin (örneðin, Python'un dis modülüne benzer).
+Uygulama: parse_program içinde bir bayt kodu üreticisi oluþturun ve run metodunu bayt kodu yürütmek için güncelleyin.

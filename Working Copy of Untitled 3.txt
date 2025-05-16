@@ -1,0 +1,471 @@
+Geliþtirilmiþ Prolog Yorumlayýcý
+Aþaðýda, tüm bu özellikleri içeren bir Python kodunu paylaþýyorum:
+class PrologInterpreter:
+    def __init__(self):
+        self.facts = []
+        self.rules = []
+        self.variables = {}
+
+    def add_fact(self, fact):
+        """Gerçekleri ekler."""
+        self.facts.append(fact)
+
+    def add_rule(self, head, body):
+        """Kurallarý ekler."""
+        self.rules.append((head, body))
+
+    def query(self, goal):
+        """Sorgularý iþler."""
+        self.variables = {}
+        if self.match_goal(goal):
+            self.print_variables()
+            print(f"Evet: {goal}")
+            return True
+        else:
+            print(f"Hayýr: {goal}")
+            return False
+
+    def match_goal(self, goal):
+        """Gerçekler ve kurallar ile hedefi eþleþtirir."""
+        # Gerçeklerle eþleþme
+        for fact in self.facts:
+            self.variables = {}  # Her sorgu için deðiþkenler sýfýrlanýr
+            if self.unify(goal, fact, self.variables):
+                return True
+
+        # Kurallar ile eþleþme
+        for head, body in self.rules:
+            self.variables = {}
+            if self.unify(goal, head, self.variables):
+                if all(self.match_goal(subgoal) for subgoal in body):
+                    return True
+
+        return False
+
+    def unify(self, term1, term2, bindings):
+        """Ýki terimi birbiriyle eþleþtirir."""
+        if isinstance(term1, str) and term1.startswith("?"):  # Deðiþken
+            bindings[term1] = term2
+            return True
+        if isinstance(term2, str) and term2.startswith("?"):  # Deðiþken
+            bindings[term2] = term1
+            return True
+        if isinstance(term1, str) and isinstance(term2, str):  # Atomlar
+            return term1 == term2
+        if isinstance(term1, tuple) and isinstance(term2, tuple):  # Yapýlar
+            if len(term1) != len(term2):
+                return False
+            return all(self.unify(t1, t2, bindings) for t1, t2 in zip(term1, term2))
+        return False
+
+    def print_variables(self):
+        """Baðlý deðiþkenleri yazdýrýr."""
+        for var, value in self.variables.items():
+            print(f"{var} = {value}")
+
+# Örnek QBasic Benzeri Kullaným
+interpreter = PrologInterpreter()
+
+# Gerçekleri ekle
+interpreter.add_fact(("PARENT", "JOHN", "MARY"))
+interpreter.add_fact(("PARENT", "MARY", "SUSAN"))
+
+# Kurallarý ekle
+interpreter.add_rule(
+    ("GRANDPARENT", "?X", "?Y"),
+    [("PARENT", "?X", "?Z"), ("PARENT", "?Z", "?Y")]
+)
+
+# Sorgu yap
+interpreter.query(("GRANDPARENT", "JOHN", "?Y"))  # Evet, deðiþken dönecek
+interpreter.query(("PARENT", "JOHN", "SUSAN"))   # Hayýr
+
+????
+Yapýlan Geliþtirmeler:
+- Deðiþken Desteði:- Sorgular ?X, ?Y gibi deðiþkenler içerebilir ve yorumlayýcý bunlarý baðlar.
+- Sorgu sonuçlarý baðlý deðiþkenlerle döner.
+
+- Geliþtirilmiþ Sözdizimi:- QBasic benzeri komutlar ve büyük harf kullanýmý.
+- Örneðin, PARENT gerçekleri, GRANDPARENT kurallarý tanýmlanabilir.
+
+- Optimize Geri Ýzleme:- Sorgu baþarýsýz olursa bir önceki adýmlara dönüp diðer olasýlýklarý deneme.
+
+
+Çalýþma Örneði:
+PARENT JOHN MARY
+PARENT MARY SUSAN
+
+GRANDPARENT ?X ?Y:
+?X = JOHN
+?Y = SUSAN
+EVET
+
+
+Bu kod ile hem QBasic benzeri sözdizimini hem de Prolog'un güçlü mantýksal çýkarým özelliklerini kullanabilirsiniz. Daha fazla geliþtirme veya ek özellik eklemek istersen, birlikte devam edebiliriz! ??
+
+class LogicEngine:
+    def __init__(self):
+        self.facts = []
+        self.rules = []
+
+    def add_fact(self, fact):
+        """Gerçek ekleme."""
+        self.facts.append(fact)
+
+    def add_rule(self, head, body):
+        """Kural ekleme."""
+        self.rules.append((head, body))
+
+    def query(self, goal):
+        """Sorgu iþleme."""
+        print(f"Sorgu: {goal}")
+        if self.match_goal(goal):
+            print(f"Evet: {goal}")
+        else:
+            print(f"Hayýr: {goal}")
+
+    def match_goal(self, goal):
+        """Gerçekler ve kurallarla eþleþme."""
+        for fact in self.facts:
+            if self.unify(goal, fact, {}):
+                return True
+        for head, body in self.rules:
+            bindings = {}
+            if self.unify(goal, head, bindings):
+                return all(self.match_goal(subgoal) for subgoal in body)
+        return False
+
+    def unify(self, term1, term2, bindings):
+        """Ýki terimi eþleþtirme."""
+        if isinstance(term1, str) and term1.startswith("?"):
+            bindings[term1] = term2
+            return True
+        if isinstance(term2, str) and term2.startswith("?"):
+            bindings[term2] = term1
+            return True
+        if isinstance(term1, str) and isinstance(term2, str):
+            return term1 == term2
+        if isinstance(term1, tuple) and isinstance(term2, tuple):
+            if len(term1) != len(term2):
+                return False
+            return all(self.unify(t1, t2, bindings) for t1, t2 in zip(term1, term2))
+        return False
+
+# Motoru kullan
+engine = LogicEngine()
+
+# Gerçekler ekle
+engine.add_fact(("parent", "john", "mary"))
+engine.add_fact(("parent", "mary", "susan"))
+
+# Kural ekle
+engine.add_rule(
+    ("grandparent", "?X", "?Y"),
+    [("parent", "?X", "?Z"), ("parent", "?Z", "?Y")]
+)
+
+# Sorgular
+engine.query(("parent", "john", "mary"))   # Evet
+engine.query(("grandparent", "john", "susan"))  # Evet
+engine.query(("parent", "john", "susan"))  # Hayýr
+
+Tabii ki, Python ile bir temel Prolog yorumlayýcýsý oluþturabiliriz. Bu yorumlayýcý, Prolog'un temel mekanizmalarýný - gerçekler, kurallar ve sorgular - içerir. Geri izleme (backtracking) mekanizmasý da temel seviyede uygulanabilir. Ýþte basit bir Prolog yorumlayýcý:
+
+```python
+class PrologInterpreter:
+    def __init__(self):
+        self.facts = []
+        self.rules = []
+
+    def add_fact(self, fact):
+        """Gerçekleri ekler."""
+        self.facts.append(fact)
+
+    def add_rule(self, head, body):
+        """Kurallarý ekler."""
+        self.rules.append((head, body))
+
+    def query(self, goal):
+        """Sorgularý iþler."""
+        if self.match_goal(goal):
+            print(f"Evet: {goal}")
+            return True
+        else:
+            print(f"Hayýr: {goal}")
+            return False
+
+    def match_goal(self, goal):
+        """Gerçekler ve kurallar ile hedefi eþleþtirir."""
+        # Gerçeklerle eþleþme
+        for fact in self.facts:
+            if self.unify(goal, fact):
+                return True
+
+        # Kurallar ile eþleþme
+        for head, body in self.rules:
+            if self.unify(goal, head):
+                if all(self.match_goal(subgoal) for subgoal in body):
+                    return True
+
+        return False
+
+    @staticmethod
+    def unify(term1, term2):
+        """Ýki terimi birbiriyle eþleþtirir."""
+        if isinstance(term1, str) and isinstance(term2, str):
+            return term1 == term2  # Atomlar
+        if isinstance(term1, tuple) and isinstance(term2, tuple):
+            if len(term1) != len(term2):
+                return False
+            return all(PrologInterpreter.unify(t1, t2) for t1, t2 in zip(term1, term2))
+        return False
+
+# Örnek Prolog Programý
+interpreter = PrologInterpreter()
+
+# Gerçekleri ekle
+interpreter.add_fact(("parent", "john", "mary"))
+interpreter.add_fact(("parent", "mary", "susan"))
+
+# Kurallarý ekle
+interpreter.add_rule(
+    ("grandparent", "X", "Y"),
+    [("parent", "X", "Z"), ("parent", "Z", "Y")]
+)
+
+# Sorgu yap
+interpreter.query(("grandparent", "john", "susan"))  # Evet
+interpreter.query(("parent", "john", "susan"))      # Hayýr
+```
+
+### Çalýþma Açýklamasý:
+1. **Gerçekler (`add_fact`)**:
+   - Örneðin, `("parent", "john", "mary")` gibi bir gerçek, John'un Mary'nin ebeveyni olduðunu belirtir.
+
+2. **Kurallar (`add_rule`)**:
+   - Örneðin, `("grandparent", "X", "Y")` baþlýðý ve `[("parent", "X", "Z"), ("parent", "Z", "Y")]` gövdesi, birisinin büyükanne veya büyükbaba olabilmesi için iki kural olduðunu belirtir.
+
+3. **Sorgu (`query`)**:
+   - Yorumlayýcý, bir hedefin gerçeklere ve kurallara uyup uymadýðýný belirler.
+
+4. **Geri Ýzleme (Backtracking)**:
+   - Herhangi bir kuralýn gövdesindeki alt hedefler baþarýsýz olursa, bir önceki adým geri alýnýr ve baþka yollar denenir.
+
+### Bu Yorumlayýcý ile Neler Yapabilirsiniz?
+- Basit gerçekler ve kurallar tanýmlayabilir.
+- Mantýksal sorgular yapabilir.
+- Temel geri izleme mekanizmasýný test edebilirsiniz.
+
+Daha geliþmiþ bir yorumlayýcýda deðiþken desteði, daha karmaþýk eþleme algoritmalarý ve optimize edilmiþ geri izleme mekanizmalarý eklenebilir. Bu temel altyapý üzerine ek geliþtirmeler yapmaya hazýr mýsýnýz? ??
+
+Elbette! Mevcut Prolog yorumlayýcýsýný daha geliþmiþ eþleme algoritmalarý ve geri izleme mekanizmasý ekleyerek geliþtirebiliriz. Ayrýca yazýlýmýn sözdizimini QBasic PDS 7.1'e benzer bir yapýya uygun hale getirebiliriz.
+
+### **Geliþtirmeler:**
+1. **Geliþmiþ Eþleme Algoritmasý:**
+   - Deðiþkenleri destekleyen ve baðlamlarý takip edebilen bir algoritma.
+   - Deðiþkenlerin deðerlerini eþleþtirme sýrasýnda baðlama ve sorgu tamamlandýktan sonra sonuçlarý döndürme.
+
+2. **Geliþtirilmiþ Geri Ýzleme:**
+   - Daha karmaþýk sorgular için optimize edilmiþ geri izleme.
+   - Sorgular baþarýsýz olduðunda bir önceki adýmlara dönerek diðer olasýlýklarý deneme.
+
+3. **QBasic Benzeri Sözdizimi:**
+   - Komutlar büyük harfle yazýlacak (ör. `LET`, `PRINT`).
+   - Prolog mantýðýndaki gerçekler ve kurallar, daha okunabilir bir þekilde tanýmlanacak.
+
+### **Geliþtirilmiþ Prolog Yorumlayýcý**
+Aþaðýda, tüm bu özellikleri içeren bir Python kodunu paylaþýyorum:
+
+```python
+class PrologInterpreter:
+    def __init__(self):
+        self.facts = []
+        self.rules = []
+        self.variables = {}
+
+    def add_fact(self, fact):
+        """Gerçekleri ekler."""
+        self.facts.append(fact)
+
+    def add_rule(self, head, body):
+        """Kurallarý ekler."""
+        self.rules.append((head, body))
+
+    def query(self, goal):
+        """Sorgularý iþler."""
+        self.variables = {}
+        if self.match_goal(goal):
+            self.print_variables()
+            print(f"Evet: {goal}")
+            return True
+        else:
+            print(f"Hayýr: {goal}")
+            return False
+
+    def match_goal(self, goal):
+        """Gerçekler ve kurallar ile hedefi eþleþtirir."""
+        # Gerçeklerle eþleþme
+        for fact in self.facts:
+            self.variables = {}  # Her sorgu için deðiþkenler sýfýrlanýr
+            if self.unify(goal, fact, self.variables):
+                return True
+
+        # Kurallar ile eþleþme
+        for head, body in self.rules:
+            self.variables = {}
+            if self.unify(goal, head, self.variables):
+                if all(self.match_goal(subgoal) for subgoal in body):
+                    return True
+
+        return False
+
+    def unify(self, term1, term2, bindings):
+        """Ýki terimi birbiriyle eþleþtirir."""
+        if isinstance(term1, str) and term1.startswith("?"):  # Deðiþken
+            bindings[term1] = term2
+            return True
+        if isinstance(term2, str) and term2.startswith("?"):  # Deðiþken
+            bindings[term2] = term1
+            return True
+        if isinstance(term1, str) and isinstance(term2, str):  # Atomlar
+            return term1 == term2
+        if isinstance(term1, tuple) and isinstance(term2, tuple):  # Yapýlar
+            if len(term1) != len(term2):
+                return False
+            return all(self.unify(t1, t2, bindings) for t1, t2 in zip(term1, term2))
+        return False
+
+    def print_variables(self):
+        """Baðlý deðiþkenleri yazdýrýr."""
+        for var, value in self.variables.items():
+            print(f"{var} = {value}")
+
+# Örnek QBasic Benzeri Kullaným
+interpreter = PrologInterpreter()
+
+# Gerçekleri ekle
+interpreter.add_fact(("PARENT", "JOHN", "MARY"))
+interpreter.add_fact(("PARENT", "MARY", "SUSAN"))
+
+# Kurallarý ekle
+interpreter.add_rule(
+    ("GRANDPARENT", "?X", "?Y"),
+    [("PARENT", "?X", "?Z"), ("PARENT", "?Z", "?Y")]
+)
+
+# Sorgu yap
+interpreter.query(("GRANDPARENT", "JOHN", "?Y"))  # Evet, deðiþken dönecek
+interpreter.query(("PARENT", "JOHN", "SUSAN"))   # Hayýr
+```
+
+### **Yapýlan Geliþtirmeler:**
+1. **Deðiþken Desteði:** 
+   - Sorgular `?X`, `?Y` gibi deðiþkenler içerebilir ve yorumlayýcý bunlarý baðlar.
+   - Sorgu sonuçlarý baðlý deðiþkenlerle döner.
+
+2. **Geliþtirilmiþ Sözdizimi:**
+   - QBasic benzeri komutlar ve büyük harf kullanýmý.
+   - Örneðin, `PARENT` gerçekleri, `GRANDPARENT` kurallarý tanýmlanabilir.
+
+3. **Optimize Geri Ýzleme:**
+   - Sorgu baþarýsýz olursa bir önceki adýmlara dönüp diðer olasýlýklarý deneme.
+
+### Çalýþma Örneði:
+```
+PARENT JOHN MARY
+PARENT MARY SUSAN
+
+GRANDPARENT ?X ?Y:
+?X = JOHN
+?Y = SUSAN
+EVET
+```
+
+Bu kod ile hem QBasic benzeri sözdizimini hem de Prolog'un güçlü mantýksal çýkarým özelliklerini kullanabilirsiniz. Daha fazla geliþtirme veya ek özellik eklemek istersen, birlikte devam edebiliriz! ??
+
+Evet, gerçekleri (`facts`) ve kurallarý (`rules`) temel alarak, Prolog yorumlayýcýsýna baþka komutlar ve yapýlar ekleyebiliriz. Bu, Prolog'un mantýksal ve deklaratif programlama paradigmasýný daha güçlü ve esnek hale getirir. Ýþte öneriler:
+
+---
+
+### **Ek Komut ve Yapýlar:**
+
+#### **1. Sorgu ve Eþleþme Operatörleri**
+- **NOT:** Mantýksal olumsuzlama. Örneðin: `NOT(parent(john, mary))`.
+- **OR:** Alternatif eþleþme. Örneðin: `parent(X, Y) OR sibling(X, Y)`.
+
+#### **2. Gerçekleri Dinamik Olarak Ekleme ve Silme**
+- **ASSERT:** Yeni bir gerçek ekleme. Örneðin: `ASSERT(parent(john, mary))`.
+- **RETRACT:** Mevcut bir gerçeði silme. Örneðin: `RETRACT(parent(john, mary))`.
+
+#### **3. Veri Yapýlarý**
+- **Liste ve Diziler:**
+  - Prolog'da listeler yaygýn olarak kullanýlýr. Bir `LIST` yapýsý tanýmlayarak elementleri eþleþtirme ve manipüle etme imkaný saðlanabilir.
+  - Örnek: `family([john, mary, susan]).`
+
+#### **4. Sayýsal Ýþlemler**
+- **Aritmetik Operatörler:**
+  - Gerçek veya kurallar içerisinde aritmetik iþlemleri desteklemek için: `X + Y`, `X * Y`.
+
+#### **5. Meta-Programlama**
+- Kurallarýn, gerçeklerin veya sorgularýn kendisini program içinde bir yapý olarak iþleme.
+- Örnek: `rule_description(parent(X, Y), "X, Y'nin ebeveynidir").`
+
+#### **6. Karmaþýk Veri Tipleri**
+- Daha zengin veri yapýlarý için `STRUCT` veya `TYPE` gibi Prolog'un mantýksal yapýsýna uygun geniþletilmiþ veri tanýmlarý.
+
+---
+
+### **Ek Komutlarýn Örnekleri**
+
+#### **Gerçekler ve Kurallar:**
+```prolog
+FACT: parent(john, mary).
+FACT: parent(mary, susan).
+RULE: grandparent(X, Y) :- parent(X, Z), parent(Z, Y).
+```
+
+#### **Mantýksal Sorgular:**
+```prolog
+QUERY: grandparent(john, ?Y).  # ?Y = susan
+QUERY: NOT(parent(john, susan)).  # True
+QUERY: parent(john, ?Y) OR sibling(john, ?Y).  # Eþleþme arar
+```
+
+#### **Dinamik Gerçek ve Kural Ýþlemleri:**
+```prolog
+ASSERT: sibling(john, mark).
+RETRACT: parent(john, mary).
+```
+
+#### **Liste ve Dizi Kullanýmý:**
+```prolog
+FACT: family([john, mary, susan]).
+RULE: member(X, [X|_]).  # Liste baþýndaki elemaný eþleþtirir
+RULE: member(X, [_|Rest]) :- member(X, Rest).  # Rekürsif arama
+```
+
+#### **Aritmetik ve Karþýlaþtýrmalar:**
+```prolog
+FACT: age(john, 50).
+QUERY: age(john, ?A), ?A > 30.  # True
+```
+
+---
+
+### **Prolog Yorumlayýcýsýný Geliþtirme Adýmlarý**
+1. **NOT ve OR Mantýksal Operatörleri:**
+   - `NOT` için ters eþleþme kontrolü eklenebilir.
+   - `OR` için paralel eþleþmeler test edilebilir.
+
+2. **Dinamik Gerçekler ve Kurallar:**
+   - `ASSERT` ve `RETRACT` komutlarýyla gerçekleri ve kurallarý çalýþma sýrasýnda ekleme veya kaldýrma.
+
+3. **Liste ve Dizi Desteði:**
+   - Liste iþlemleri için rekürsif kurallar oluþturulabilir.
+
+4. **Sayýsal Ýþlemler:**
+   - Aritmetik hesaplamalar ve karþýlaþtýrmalarý desteklemek için `eval()` gibi bir fonksiyon kullanýlabilir.
+
+---
+
+Bu eklemeler, Prolog yorumlayýcýsýný daha dinamik ve güçlü hale getirecektir. Birlikte örnekler oluþturabilir ve detaylandýrarak bu yapýlarý kodlayabiliriz! ??

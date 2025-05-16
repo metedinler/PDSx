@@ -1,0 +1,284 @@
+# ----------------------------
+# Ana İşlem Fonksiyonu
+# ----------------------------
+def process_file(item):
+    try:
+        if not isinstance(item, dict):
+            raise ValueError("Geçersiz öğe formatı")
+        title = item.get("title")
+        if not title:
+            raise ValueError("Başlık bulunamadı")
+        dosya_path = os.path.join(STORAGE_DIR, title)
+        if not os.path.exists(dosya_path):
+            raise FileNotFoundError(f"Dosya bulunamadı: {dosya_path}")
+        if title.lower().endswith('.pdf'):
+            raw_text = extract_text_from_pdf(dosya_path)
+            source_type = "pdf"
+        elif title.lower().endswith('.txt'):
+            with open(dosya_path, 'r', encoding='utf-8') as f:
+                raw_text = f.read()
+            source_type = "txt"
+        else:
+            raise ValueError("Desteklenmeyen dosya uzantısı.")
+        if not raw_text:
+            raise Exception("Ham metin çıkarılamadı")
+        
+        # Haritalama: Metin çıkartmadan önce belge haritası oluşturuluyor
+        # İsteğe bağlı: mapping_info loglanabilir veya sonraki işlemlerde kullanılabilir.
+        # mapping_info = map_scientific_sections(raw_text)
+        # logger.info(f"Haritalama bilgileri oluşturuldu: {json.dumps(mapping_info, ensure_ascii=False)}")
+        
+        # Tablo Oluşturma: Haritalama sonrasında tablolar tespit ediliyor
+        tables = detect_tables(dosya_path) if source_type == "pdf" else []
+        if tables:
+            tables_text = " ".join([table["baslik"] for table in tables])
+        else:
+            tables_text = "No table content available."
+        # bu noktadan sonra yapay zeka bana bazi yordamlaronerdi bunlari inceleyecegim
+        # ama once stak dosya yapisini kullanima sokmak gerekiyor.
+        # Referanslar Çıkarma: Haritalama sonrasında referanslar tespit ediliyor
+        references = extract_references_enhanced(raw_text)
+        if references:
+            ref_filename = os.path.splitext(title)[0] + "_references.txt" #dosya adini kisaltarak referas dosyasini .txt uzantili yazar
+            save_text_file(TEMIZ_KAYNAKCA_DIR, ref_filename, "\n".join(references))
+            vosviewer_file = os.path.join(TEMIZ_KAYNAKCA_DIR, os.path.splitext(title)[0] + "_references_vosviewer.txt")
+            save_text_file(TEMIZ_KAYNAKCA_DIR, vosviewer_file, "\n".join(references))
+        else:
+            ref_filename = "Kaynak dosyada Kullanilabilir referans bulunamadi. Kaynak dosyasi (.txt) olusturulamadi."
+            vosviewer_file = "Kaynak dosyada Kullanilabilir referans bulunamadi (.vos) olusturulamadi."
+        
+        # Temiz Metin Oluşturma: Metin temizleme işlemi
+        temiz_metin = clean_text(raw_text)
+        temiz_metin_filename = os.path.splitext(title)[0] + "_temiz_metin.txt"
+        save_text_file(TEMIZ_METIN_DIR, temiz_metin_filename, temiz_metin)
+        temiz_metin_vosviewer = os.path.splitext(title)[0] + "_temiz_metin_vosviewer.txt"
+        save_text_file(TEMIZ_METIN_DIR, temiz_metin_vosviewer, temiz_metin)
+        
+        # Temiz Tablo Oluşturma: Tablolar temizleme işlemi    
+        temiz_tablo_filename = os.path.splitext(title)[0] + "_temiz_tablo.txt"
+        save_text_file(TEMIZ_TABLO_DIR, temiz_tablo_filename, tables_text)
+        temiz_tablo_vosviewer = os.path.splitext(title)[0] + "_temiz_tablo_vosviewer.txt"
+        save_text_file(TEMIZ_TABLO_DIR, temiz_tablo_vosviewer, tables_text)
+        
+        # Temiz Kaynakca Oluşturma: Kaynakca temizleme işlemi
+        temiz_kaynakca_filename = os.path.splitext(title)[0] + "_temiz_kaynakca.txt"
+        save_text_file(TEMIZ_KAYNAKCA_DIR, temiz_kaynakca_filename, ref_filename)
+        temiz_kaynakca_vosviewer = os.path.splitext(title)[0] + "_temiz_kaynakca_vosviewer.txt"
+        save_text_file(TEMIZ_KAYNAKCA_DIR, temiz_kaynakca_vosviewer, vosviewer_file)
+        
+        # Temiz Metin ve Tablo dosyalarının dosya yapisini guncelleyin
+        # dosya yapisini guncellemek icin kalan dosyalarin okunmasi lazim    
+        dosya_adi = os.path.basename(dosya_path)    
+        # LOG dosyasından işlenen dosyayı çıkar
+        # stack log dosyasi icin kalan dosyalari okumak belki main bolumune tasinmali
+        kalan = kalan_dosyalari_oku()
+        if dosya_adi in kalan:
+            kalan.remove(dosya_adi)
+        with open(LOG_DOSYASI, "w", encoding="utf-8") as f:
+            f.write("\n".join(kalan) + "\n")
+        
+        print(f"✅ İşlendi: {dosya_adi}")
+    except Exception as e:
+        print(f"❌ Hata: {dosya_adi} ({e})")
+        print(traceback.format_exc())
+    
+    print("\n🎉 Tüm işlemler başarıyla tamamlandı!") #silinecek veya baska yere tasinacak
+       
+        # onceki bolum buradan devam ediyor
+        mapping_info = None
+        if source_type == "pdf":
+            mapping_info = map_scientific_sections_extended(raw_text)
+            # İsteğe bağlı: mapping_info loglanabilir veya sonraki işlemlerde kullanılabilir.
+            logger.info(f"Haritalama bilgileri oluşturuldu: {json.dumps(mapping_info, ensure_ascii=False)}")
+        
+        reflowed_text = reflow_columns(raw_text)
+        tables = detect_tables(dosya_path) if source_type == "pdf" else []
+        if tables:
+            tables_text = " ".join([table["baslik"] for table in tables])
+        else:
+            tables_text = "No table content available."
+        references = extract_references_enhanced(raw_text)
+        if references:
+            ref_filename = os.path.splitext(title)[0] + "_references.txt"
+            save_text_file(TEMIZ_KAYNAKCA_DIR, ref_filename, "\n".join(references))
+            vosviewer_file = os.path.join(TEMIZ_KAYNAKCA_DIR, os.path.splitext(title)[0] + "_references_vosviewer.txt")
+            pajek_file = os.path.join(TEMIZ_KAYNAKCA_DIR, os.path.splitext(title)[0] + "_references_pajek.net")
+            save_references_for_analysis(references, vosviewer_file, pajek_file)
+        else:
+            references = ["No references found."]
+        temiz_metin = clean_text(reflowed_text)
+        if not temiz_metin:
+            temiz_metin = "No clean text extracted."
+        temiz_metin_filename = os.path.splitext(title)[0] + ".temizmetin.txt"
+        save_text_file(TEMIZMETIN_DIR, temiz_metin_filename, temiz_metin)
+        chunks = split_text(temiz_metin, chunk_size=256)
+        chunk_ids = [f"{os.path.splitext(title)[0]}_{i}" for i in range(len(chunks))]
+        embeddings = []
+        for idx, chunk in enumerate(chunks):
+            emb = embed_text(chunk)
+            if emb is None:
+                logger.warning(f"Chunk {idx} için embedding oluşturulamadı.")
+                embeddings.append([0.0] * 768)
+            else:
+                embeddings.append(emb)
+            embed_filename = f"{os.path.splitext(title)[0]}_{idx}.embed.txt"
+            save_text_file(EMBEDDING_DIR, embed_filename, chunk)
+        try:
+            collection.add(
+                ids=chunk_ids,
+                embeddings=embeddings,
+                metadatas=[{'title': title, 'source': source_type, 'chunk_index': i,
+                            'timestamp': datetime.now().isoformat()} for i in range(len(chunks))]
+            )
+            logger.info(f"✅ {title} için tüm chunk embedding'leri ChromaDB'ye eklendi.")
+        except Exception as e:
+            logger.error(f"Embedding eklenirken hata oluştu: {e}")
+        item_key = item.get("key")
+        if item_key:
+            bib_data = fetch_zotero_metadata(item_key)
+            if bib_data:
+                try:
+                    bib_collection.add(
+                        ids=[os.path.splitext(title)[0]],
+                        embeddings=[[0.0] * 768],
+                        metadatas=[{'title': title, 'bibliography': bib_data,
+                                    'timestamp': datetime.now().isoformat()}]
+                    )
+                    logger.info(f"✅ {title} için Zotero bibliyografi bilgisi eklendi.")
+                    bib_str = json.dumps(bib_data)
+                except Exception as e:
+                    logger.error(f"Bibliyografi eklenirken hata: {e}")
+                    bib_str = "No bibliographic data available."
+            else:
+                bib_str = "No bibliographic data available."
+        else:
+            bib_str = "No bibliographic data available."
+        stack_guncelle(title, "işlendi")
+        log_entry = {
+            'dosya': title,
+            'tarih': datetime.now(pytz.timezone('Turkey')).isoformat(),
+            'tablo_sayisi': len(tables),
+            'referans_sayisi': len(references),
+            'dosya_tipi': source_type,
+            'bellek_kullanim': memory_usage(),
+            'clean_text': temiz_metin,
+            'tables': tables_text,
+            'bibliography': bib_str,
+            'mapping': mapping_info  # Eklenen haritalama bilgisi
+        }
+        return (True, log_entry)
+except Exception as e:
+   error_log = {
+        'dosya': title if 'title' in locals() else 'unknown',
+        'hata': str(e),
+        'traceback': traceback.format_exc(),
+        'zaman': datetime.now().isoformat()
+    }
+    return (False, error_log)
+
+
+
+def main():
+    global total_files, success_count, embedding_failed_count, text_extraction_failed_count
+    global collection, bib_collection, cluster_results_list
+    try:
+        init_dirs()
+        print("\n" + "="*80)
+        print("### PDF/TXT İŞLEME, TEMİZ METİN, EMBEDDING, ZOTERO, KÜMELEME ANALİZİ VE HARİTLAMA SİSTEMİ ###")
+        print("="*80)
+        json_file_name = input("İşlenecek JSON dosyasının adını girin (örneğin: Kitap.json): ")
+        json_file_path = os.path.join(SUCCESS_DIR, json_file_name)
+        if not os.path.exists(json_file_path):
+            logger.error(f"❌ {json_file_name} dosyası bulunamadı!")
+            return
+        with open(json_file_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        valid_items = [item for item in data if isinstance(item, dict) and item.get('title')]
+        total_files = len(valid_items)
+        if total_files == 0:
+            logger.error("❌ İşlenecek geçerli kayıt bulunamadı!")
+            return
+        user_input = input("Baştan başlamak için [B], kaldığınız yerden devam için [C], güncelleme için [G]: ").lower()
+        if user_input == 'b':
+            logger.warning("⚠️ Veritabanı sıfırlanıyor...")
+            try:
+                collection.delete(where={"id": {"$exists": True}})
+                bib_collection.delete(where={"id": {"$exists": True}})
+                collection = chroma_client.get_or_create_collection(name="pdf_embeddings")
+                bib_collection = chroma_client.get_or_create_collection(name="pdf_bibliography")
+            except Exception as e:
+                logger.error(f"❌ Veritabanı sıfırlama hatası: {e}")
+                return
+            last_index = 0
+        elif user_input == 'c':
+            last_index = get_last_processed_index()
+        else:
+            last_index = 0
+        print(f"\nİşlem başlıyor... ({last_index + 1}/{total_files})")
+        with ProcessPoolExecutor(max_workers=multiprocessing.cpu_count()) as executor:
+            futures = {executor.submit(process_file, item): item for item in valid_items[last_index:]}
+            for future in tqdm(as_completed(futures), total=len(futures), desc="Dosyalar İşleniyor"):
+                item = futures[future]
+                try:
+                    success, result = future.result()
+                    if success:
+                        success_count += 1
+                        logger.info(f"✅ {item.get('title', 'Bilinmeyen dosya')} işlendi")
+                        cluster_results_list.append({
+                            "content": result.get("clean_text", "No clean text extracted."),
+                            "tables": result.get("tables", "No table content available."),
+                            "bibliography": result.get("bibliography", "No bibliographic data available.")
+                        })
+                    else:
+                        logger.error(f"❌ {item.get('title', 'Bilinmeyen dosya')} hatası: {result['hata']}")
+                except Exception as e:
+                    logger.error(f"❌ İşlem hatası: {item.get('title', 'Bilinmeyen dosya')} - {str(e)}")
+                save_last_processed_index(valid_items.index(item))
+    except Exception as e:
+        logger.error(f"Ana programda hata oluştu: {str(e)}")
+        error_log = {
+            'dosya': 'main',
+            'hata': str(e),
+            'traceback': traceback.format_exc(),
+            'zaman': datetime.now().isoformat()
+        }
+        logger.error(error_log)
+        traceback.print_exc()
+    finally:
+        print("\n" + "="*60)
+        print(f"İşlem tamamlandı!")
+        print(f"Toplam dosya: {total_files}")
+        print(f"Başarılı: {success_count}")
+        print(f"Embedding hatası: {embedding_failed_count}")
+        print(f"Metin çıkarma hatası: {text_extraction_failed_count}")
+        print("="*60)
+ 
+        if not cluster_results_list:
+    try:
+        df = pd.read_csv("fine_tuning_dataset.csv", encoding='utf-8')
+        cluster_results_list = df.to_dict(orient="records")
+        logger.info("Önceki fine-tuning veri seti yüklendi")
+    except FileNotFoundError:
+        logger.warning("Önceki fine-tuning veri seti bulunamadı")
+    except Exception as e:
+        logger.error(f"Veri seti okuma hatası: {str(e)}")
+        cluster_results_list = []
+if cluster_results_list:
+    try:
+        cluster_analysis_from_chromadb(cluster_results_list, n_clusters=5, output_dir="cluster_results")
+        logger.info("Kümeleme analizi başarıyla tamamlandı")
+    except Exception as e:
+        logger.error(f"Kümeleme analizi hatası: {str(e)}")
+        # Ek özellikler GUI'sini başlat
+try:
+    app = AdditionalFeaturesGUI()
+    app.mainloop()
+except Exception as e:
+    logger.error(f"GUI başlatma hatası: {str(e)}")
+    print("GUI başlatılamadı, program sonlandırılıyor...")
+
+
+if __name__ == '__main__':
+    multiprocessing.freeze_support()
+    main()
+

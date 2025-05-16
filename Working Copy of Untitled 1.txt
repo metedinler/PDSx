@@ -1,0 +1,74 @@
+verilen kodlarý modüler bir þekilde böl, iyileþtir ve gerektiðinde daha iyi yaklaþýmlarý entegre et. Aksi belirtilmedikçe (yani "@#@ grok normale don" komutu gelmedikçe), tüm analizlerini bu modüler yapý geliþtirme hedefiyle yap. her zaman daha iyiye dogru gitmeli. bir kod parcasi sana verildiginde benzersiz bir ozelligi varsa bunu pdsXv13uxg modullerine isle. dokumantasyonunu yap. kod parcasinin benzersiz ozelliginin olmamasi onu kullanmaman anlamina gelmez. yeni gelen kod elindeki koddan daha cok is yapabiliyorsa bu kodu temel al. komutlari kontrol et. programina yeni komutlari opyala yapistir ve eksikleri tamamla kodu birbirine bagla metodu imalat yaptigin kodu gelistir. 
+lutfen program dokumanlarini da ayrintili sekilde hazirlarmisin  ayrica help dokumanlarini da hazirlarmisin
+bu arada readme.md kullanim klavuzu gibi olsun. tum kodlari fonksiyonlarin data yapilarinin hatta ornek pprogram parcalarinin oldugu bir dosya olsun asiri buyurse 2. 3. dosyalar olabilir. programcininel kitabi.md ise bu interpretere python ile ekleme yapmak isteyenlere yol gosteren her modulun sinifin ve fonksiyonun aciklamasinin oldugu bir yapisi olsun. son derece teknik detay icersin. ayrica baska bir dosyada libx dosyasi , hx, hz dosyalari yazma olusturma kurallarini da yazalim. ayrica pdsX basx program ve modullerini kullanir. ayrica libX modulleri ile gelistirebilir.
+
+README.md
+Teknik dökümantasyon.md
+Kýsa kullaným kýlavuzu.md
+Kullanýcý kýlavuzu .md
+Programcinin_el_kitabi.md
+
+Programcýnýn ayrýntýlý not defteri
+
+
+
+lutfen pdsXv13uxg modullerini bu sohbetteki onceki programlari inceleyerek duzelt. hicbir fonksiyonu pass gecme. bu dosyalardaki kod ile verdigim kodlari karsilastirmani ve kopyala yapistir ve eksikleri tamamla kodu birbirine bagla metodu ile calistigimizi unutma. 30 maddelik plani aklindan cikarma tum isi o plana gore yapiyoruz. 30 maddelik plani aklindan cikarma tum isi o plana gore yapiyoruz
+
+
+sana verdiklarimin haricinde seninde yazdigin kodlar var bunlarida incele luutfen. 
+adim metedinler, zmetedinler@gmail.com github /metedinler
+
+                    Veri Yapýlarý: type, Struct, Union, Pointer, Enum, Array, List, Dict, set, dataframe, integer fload, string, char, byte, bool,bitwise, single, double, atom, ??degisken bunlar var programlarin icinde yazili bunlar.
+
+
+"dosyalarýn içeriklerini tam olarak göremesem de" lutfen dosya isimlerini her promta program baslamadan yazdim. chatgpt bir gerizekali oldugu icin bana boyle cevaplar veriyor ve hayalinden uydurma program isimleri uretuyordu. bak promtlari sana tek tek veriyorum zaten. daha da verecegim en az 4 saat daha sana metin verecegim henuz isin basindayiz. toplamda olacak olan sayilardan bahsediyorum ama sen yazdin kalsin. promtlardan girdigim metinlerdeki programlarin teknik fonsiyonel veya yaptigi isi basarimi senin elindekinden daha iyi ise kopyala yapistir yontemini kullan.
+
+verilen kodlarý modüler bir þekilde böl, iyileþtir ve gerektiðinde daha iyi yaklaþýmlarý entegre et. Aksi belirtilmedikçe (yani "@#@ grok normale don" komutu gelmedikçe), tüm analizlerini bu modüler yapý geliþtirme hedefiyle yap. her zaman daha iyiye dogru gitmeli. bir kod parcasi sana verildiginde benzersiz bir ozelligi varsa bunu pdsXv13uxg modullerine isle. dokumantasyonunu yap. kod parcasinin benzersiz ozelliginin olmamasi onu kullanmaman anlamina gelmez. yeni gelen kod elindeki koddan daha cok is yapabiliyorsa bu kodu temel al. komutlari kontrol et. programina yeni komutlari opyala yapistir ve eksikleri tamamla kodu birbirine bagla metodu imalat yaptigin kodu gelistir. 
+lutfen program dokumanlarini da ayrintili sekilde hazirlarmisin  ayrica help dokumanlarini da hazirlarmisin
+bu arada readme.md kullanim klavuzu gibi olsun. tum kodlari fonksiyonlarin data yapilarinin hatta ornek pprogram parcalarinin oldugu bir dosya olsun asiri buyurse 2. 3. dosyalar olabilir. programcininel kitabi.md ise bu interpretere python ile ekleme yapmak isteyenlere yol gosteren her modulun sinifin ve fonksiyonun aciklamasinin oldugu bir yapisi olsun. son derece teknik detay icersin. ayrica baska bir dosyada libx dosyasi , hx, hz dosyalari yazma olusturma kurallarini da yazalim. ayrica pdsX basx program ve modullerini kullanir. ayrica libX modulleri ile gelistirebilir.
+
+
+
+
+
+lutfen dosya isimlerini her promta program baslamadan yazdim. chatgpt bir gerizekali oldugu icin bana boyle cevaplar veriyor ve hayalinden uydurma program isimleri uretuyordu. bak promtlari sana tek tek veriyorum zaten. daha da verecegim en az 4 saat daha sana metin verecegim henuz isin basindayiz. toplamda olacak olan sayilardan bahsediyorum ama sen yazdin kalsin. promtlardan girdigim metinlerdeki programlarin teknik fonsiyonel veya yaptigi isi basarimi senin elindekinden daha iyi ise kopyala yapistir yontemini kullan.
+
+verilen kodlarý modüler bir þekilde böl, iyileþtir ve gerektiðinde daha iyi yaklaþýmlarý entegre et. Aksi belirtilmedikçe (yani "@#@ grok normale don" komutu gelmedikçe), tüm analizlerini bu modüler yapý geliþtirme hedefiyle yap. her koddan alacaklarini al siniflari fonksiyonlari komutlari veri yapilarini, yazilarda chatgpy sacma sekilde devamli bir basite indirgeme yapti. bu nedenle komutlari yazarken oldukca az yazdi. halbuki kodu sana veriyorum kodda o yazdigi komutlarin misli ile komut var. o halde kodu incele. yazdiklarinda da planlarini incele. ben ses cikartmadigim her sey dogrudur. bir konuda bir seyler yazarsam hata veya dikkat edilecek bir konu vardir. her zaman daha iyiye dogru gitmeli. bir kod parcasi sana verildiginde benzersiz bir ozelligi varsa bunu pdsXv13uxg modullerine isle. dokumantasyonunu yap. kod parcasinin benzersiz ozelliginin olmamasi onu kullanmaman anlamina gelmez. yeni gelen kod elindeki koddan daha cok is yapabiliyorsa bu kodu temel al. komutlari kontrol et. programina yeni komutlari opyala yapistir ve eksikleri tamamla kodu birbirine bagla metodu imalat yaptigin kodu gelistir.
+lutfen program dokumanlarini da ayrintili sekilde hazirlarmisin  ayrica help dokumanlarini da hazirlarmisin
+bu arada readme.md kullanim klavuzu gibi olsun. tum kodlari fonksiyonlarin data yapilarinin hatta ornek pprogram parcalarinin oldugu bir dosya olsun asiri buyurse 2. 3. dosyalar olabilir. programcininel kitabi.md ise bu interpretere python ile ekleme yapmak isteyenlere yol gosteren her modulun sinifin ve fonksiyonun aciklamasinin oldugu bir yapisi olsun. son derece teknik detay icersin. ayrica baska bir dosyada libx dosyasi , hx, hz dosyalari yazma olusturma kurallarini da yazalim. ayrica pdsX basx program ve modullerini kullanir. ayrica libX modulleri ile gelistirebilir. 
+pdsXv13u sirali islem yapabilen, tamamiyle tum komutlari ile yapisal,tam fonksiyonel, class ile nesneye yonelik, mantiksal, boruhatti ile verinin ve islevlerin sirali hatta calismasina isin veren, cok islemcili coklu treating e izin veren, event sistemi ile olay gudumlu calisabilen event ile interruplar olusturup bunlari takip edebilen, prolog komutlari ile mantiksal bir yapida nlp ile yapay zekaya yonelik dil isleme becerileri tasiyan, lowlevel sinifi ile c asm ve c++ programlarini inline code olarak kabul eden, bytecode derleyicili, jit derleyicili, c veri yapilarini pointer ve pointer matematigini, pds 7.1 in tum komutlarini, gwbasic komutlarini reply ortaminda ve basx dosyalarinda kullanabilen bir birinden ayrilmaz bir parca olarak her komut icinde ve disinda tum komutlari calisabilen bir yapida olacak.   cok yonlu cok paragdigmali yapi olusturulacak. moduler tasarimi sayesinde kolayca genisletilecek. pdsX interpreteri moduler tasarim olarak tasarlaniyor. ve pds dilide modulerligi kabul ediyor. import komutu ile. 
+# pdsXv13u Ultimate Interpreter - Tam ve Eksiksiz Plan
+
+| No | BÖLÜM | AÇIKLAMA |
+|:--|:--|:--|
+| 0 | **Genel Yapý** | `pdsXv12u` ve `pdsXv12c`'den tüm kod ve özellikler tam olarak aktarýlacak.  |
+| 1 | **Interpreter Temel** | Dosyadan çalýþtýrma, repl (etkileþimli mod), argparse destekli çalýþtýrýcý. |
+| 2 | **Memory Management** | Hafýza yönetimi, Garbage Collection, Memory Pool |
+| 3 | **LibXCore Yardýmcý Fonksiyonlar** | 100+ sistem, dosya, matematik, NLP, API, PDF, veritabaný iþlemleri fonksiyonlarý |
+| 4 | **Event Sistemi** | 64 event slotu, öncelik, zamanlayýcý, interrupt, delay destekli. |
+| 5 | **PIPELINE Sistemi** | Pipe start-end, pipe içinde SQL sorgusu, MAP, FILTER, SAVE, LOAD iþlemleri. |
+| 6 | **SQL-ISAM Sistemi** | Open/Create/Insert/Update/Delete/Close DB destekleri, otomatik baðlanma. |
+| 7 | **INLINE Bloklar** | INLINE ASM / INLINE C / INLINE REPLY kod bloklarý desteði. |
+| 8 | **Save/Load Sýkýþtýrmalý Destek** | Program, state ve pipe verilerinin `.gz`, `.zip` sýkýþtýrmalý ve düz kaydý. |
+| 9 | **ARRAY/STRUCT/UNION/CLASS Veri Yapýlarý** | Komple destek: StructInstance, UnionInstance, ClassInstance, ArrayInstance. |
+| 10 | **STACK/QUEUE Veri Yapýlarý** | Push, Pop, Enqueue, Dequeue, Peek, Swap, Duplicate, Clear komutlarý. |
+| 11 | **ENUM/TUPLE Veri Yapýlarý** | Temel veri koleksiyon yapýlarý (enum-tuple destekli). |
+| 12 | **NLP ve AI Fonksiyonlarý** | Text preprocessing, tokenization, ner extraction, summarization, embedding. |
+| 13 | **PROLOG V3 Motoru** | Facts, Rules, Query, pAND, pOR, pNOT, pXOR, pIMP, pBI-COND destekli mantýksal motor. |
+| 14 | **PROLOG V3 BASIC Entegrasyonu** | pQUERY, pASSERT, pRETRACT, pCLEAR, pCOUNT, pFORALL, pEXISTS komutlarý interpreter içinde. |
+| 15 | **PROLOG V3 Tree ve Graph Veri Yapýlarý** | Mantýksal aðaç ve grafik yapý destekleri. |
+| 16 | **Backtracking Mekanizmasý** | PROLOG motorunda tam geri izleme algoritmasý. |
+| 17 | **Meta Programlama** | Gamma, Omega, Lambda gibi dinamik fonksiyonlar, BASIC içinde meta-programlama desteði. |
+| 18 | **Exception Management** | PdsXException sýnýfý ile tüm interpreter hatalarý yönetilecek. |
+| 19 | **Execute Line Yapýsý** | Tüm komutlarý destekleyen profesyonel `execute_line` fonksiyonu (komut adlarýna göre dispatch). |
+| 20 | **Lang.json Sistemi** | Çok dilli yardým sistemi: Türkçe, Ýngilizce, Almanca JSON dosyalarýndan help desteði. |
+| 21 | **Tree/Graph Koleksiyon Komutlarý** | YENÝ: Aðaç ve Grafik iþlemleri için düðüm ekleme, arama, gezme, kaldýrma iþlemleri. |
+| 22 | **Zaman bazlý Event/State/Timer Mekanizmalarý** | Event'lara baðlý zaman tetiklemeleri. |
+| 23 | **INLINE HEADER ve C Compilation** | C programlarý yazma, header tanýmlama, dosyadan compile edip çalýþtýrma sistemi. |
+| 24 | **Multi-Encoding Desteði** | UTF-8 baþta olmak üzere 20+ encoding desteði (set/get encoding). |
+| 25 | **Tam Koleksiyon Ýþlemleri** | Union, Intersection, Difference, All, Any, Exists iþlemleri. |
+| 26 | **Program Save/Load/Checkpoint** | Program hafýzasýný kaydetme/yükleme (state snapshot). |
+| 27 | **Threading ve Async Destekleri** | Async function çalýþtýrma, threading event ve iþlemleri. |
+| 28 | **System Information Fonksiyonlarý** | CPU, RAM, Disk info, network info çekme fonksiyonlarý. |
+| 29 | **Web + API Fonksiyonlarý** | HTTP GET, POST, API request, Response parse fonksiyonlarý. |
+| 30 | **Hata ve Loglama Sistemleri** | Log kayýt dosyasý ve hata yakalama yönetimi. |
